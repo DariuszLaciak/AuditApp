@@ -1,0 +1,25 @@
+#main{
+    width: 80%;
+    border: 1px solid black;
+    margin: 0 auto;
+}
+#header{
+    height: 150px;
+    background-color: aquamarine;
+}
+#content{
+    margin: 10px 0 10px 0;
+    position: relative;
+    background-color: chartreuse;
+    min-height: 800px;
+}
+
+#footer{
+    position: relative;
+    background-color: darkred;
+    height: 30px;
+}
+
+#logo{
+
+}

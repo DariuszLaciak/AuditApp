@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="war" name="AutidApp:war">
+    <output-path>$PROJECT_DIR$/target</output-path>
+    <root id="archive" name="Laciak.war">
+      <element id="artifact" artifact-name="AutidApp:war exploded" />
+    </root>
+  </artifact>
+</component>
