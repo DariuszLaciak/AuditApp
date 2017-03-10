@@ -1,3 +1,5 @@
+package main.app;
+
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -15,6 +17,7 @@ public class Login extends HttpServlet {
     }
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-
+        response.getWriter().println("Zalogowano");
+        request.getSession().setAttribute("name",request.getAttribute("name"));
     }
 }

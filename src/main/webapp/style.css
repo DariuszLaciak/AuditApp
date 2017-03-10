@@ -20,6 +20,20 @@
     height: 30px;
 }
 
-#logo{
+#loginPanel{
+    float: right;
+    margin: 10px;
+    display: block;
+    width: 200px;
+    height: 100px;
+}
 
+#user_id #user_password{
+    display: inline-block;
+    width: 150px;
+    margin: 2px;
+}
+
+input[type='submit'] {
+    margin: 0 auto;
 }
