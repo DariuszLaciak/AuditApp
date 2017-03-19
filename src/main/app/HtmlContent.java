@@ -18,9 +18,9 @@ public class HtmlContent {
         html += "<form id='loginPanel'>";
         html += "<input type='text' id='user_id' name='user_id' placeholder='Login' />";
         html += "<input type='password' id='user_password' name='user_password' placeholder='Hasło'/>";
-        html += "<input type='submit' value='Zaloguj'/>";
+        html += "<input type='submit' value='Zaloguj się'/>";
         html += "<div id='registerUser' class='registerNew link'>Zarejestruj się</div>";
-        html += "</div>";
+        html += "</form>";
 
         return html;
     }

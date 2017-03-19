@@ -5,6 +5,7 @@
     <link rel="stylesheet" href="style.css">
     <script src="lib/jquery-3.1.1.min.js" type="application/javascript"></script>
     <script src="jscript/functions.js" type="application/javascript"></script>
+    <script src="jscript/common.js" type="application/javascript"></script>
 </head>
 <body>
 <div id="main">
@@ -18,5 +19,6 @@
         <jsp:include page="footer.jsp"/>
     </div>
 </div>
+<div id="infoBox"></div>
 </body>
 </html>

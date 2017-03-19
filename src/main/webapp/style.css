@@ -56,3 +56,27 @@ input[type='submit'] {
     display: block;
     width: 110px;
 }
+
+#infoBox{
+    position: fixed;
+    top: 50px;
+    left: 50%;
+    margin-left: -201.5px;
+    max-width: 400px;
+    max-height: 50px;
+    width: 500px;
+    height: 50px;
+    border: 1px solid black;
+    color: white;
+    text-align: center;
+    padding: 6px;
+    display: none;
+}
+
+.success{
+    background-color: green;
+}
+
+.failed{
+    background-color: red;
+}
