@@ -28,12 +28,31 @@
     height: 100px;
 }
 
-#user_id #user_password{
+input#user_id,input#user_password{
     display: inline-block;
-    width: 150px;
-    margin: 2px;
+    margin: 0 0 2px 0;
 }
 
 input[type='submit'] {
-    margin: 0 auto;
+    display: block;
+}
+
+.registerNew{
+    margin-top: 5px;
+}
+
+.link {
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.link:hover{
+    opacity: 0.7;
+}
+
+#loggedPanel{
+    float: right;
+    margin: 90px 10px 10px 10px;
+    display: block;
+    width: 110px;
 }

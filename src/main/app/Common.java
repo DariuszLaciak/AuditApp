@@ -7,6 +7,6 @@ import javax.servlet.http.HttpSession;
  */
 public class Common {
     public static boolean isSessionActive(HttpSession session){
-        return session.getAttribute("name") != null;
+        return session.getAttribute("userId") != null;
     }
 }
