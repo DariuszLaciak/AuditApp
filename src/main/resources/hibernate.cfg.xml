@@ -28,9 +28,20 @@
         <property name="format_sql">true</property>
         <property name="hbm2ddl.auto">update</property>
 
-        <!-- Bind the getCurrentSession() method to the thread. -->
-        <property name="current_session_context_class">thread</property>
+        <!--&lt;!&ndash; Bind the getCurrentSession() method to the thread. &ndash;&gt;-->
+        <property name="hibernate.current_session_context_class">thread</property>
+        <property name="hibernate.connection.pool_size">1</property>
+        <!--<property name="c3p0.acquire_increment">1</property>-->
+        <!--<property name="c3p0.idle_test_period">100</property> &lt;!&ndash; seconds &ndash;&gt;-->
+        <!--<property name="c3p0.max_size">100</property>-->
+        <!--<property name="c3p0.max_statements">0</property>-->
+        <!--<property name="c3p0.min_size">10</property>-->
+        <!--<property name="c3p0.timeout">1800</property> &lt;!&ndash; seconds &ndash;&gt;-->
 
+        <property name="cache.provider_class">org.hibernate.cache.internal.NoCachingRegionFactory</property>
+        <property name="cache.use_query_cache">false</property>
+        <property name="cache.use_minimal_puts">false</property>
+        <property name="max_fetch_depth">3</property>
 
     </session-factory>
 </hibernate-configuration>

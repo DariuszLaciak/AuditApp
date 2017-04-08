@@ -1,4 +1,12 @@
-package main.app;
+package main.app.servlets;
+
+import main.app.HtmlContent;
+import main.app.orm.HibernateUtil;
+import main.app.orm.User;
+import org.hibernate.Session;
+import org.hibernate.exception.JDBCConnectionException;
+import org.hibernate.query.Query;
+import org.json.simple.JSONObject;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -7,38 +15,27 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
-
-import main.app.orm.HibernateUtil;
-import main.app.orm.User;
-import org.hibernate.Session;
-import org.hibernate.exception.JDBCConnectionException;
-import org.hibernate.query.Query;
-import org.json.simple.JSONObject;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
-
+@WebServlet(name = "Login", urlPatterns = {"/Login"})
 public class Login extends HttpServlet {
-    HttpSession s;
-    Session session;
 
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        s = request.getSession();
+        HttpSession s = request.getSession();
         response.setContentType("text/plain");
         response.setCharacterEncoding("UTF-8");
         JSONObject json = new JSONObject();
         PrintWriter out = response.getWriter();
-        String html = "";
         String login = request.getParameter("login");
         String password = request.getParameter("password");
-
-        String responseMessage = "";
+        String responseMessage;
         boolean success = false;
         Object data = null;
 
-        session = HibernateUtil.getSessionFactory().getCurrentSession();
+        Session session = HibernateUtil.getSessionFactory().getCurrentSession();
         if(!session.getTransaction().isActive())
             session.beginTransaction();
 
@@ -62,7 +59,6 @@ public class Login extends HttpServlet {
             User loggedUser = (User)list.get(0);
             s.setAttribute("userData",loggedUser);
             s.setAttribute("userId",loggedUser.getId());
-
             data = HtmlContent.makeLoggedPanel(s);
         }
 
