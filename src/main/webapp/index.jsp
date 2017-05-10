@@ -21,5 +21,6 @@
     </div>
 </div>
 <div id="infoBox"></div>
+<div id="dataContainer"></div>
 </body>
 </html>

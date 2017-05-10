@@ -3,9 +3,10 @@ package main.app.orm;
 import main.app.enums.LoginType;
 
 import javax.persistence.*;
+import java.util.List;
 
-@Entity
 @Table
+@Entity
 public class User implements ObjectDTO {
 
 
@@ -17,6 +18,8 @@ public class User implements ObjectDTO {
     private String surname;
     private String email;
     private boolean active = false;
+
+    private List<Audit> audits;
 
     public User(){}
 
@@ -104,5 +107,15 @@ public class User implements ObjectDTO {
 
     public void setActive(boolean active) {
         this.active = active;
+    }
+
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "auditor")
+    @PrimaryKeyJoinColumn
+    public List<Audit> getAudits() {
+        return audits;
+    }
+
+    public void setAudits(List<Audit> audits) {
+        this.audits = audits;
     }
 }

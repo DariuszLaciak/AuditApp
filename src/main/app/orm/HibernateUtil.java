@@ -14,6 +14,10 @@ public class HibernateUtil {
     private static SessionFactory buildSessionFactory() {
         Configuration configuration = new Configuration();
         configuration.addAnnotatedClass(User.class);
+        configuration.addAnnotatedClass(Audit.class);
+        configuration.addAnnotatedClass(AuditResult.class);
+        configuration.addAnnotatedClass(Question.class);
+        configuration.addAnnotatedClass(Answer.class);
         configuration.configure();
         serviceRegistry = new StandardServiceRegistryBuilder().applySettings(
                 configuration.getProperties()).build();

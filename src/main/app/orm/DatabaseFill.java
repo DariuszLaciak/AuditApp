@@ -12,6 +12,15 @@ public class DatabaseFill {
         Session s = HibernateUtil.getSessionFactory().getCurrentSession();
         s.beginTransaction();
 
+        users(s);
+
+        s.getTransaction().commit();
+        s.close();
+
+        System.exit(0);
+    }
+
+    private static void users(Session s){
         User user = new User(LoginType.USER,"user","user","user","user","email",true);
         User user2 = new User(LoginType.ADMIN,"admin","admin","user","user","email",true);
         User user3 = new User(LoginType.USER,"inactive","inactive","user","user","email",false);
@@ -19,10 +28,5 @@ public class DatabaseFill {
         s.save(user);
         s.save(user2);
         s.save(user3);
-
-        s.getTransaction().commit();
-        s.close();
-
-        System.exit(0);
     }
 }

@@ -5,7 +5,7 @@
 <hibernate-configuration>
     <session-factory>
         <property name="hibernate.dialect">
-            org.hibernate.dialect.MySQL5Dialect
+            org.hibernate.dialect.MySQL5InnoDBDialect
         </property>
         <property name="hibernate.connection.driver_class">
             com.mysql.jdbc.Driver
@@ -24,11 +24,12 @@
         </property>
         <property name="hibernate.connection.password">
         </property>
+        <property name="hibernate.dialect.storage_engine"> innodb </property>
         <property name="show_sql">false</property>
         <property name="format_sql">true</property>
         <property name="hbm2ddl.auto">update</property>
 
-        <!--&lt;!&ndash; Bind the getCurrentSession() method to the thread. &ndash;&gt;-->
+        <!-- Bind the getCurrentSession() method to the thread. -->
         <property name="hibernate.current_session_context_class">thread</property>
         <property name="hibernate.connection.pool_size">1</property>
         <!--<property name="c3p0.acquire_increment">1</property>-->

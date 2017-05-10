@@ -1,4 +1,5 @@
 function showInfo(success, message) {
+    $("#infoBox").removeClass();
     var FADE_SPEED = 1000;
     var MESSAGE_TIME = 2000;
     var cl = "failed";

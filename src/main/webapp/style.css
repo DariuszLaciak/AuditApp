@@ -2,6 +2,7 @@
     width: 80%;
     border: 1px solid black;
     margin: 0 auto;
+    min-width: 700px;
 }
 #header{
     height: 150px;
@@ -11,7 +12,7 @@
     margin: 10px 0 10px 0;
     position: relative;
     background-color: #ffffa7;
-    min-height: 800px;
+    min-height: 400px;
 }
 
 #footer{
@@ -65,9 +66,7 @@ input[type='submit'] {
     left: 50%;
     margin-left: -201.5px;
     max-width: 400px;
-    max-height: 20px;
     width: 500px;
-    height: 20px;
     border: 1px solid black;
     color: white;
     text-align: center;
@@ -132,4 +131,37 @@ input[type='submit'] {
 
 #contentData input[type='text']{
     margin-left: 10px;
+}
+
+#dataContainer{
+    display: none;
+}
+
+.yesValue{
+    display: none;
+    margin-left: 20px;
+    width: 60px;
+    margin-bottom: -1px;
+}
+
+.lickertRadio,.yesNoRadio{
+    /*margin-left: 5px;*/
+    margin-right: 20px;
+}
+
+.mainResult{
+    font-size: 40px;
+    text-align: center;
+    margin: 50px 0;
+}
+
+.auditResults{
+    width: 600px;
+    height: 400px;
+    margin: 0 auto;
+}
+
+.otherResult{
+    text-align: center;
+    font-size: 20px;
 }

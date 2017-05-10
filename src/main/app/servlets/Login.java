@@ -54,12 +54,17 @@ public class Login extends HttpServlet {
             responseMessage = "Zła nazwa użytkownika lub hasło!";
         }
         else {
-            responseMessage = null;
-            success = true;
             User loggedUser = (User)list.get(0);
-            s.setAttribute("userData",loggedUser);
-            s.setAttribute("userId",loggedUser.getId());
-            data = HtmlContent.makeLoggedPanel(s);
+            if(!loggedUser.isActive()){
+                responseMessage = "Użytkownik nie jest aktywny. Skontaktuj się z administratorem";
+            }
+            else {
+                s.setAttribute("userData", loggedUser);
+                s.setAttribute("userId", loggedUser.getId());
+                data = HtmlContent.makeLoggedPanel(s);
+                success = true;
+                responseMessage = null;
+            }
         }
 
         session.getTransaction().commit();
