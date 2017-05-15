@@ -152,24 +152,19 @@ function getQuestions(selector){
     });
 }
 
-function handleQuestionRequest(dataToSave, nextCategoryIndex){
-    if(questionCategories.length >= nextCategoryIndex) {
-        var categoryToDisplay = questionCategories[nextCategoryIndex];
+function handleQuestionRequest(dataToSave) {
         $.ajax({
             url: "/Question",
             method: "POST",
             dataType: "json",
             data: {
                 action: "getQuestions",
-                category: categoryToDisplay,
-                index: nextCategoryIndex,
-                toSave: JSON.stringify(dataToSave),
-                numberOfCategories: questionCategories.length
+                toSave: JSON.stringify(dataToSave)
             },
             success: function (data) {
                 if (data.success) {
                     $("#contentData").html(data.data);
-                    activateSwitchYes();
+                    //activateSwitchYes();
                     $("html, body").animate({ scrollTop: 0 }, "slow");
                 }
                 else {
@@ -177,16 +172,12 @@ function handleQuestionRequest(dataToSave, nextCategoryIndex){
                 }
             }
         });
-    }
-    else {
-        alert("tutaj");
-    }
 }
 
 function nextQuestions(){
     var dataToSave = new Array();
     var numberOfQuestions = 0;
-    if($(".yesNoRadio").length > 0){
+    /*if($(".yesNoRadio").length > 0){
         numberOfQuestions = $(".yesNoRadio").length / 2;
         //yesNo
         $.each($(".yesNoRadio").filter(":checked"),function(){
@@ -201,7 +192,7 @@ function nextQuestions(){
             dataToSave.push(singleData);
         });
     }
-    else {
+     else {*/
         numberOfQuestions = $(".lickertRadio").length / 7;
             // lickert
         $.each($(".lickertRadio").filter(":checked"),function(){
@@ -213,9 +204,9 @@ function nextQuestions(){
             singleData.id = id;
             dataToSave.push(singleData);
         });
-    }
+    //}
     if(dataToSave.length == numberOfQuestions) {
-        handleQuestionRequest(dataToSave, ++actualIndex);
+        handleQuestionRequest(dataToSave);
     }
     else {
         showInfo(false,"Wszystkie odpowiedzi są wymagane");

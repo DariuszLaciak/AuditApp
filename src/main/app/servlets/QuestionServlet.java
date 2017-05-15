@@ -1,6 +1,7 @@
 package main.app.servlets;
 
 import main.app.Common;
+import main.app.Constraints;
 import main.app.HtmlContent;
 import main.app.enums.QuestionCategory;
 import main.app.enums.QuestionType;
@@ -76,17 +77,13 @@ public class QuestionServlet extends HttpServlet {
             }
             break;
             case "getQuestions": {
-
-                String cat = request.getParameter("category");
-                String index = request.getParameter("index");
-                String toSave = request.getParameter("toSave");
-                String numberOfCategories = request.getParameter("numberOfCategories");
-                int ind = Integer.parseInt(index);
-                int allIndex = Integer.parseInt(numberOfCategories);
-                QuestionCategory category = null;
-                if (cat != null) {
-                    category = QuestionCategory.valueOf(cat);
+                if (s.getAttribute("notAskedQuestions") == null) {
+                    s.setAttribute("notAskedQuestions", QuestionMethods.getQuestions());
                 }
+                List<Question> allQuestions = (List<Question>) s.getAttribute("notAskedQuestions");
+
+                int numberOfQuestions = allQuestions.size();
+                String toSave = request.getParameter("toSave");
 
 
                 JSONArray toSaveJson = null;
@@ -120,16 +117,17 @@ public class QuestionServlet extends HttpServlet {
                         q.getAnswers().add(ans);
                         audit.getAnswers().add(ans);
                         session.merge(q);
+                        s.removeAttribute("notAskedQuestions");
                     }
                 }
                 session.getTransaction().commit();
                 session.close();
-                if (allIndex == ind) {
+                if (numberOfQuestions == 0) {
                     List<Answer> answers = ResultMethods.getAnswersForAudit((Long) s.getAttribute("auditId"));
                     float result = Common.getResultFromAnswers(answers);
                     result *= 100;
                     int percent = Math.round(result);
-                    data = HtmlContent.prepareResults(answers); // + wynik punktowy
+
                     session = HibernateUtil.getSessionFactory().getCurrentSession();
                     if (!session.getTransaction().isActive())
                         session.beginTransaction();
@@ -143,9 +141,17 @@ public class QuestionServlet extends HttpServlet {
 
                     session.getTransaction().commit();
                     session.close();
+
+                    data = HtmlContent.prepareResults(answers, audit); // + wynik punktowy
                 } else {
-                    List<Question> questionsToPrepare = QuestionMethods.getQuestions(category);
-                    data = HtmlContent.makeQuestions(questionsToPrepare, category, ind == allIndex - 1);
+                    session = HibernateUtil.getSessionFactory().getCurrentSession();
+                    if (!session.getTransaction().isActive())
+                        session.beginTransaction();
+                    Audit audit = session.load(Audit.class, 5L);
+                    //data = HtmlContent.makeQuestions(allQuestions,s);
+                    List<Answer> answers = ResultMethods.getAnswersForAudit(5);
+                    data = HtmlContent.prepareResults(answers, audit);
+                    session.close();
                 }
 
             }

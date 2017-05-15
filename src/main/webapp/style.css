@@ -6,18 +6,21 @@
 }
 #header{
     height: 150px;
-    background-color: #d2b280;
+    background: #328cc1 url(images/logo.png) no-repeat;
+    background-blend-mode: luminosity;
+
 }
 #content{
     margin: 10px 0 10px 0;
     position: relative;
-    background-color: #ffffa7;
+    background-color: #0b3c5d;
     min-height: 400px;
+    color: white;
 }
 
 #footer{
     position: relative;
-    background-color: #ac7a33;
+    background-color: #1d2731;
     height: 30px;
 }
 
@@ -76,11 +79,11 @@ input[type='submit'] {
 }
 
 .success{
-    background-color: green;
+    background-color: darkgreen;
 }
 
 .failed{
-    background-color: red;
+    background-color: darkred;
 }
 
 #userMenu{
@@ -90,22 +93,22 @@ input[type='submit'] {
 
 
 .userMenuButton {
-    -moz-box-shadow:inset 0px 1px 0px 0px #a6827e;
-    -webkit-box-shadow:inset 0px 1px 0px 0px #a6827e;
-    box-shadow:inset 0px 1px 0px 0px #a6827e;
-    background-color:#7d5d3b;
+    -moz-box-shadow: inset 0px 1px 0px 0px #d9b310;
+    -webkit-box-shadow: inset 0px 1px 0px 0px #d9b310;
+    box-shadow: inset 0px 1px 0px 0px #d9b310;
+    background-color: #d9b310;
     -moz-border-radius:3px;
     -webkit-border-radius:3px;
     border-radius:3px;
-    border:1px solid #54381e;
+    border: 1px solid #d9b310;
     display:inline-block;
     cursor:pointer;
-    color:#ffffff;
+    color: black;
     font-family:Arial;
     font-size:13px;
     padding:6px 24px;
     text-decoration:none;
-    text-shadow:0px 1px 0px #4d3534;
+    text-shadow: 0px 1px 0px #d9b310;
     margin-left: 5px;
     margin-top: 5px;
 }
@@ -152,16 +155,56 @@ input[type='submit'] {
 .mainResult{
     font-size: 40px;
     text-align: center;
-    margin: 50px 0;
+    margin: 50px 0 0 0;
 }
 
 .auditResults{
-    width: 600px;
-    height: 400px;
+    width: 650px;
     margin: 0 auto;
 }
 
 .otherResult{
     text-align: center;
     font-size: 20px;
+}
+
+.resultSpider {
+    display: block;
+    margin: 0 auto;
+}
+
+.otherResultPercent {
+    font-size: larger;
+    font-weight: bold;
+    margin-bottom: 15px;
+}
+
+.otherResultDesc {
+    margin-top: 5px;
+}
+
+.resultSeparator {
+    border-bottom: 1px solid;
+    margin: 0 auto 10px auto;
+    width: 50%;
+}
+
+.auditResultHeader {
+    margin-bottom: 5px;
+    text-align: center;
+}
+
+.importantSpan {
+    font-style: italic;
+    font-weight: bold;
+}
+
+.auditorData {
+    font-style: italic;
+    font-weight: bold;
+    margin-top: 15px;
+}
+
+.auditedCompany span {
+    display: block;
 }

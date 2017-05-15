@@ -1,16 +1,29 @@
 package main.app;
 
+import com.mchange.io.FileUtils;
 import main.app.enums.LoginType;
 import main.app.enums.QuestionCategory;
-import main.app.enums.QuestionType;
 import main.app.orm.Answer;
+import main.app.orm.Audit;
 import main.app.orm.Question;
 import main.app.orm.User;
+import org.jfree.chart.ChartUtilities;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.labels.CategoryItemLabelGenerator;
+import org.jfree.chart.labels.StandardCategoryItemLabelGenerator;
+import org.jfree.chart.plot.Marker;
+import org.jfree.chart.plot.SpiderWebPlot;
+import org.jfree.data.category.CategoryDataset;
+import org.jfree.data.category.DefaultCategoryDataset;
 
 import javax.servlet.http.HttpSession;
-import java.util.HashMap;
+import java.awt.*;
+import java.io.File;
+import java.io.IOException;
+import java.text.NumberFormat;
+import java.text.SimpleDateFormat;
+import java.util.Base64;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created by Darek on 2017-03-10.
@@ -73,28 +86,18 @@ public class HtmlContent {
         return html;
     }
 
-    public static String makeQuestions(List<Question> questions, QuestionCategory category, boolean isLast){
-        String html = "<h1>"+category.getVisible()+"</h1>";
-        if(!category.equals(QuestionCategory.GENERAL)){
-            html += "<h3>1- Zdecydowanie nie 2- Nie 3- Raczej nie 4- Nie wiem  5- Raczej tak 6- Tak 7-Zdecydowanie tak</h3>";
+    public static String makeQuestions(List<Question> questions, HttpSession session) {
+
+        String html = "<h3>1- Zdecydowanie nie 2- Nie 3- Raczej nie 4- Nie wiem  5- Raczej tak 6- Tak 7-Zdecydowanie tak</h3>";
+        String buttonValue = "Następne pytania";
+        if (questions.size() <= Constraints.NUMBER_OF_QUESTIONS_PER_PAGE) {
+            buttonValue = "Zakończ audyt";
         }
         html += "<ol>";
-        for(Question q : questions){
+        for (Question q : Common.getRandomQuestionsAndRemoveAskedFromSession(questions, session)) {
             html += "<li><span>"+q.getContent()+"</span>";
-            if(q.getType().equals(QuestionType.YES_NO)){
-                html += makeYesNo(q.getId());
-                if(q.getYesValue())
-                    html += "<input class='yesValue' type='number' id='"+q.getId()+"_yesVal' placeholder='Ile'/>";
-                html += "</p>";
-            }
-            else {
-                html += makeLickertScale(q.getId());
-            }
+            html += makeLickertScale(q.getId());
             html += "</li>";
-        }
-        String buttonValue = "Następna kategoria pytań";
-        if(isLast){
-            buttonValue = "Zakończ audyt";
         }
         html += makeButton(buttonValue,"nextQuestions");
         html += "</ol>";
@@ -118,20 +121,82 @@ public class HtmlContent {
         return html;
     }
 
-    public static String prepareResults(List<Answer> answers){
+    public static String prepareResults(List<Answer> answers, Audit audit) {
         StringBuilder html = new StringBuilder("<div class='auditResults'>");
         int resultTotal = Math.round(Common.getResultFromAnswers(answers)*100);
-        int yesNo_result = Math.round(Common.getResultFromAnswersForYesNo(answers)*100);
-
+        html.append(prepareAuditResultHeader(audit));
         html.append("<div class='mainResult'>Całkowity wynik: ").append(resultTotal).append(" % </div>");
-        html.append("<div class='otherResult'>Wynik w grupie \"").append(QuestionCategory.GENERAL.getVisible()).append("\": ").append(yesNo_result).append(" % </div>");
-
+        html.append(prepareSpiderChart(answers));
         for(QuestionCategory category : QuestionCategory.values()){
-            if(!category.equals(QuestionCategory.GENERAL))
-                html.append("<div class='otherResult'>Wynik w grupie \"").append(category.getVisible()).append("\": ").append(Math.round(Common.getResultFromAnswersForLickert(answers, category) * 100)).append(" % </div>");
+            if (!category.equals(QuestionCategory.GENERAL)) {
+                html.append("<div class='otherResult'>" +
+                        "<div class='otherResultHeader'>" + category.getVisible().toUpperCase() + "</div>" +
+                        "<div class='otherResultDesc'>" + category.getDesription() + "</div>" +
+                        "<div class='otherResultPercent'>Spełnione w ").append(Math.round(Common.getResultFromAnswersForLickert(answers, category, true) * 100)).append(" % </div>" +
+                        "<div class='resultSeparator'></div></div>");
+            }
         }
         html.append("</div>");
         html.append(HtmlContent.makeButton("Rozpocznij nowy audyt", "nextAudit"));
         return html.toString();
+    }
+
+    private static String prepareAuditResultHeader(Audit audit) {
+        SimpleDateFormat sdf = new SimpleDateFormat("YYYY-MM-dd");
+        String html = "<div class='auditResultHeader'>";
+        html += "<div class='auditedCompany'>" +
+                "<span class='importantSpan'>Audyt innowacji firmy: " + audit.getName() + "</span>" +
+                "<span>Data przeprowadzenia audytu: " + sdf.format(audit.getAuditDate()) + "</span></div>";
+        html += "<div class='auditorData'>Audytor: " + audit.getAuditor().getName() + " " + audit.getAuditor().getSurname() + "</div>";
+        html += "</div>";
+
+        return html;
+    }
+
+    private static String prepareSpiderChart(List<Answer> answers) {
+        String html = "";
+
+        DefaultCategoryDataset dataset = new DefaultCategoryDataset();
+        for (QuestionCategory qc : QuestionCategory.values()) {
+            if (!qc.equals(QuestionCategory.GENERAL)) {
+                int result = Math.round(Common.getResultFromAnswersForLickert(answers, qc, false) / 3);
+                dataset.addValue(result, "wynik", qc.getVisible());
+                dataset.addValue(10, "max10", qc.getVisible());
+                dataset.addValue(8, "max8", qc.getVisible());
+                dataset.addValue(6, "max6", qc.getVisible());
+                dataset.addValue(4, "max4", qc.getVisible());
+                dataset.addValue(2, "max2", qc.getVisible());
+            }
+        }
+
+        SpiderWebPlot spiderWebPlot = new SpiderWebPlot(dataset);
+        spiderWebPlot.setWebFilled(true);
+        spiderWebPlot.setLabelGenerator(new StandardCategoryItemLabelGenerator());
+        spiderWebPlot.setInteriorGap(0.4);
+        spiderWebPlot.setMaxValue(10);
+        spiderWebPlot.setBackgroundPaint(null);
+        spiderWebPlot.setOutlineStroke(null);
+        spiderWebPlot.setBackgroundAlpha(0);
+        spiderWebPlot.setSeriesPaint(0, Color.GREEN);
+        spiderWebPlot.setSeriesOutlineStroke(0, new BasicStroke(3f));
+        spiderWebPlot.setSeriesPaint(1, Color.WHITE);
+        spiderWebPlot.setSeriesPaint(2, Color.WHITE);
+        spiderWebPlot.setSeriesPaint(3, Color.WHITE);
+        spiderWebPlot.setSeriesPaint(4, Color.WHITE);
+        spiderWebPlot.setSeriesPaint(5, Color.WHITE);
+        spiderWebPlot.setLabelPaint(Color.WHITE);
+
+        JFreeChart chart = new JFreeChart(null, null, spiderWebPlot, false);
+        chart.setBackgroundPaint(null);
+
+
+        File tempFile = new File("temporary.png");
+        try {
+            ChartUtilities.saveChartAsPNG(tempFile, chart, 400, 400);
+            html += "<img class='resultSpider' src=\"data:image/png;base64, " + Base64.getEncoder().encodeToString(FileUtils.getBytes(tempFile)) + "\"/>";
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return html;
     }
 }
