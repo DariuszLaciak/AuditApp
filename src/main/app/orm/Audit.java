@@ -1,13 +1,9 @@
 package main.app.orm;
 
 import javax.persistence.*;
-import java.time.Instant;
 import java.util.Date;
 import java.util.List;
 
-/**
- * Created by Darek on 2017-04-09.
- */
 
 @Table
 @Entity

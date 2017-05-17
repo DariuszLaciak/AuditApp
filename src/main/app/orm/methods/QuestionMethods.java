@@ -3,7 +3,6 @@ package main.app.orm.methods;
 import main.app.enums.QuestionCategory;
 import main.app.orm.HibernateUtil;
 import main.app.orm.Question;
-import main.app.orm.User;
 import org.hibernate.Session;
 
 import java.util.List;

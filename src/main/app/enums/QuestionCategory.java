@@ -2,9 +2,6 @@ package main.app.enums;
 
 import main.app.Constraints;
 
-/**
- * Created by Darek on 2017-04-22.
- */
 public enum QuestionCategory {
     GENERAL("Metryki"),
     STRATEGIC("Strategia"),

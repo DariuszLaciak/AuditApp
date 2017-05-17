@@ -21,7 +21,8 @@ public class User implements ObjectDTO {
 
     private List<Audit> audits;
 
-    public User(){}
+    public User() {
+    }
 
     public User(String username, String password) {
         this.role = LoginType.USER;
@@ -76,6 +77,7 @@ public class User implements ObjectDTO {
     public void setPassword(String password) {
         this.password = password;
     }
+
     @Column(length = 70)
     public String getName() {
         return name;
@@ -84,6 +86,7 @@ public class User implements ObjectDTO {
     public void setName(String name) {
         this.name = name;
     }
+
     @Column(length = 70)
     public String getSurname() {
         return surname;
@@ -92,6 +95,7 @@ public class User implements ObjectDTO {
     public void setSurname(String surname) {
         this.surname = surname;
     }
+
     @Column(length = 70)
     public String getEmail() {
         return email;
@@ -100,6 +104,7 @@ public class User implements ObjectDTO {
     public void setEmail(String email) {
         this.email = email;
     }
+
     @Column(nullable = false, length = 70)
     public boolean isActive() {
         return active;

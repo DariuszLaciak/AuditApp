@@ -31,11 +31,11 @@ public class AuditHistory extends HttpServlet {
         JSONObject json = new JSONObject();
         PrintWriter out = response.getWriter();
         String responseMessage = "";
-        Object data = null;
+        String data = null;
         boolean success = true;
         User loggedUser = (User) s.getAttribute("userData");
         List<Audit> allAudits = AuditMethods.getAudits();
-        if (!loggedUser.getRole().equals(LoginType.EMPOLYEE)) {
+        if (!loggedUser.getRole().equals(LoginType.EMPLOYEE)) {
             switch (action) {
                 case "table":
                     data = HtmlContent.getAuditHitory(allAudits);

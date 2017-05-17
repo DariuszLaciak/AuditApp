@@ -9,39 +9,32 @@ import main.app.orm.Question;
 import main.app.orm.User;
 import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
-import org.jfree.chart.labels.CategoryItemLabelGenerator;
 import org.jfree.chart.labels.StandardCategoryItemLabelGenerator;
-import org.jfree.chart.plot.Marker;
 import org.jfree.chart.plot.SpiderWebPlot;
-import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.category.DefaultCategoryDataset;
 
 import javax.servlet.http.HttpSession;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
-import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.Base64;
 import java.util.List;
 
-/**
- * Created by Darek on 2017-03-10.
- */
 public class HtmlContent {
-    public static String makeButton(String nameToDisplay, String onclick){
+    private static String makeButton(String nameToDisplay, String onclick) {
         String html = "";
-        html += "<input class='userMenuButton' type='button' value='"+nameToDisplay+"' onclick='"+onclick+"()'/>";
+        html += "<input class='userMenuButton' type='button' value='" + nameToDisplay + "' onclick='" + onclick + "()'/>";
         return html;
     }
 
-    public static String makeButton(String nameToDisplay, String onclick, String argument) {
+    private static String makeButton(String nameToDisplay, String onclick, String argument) {
         String html = "";
         html += "<input class='userMenuButton' type='button' value='" + nameToDisplay + "' onclick='" + onclick + "(" + argument + ")'/>";
         return html;
     }
 
-    public static String makeLoginForm(){
+    public static String makeLoginForm() {
         String html = "";
 
         html += "<form id='loginPanel' >";
@@ -54,64 +47,63 @@ public class HtmlContent {
         return html;
     }
 
-    public static String makeLoggedPanel(HttpSession session){
+    public static String makeLoggedPanel(HttpSession session) {
         String html = "";
 
         User loggedUser = (User) session.getAttribute("userData");
         String username = loggedUser.getUsername();
 
         html += "<div id='loggedPanel'>";
-        html += "<div class='loggedIn'>Witaj "+username+"! </div>";
+        html += "<div class='loggedIn'>Witaj " + username + "! </div>";
         html += "<div class='link logoutUser'>Wyloguj</div>";
         html += "</div>";
 
         return html;
     }
 
-    public static String makeUserMenu(LoginType userType){
+    public static String makeUserMenu(LoginType userType) {
         String html = "";
         html += "<div id='userMenu'>";
-        html += makeButton("Nowy audyt","newAudit");
-        html += makeButton("Historia audytów","auditHistory");
+        html += makeButton("Nowy audyt", "newAudit");
+        html += makeButton("Historia audytów", "auditHistory");
         if (userType == LoginType.ADMIN)
-            html += makeButton("Zarządzaj pytaniami","manageQuestions");
+            html += makeButton("Zarządzaj pytaniami", "manageQuestions");
         html += "</div>";
 
 
         return html;
     }
 
-    public static String makeQuestionTable(List<Question> questions){
-        String html = "<table>";
-        html += "<tr><th>Id</th><th>Treść</th><th>Typ</th><th>Wartość TAK</th><th>Kategoria</th></tr>";
-        for(Question q : questions){
-            html += "<tr><td>"+q.getId()+"</td><td>"+q.getContent()+"</td><td>"+q.getType()+"" +
-                    "</td><td>"+q.getYesValue()+"</td><td>"+q.getCategory()+"</td></tr>";
+    public static String makeQuestionTable(List<Question> questions) {
+        StringBuilder html = new StringBuilder("<table>");
+        html.append("<tr><th>Id</th><th>Treść</th><th>Typ</th><th>Wartość TAK</th><th>Kategoria</th></tr>");
+        for (Question q : questions) {
+            html.append("<tr><td>").append(q.getId()).append("</td><td>").append(q.getContent()).append("</td><td>").append(q.getType()).append("").append("</td><td>").append(q.getYesValue()).append("</td><td>").append(q.getCategory()).append("</td></tr>");
         }
-        html += "</table>";
-        return html;
+        html.append("</table>");
+        return html.toString();
     }
 
     public static String makeQuestions(List<Question> questions, HttpSession session) {
 
-        String html = "<h3>1- Zdecydowanie nie 2- Nie 3- Raczej nie 4- Nie wiem  5- Raczej tak 6- Tak 7-Zdecydowanie tak</h3>";
+        StringBuilder html = new StringBuilder("<h3>1- Zdecydowanie nie 2- Nie 3- Raczej nie 4- Nie wiem  5- Raczej tak 6- Tak 7-Zdecydowanie tak</h3>");
         String buttonValue = "Następne pytania";
         if (questions.size() <= Constraints.NUMBER_OF_QUESTIONS_PER_PAGE) {
             buttonValue = "Zakończ audyt";
         }
-        html += "<ol>";
+        html.append("<ol>");
         for (Question q : Common.getRandomQuestionsAndRemoveAskedFromSession(questions, session)) {
-            html += "<li><span class='questionLabel'>" + q.getContent() + "</span>";
-            html += makeLickertScale(q.getId());
-            html += "</li>";
+            html.append("<li><span class='questionLabel'>").append(q.getContent()).append("</span>");
+            html.append(makeLickertScale(q.getId()));
+            html.append("</li>");
         }
-        html += makeButton(buttonValue,"nextQuestions");
-        html += "</ol>";
-        return html;
+        html.append(makeButton(buttonValue, "nextQuestions"));
+        html.append("</ol>");
+        return html.toString();
     }
 
     //<input type="radio" id="option-one" name="selector"><label for="option-one">Tak</label><input type="radio" id="option-two" name="selector"><label for="option-two">Raczej tak</label><input type="radio" id="option-three" name="selector"><label for="option-three">Zdecydowanie tak</label>
-    private static String makeLickertScale(long id){
+    private static String makeLickertScale(long id) {
         String html = "<div class='radio-group'><input class='lickertRadio' type='radio' id='" + id + "_lickert_1' name='" + id + "_lickert' value='" + Constraints.LICKERT_1 + "'><label for='" + id + "_lickert_1'>Zdecydowanie nie</label>";
         html += "<input class='lickertRadio' type='radio' id='" + id + "_lickert_2' name='" + id + "_lickert' value='" + Constraints.LICKERT_2 + "'><label for='" + id + "_lickert_2'>Raczej nie</label>";
         html += "<input class='lickertRadio' type='radio' id='" + id + "_lickert_3' name='" + id + "_lickert' value='" + Constraints.LICKERT_3 + "'><label for='" + id + "_lickert_3'>Nie</label>";
@@ -122,24 +114,23 @@ public class HtmlContent {
         return html;
     }
 
-    private static String makeYesNo(long id){
-        String html = "<p>Tak <input class='yesNoRadio' type='radio' name = '"+id+"_yesNo' id='"+id+"_yesNo' value='"+Constraints.YES_VAL+"'/>";
-        html += "Nie <input class='yesNoRadio' type='radio' name = '"+id+"_yesNo' id='"+id+"_yesNo' value='"+Constraints.NO_VAL+"'/>";
-        return html;
-    }
-
     public static String prepareResults(List<Answer> answers, Audit audit) {
         StringBuilder html = new StringBuilder("<div class='auditResults'>");
-        int resultTotal = Math.round(Common.getResultFromAnswers(answers)*100);
+        int resultTotal = Math.round(Common.getResultFromAnswers(answers) * 100);
         html.append(prepareAuditResultHeader(audit));
         html.append("<div class='mainResult'>Całkowity wynik: ").append(resultTotal).append(" % </div>");
         html.append(prepareSpiderChart(answers));
-        for(QuestionCategory category : QuestionCategory.values()){
+        for (QuestionCategory category : QuestionCategory.values()) {
             if (!category.equals(QuestionCategory.GENERAL)) {
-                html.append("<div class='otherResult'>" +
-                        "<div class='otherResultHeader'>" + category.getVisible().toUpperCase() + "</div>" +
-                        "<div class='otherResultDesc'>" + category.getDesription() + "</div>" +
-                        "<div class='otherResultPercent'>Spełnione w ").append(Math.round(Common.getResultFromAnswersForLickert(answers, category, true) * 100)).append(" % </div>" +
+                html.append("<div class='otherResult'>" + "<div class='otherResultHeader'>").
+                        append(category.getVisible().toUpperCase()).
+                        append("</div>").
+                        append("<div class='otherResultDesc'>").
+                        append(category.getDesription()).
+                        append("</div>").
+                        append("<div class='otherResultPercent'>Spełnione w ").
+                        append(Math.round(Common.getResultFromAnswersForLickert(answers, category, true) * 100)).
+                        append(" % </div>" +
                         "<div class='resultSeparator'></div></div>");
             }
         }
@@ -209,17 +200,17 @@ public class HtmlContent {
 
     public static String getAuditHitory(List<Audit> audits) {
         SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-YYYY");
-        String html = "<table>";
-        html += "<tr><th>Data audytu</th><th>Wynik</th><th></th></tr>";
+        StringBuilder html = new StringBuilder("<table>");
+        html.append("<tr><th>Data audytu</th><th>Wynik</th><th></th></tr>");
         for (Audit audit : audits) {
-            html += "<tr>";
-            html += "<td>" + sdf.format(audit.getAuditDate()) + "</td>";
-            html += "<td>" + audit.getResult().getResultValue() + "</td>";
-            html += "<td>" + makeButton("Raport", "makeReport", String.valueOf(audit.getId())) + "</td>";
-            html += "</tr>";
+            html.append("<tr>");
+            html.append("<td>").append(sdf.format(audit.getAuditDate())).append("</td>");
+            html.append("<td>").append(audit.getResult().getResultValue()).append("</td>");
+            html.append("<td>").append(makeButton("Raport", "makeReport", String.valueOf(audit.getId()))).append("</td>");
+            html.append("</tr>");
         }
-        html += "</table>";
-        return html;
+        html.append("</table>");
+        return html.toString();
     }
 
     public static String getReport(Audit audit) {

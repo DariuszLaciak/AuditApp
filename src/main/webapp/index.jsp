@@ -1,5 +1,4 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ page import="main.app.Common" %>
 <html>
 <head>
     <link rel="stylesheet" href="style.css">

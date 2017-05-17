@@ -52,21 +52,19 @@ public class BeginAudit extends HttpServlet {
         int employees = 0;
         try {
             employees = Integer.parseInt(companyEmployees);
-        }
-        catch (NumberFormatException e){
+        } catch (NumberFormatException e) {
             responseMessage = "Liczba pracowników musi być liczbą!";
         }
 
 
-
-        if(employees > 0 && companyEstrabished!= null && auditor != null) {
+        if (employees > 0 && companyEstrabished != null && auditor != null) {
             Audit newAudit = new Audit(companyName, companyREGON, companyKRS, companyEstrabished, employees);
             Session session = HibernateUtil.getSessionFactory().getCurrentSession();
-            if(!session.getTransaction().isActive())
+            if (!session.getTransaction().isActive())
                 session.beginTransaction();
             newAudit.setAuditor(auditor);
             long id = (long) session.save(newAudit);
-            s.setAttribute("auditId",id);
+            s.setAttribute("auditId", id);
 
             responseMessage = "";
             success = true;
@@ -76,8 +74,8 @@ public class BeginAudit extends HttpServlet {
         }
 
 
-        json.put("success",success);
-        json.put("message",responseMessage);
+        json.put("success", success);
+        json.put("message", responseMessage);
 
         out.println(json);
 

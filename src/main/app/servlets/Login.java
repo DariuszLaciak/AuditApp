@@ -36,29 +36,26 @@ public class Login extends HttpServlet {
         Object data = null;
 
         Session session = HibernateUtil.getSessionFactory().getCurrentSession();
-        if(!session.getTransaction().isActive())
+        if (!session.getTransaction().isActive())
             session.beginTransaction();
 
-        Query q = session.createQuery("from User where username=:user AND password=:pass").setParameter("user", login).setParameter("pass",password);
+        Query q = session.createQuery("from User where username=:user AND password=:pass").setParameter("user", login).setParameter("pass", password);
 
         List<?> list = new ArrayList<>();
 
-        try{
+        try {
             list = q.list();
-        }
-        catch(JDBCConnectionException e){
+        } catch (JDBCConnectionException e) {
             responseMessage = "Problem z serwerem. Spróbuj ponownie się zalogować.";
         }
 
-        if(list.isEmpty()){
+        if (list.isEmpty()) {
             responseMessage = "Zła nazwa użytkownika lub hasło!";
-        }
-        else {
-            User loggedUser = (User)list.get(0);
-            if(!loggedUser.isActive()){
+        } else {
+            User loggedUser = (User) list.get(0);
+            if (!loggedUser.isActive()) {
                 responseMessage = "Użytkownik nie jest aktywny. Skontaktuj się z administratorem";
-            }
-            else {
+            } else {
                 s.setAttribute("userData", loggedUser);
                 s.setAttribute("userId", loggedUser.getId());
                 data = HtmlContent.makeLoggedPanel(s);
@@ -69,9 +66,9 @@ public class Login extends HttpServlet {
 
         session.getTransaction().commit();
         session.close();
-        json.put("success",success);
-        json.put("message",responseMessage);
-        json.put("data",data);
+        json.put("success", success);
+        json.put("message", responseMessage);
+        json.put("data", data);
 
         out.println(json);
     }

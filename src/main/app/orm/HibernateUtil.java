@@ -8,9 +8,6 @@ import org.hibernate.service.ServiceRegistry;
 public class HibernateUtil {
     private static final SessionFactory sessionFactory = buildSessionFactory();
 
-
-    private static ServiceRegistry serviceRegistry;
-
     private static SessionFactory buildSessionFactory() {
         Configuration configuration = new Configuration();
         configuration.addAnnotatedClass(User.class);
@@ -19,7 +16,7 @@ public class HibernateUtil {
         configuration.addAnnotatedClass(Question.class);
         configuration.addAnnotatedClass(Answer.class);
         configuration.configure();
-        serviceRegistry = new StandardServiceRegistryBuilder().applySettings(
+        ServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder().applySettings(
                 configuration.getProperties()).build();
         return configuration.buildSessionFactory(serviceRegistry);
     }

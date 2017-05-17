@@ -14,14 +14,14 @@ public class UserMethods {
     private static Session s;
 
     @SuppressWarnings("unchecked")
-    public static List<User> getUsers(){
-        List<User> lista= null;
+    public static List<User> getUsers() {
+        List<User> lista = null;
         s = HibernateUtil.getSessionFactory().getCurrentSession();
-        if(!s.getTransaction().isActive())
+        if (!s.getTransaction().isActive())
             s.beginTransaction();
         lista = s.createQuery("from User").list();
         s.getTransaction().commit();
-        if(s.isOpen())
+        if (s.isOpen())
             s.close();
         return lista;
     }

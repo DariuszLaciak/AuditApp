@@ -2,10 +2,6 @@ package main.app.orm;
 
 import javax.persistence.*;
 
-/**
- * Created by Darek on 2017-04-09.
- */
-
 @Table
 @Entity
 public class Answer implements ObjectDTO {

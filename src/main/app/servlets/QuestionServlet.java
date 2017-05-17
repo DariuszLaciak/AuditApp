@@ -1,20 +1,12 @@
 package main.app.servlets;
 
-import com.itextpdf.text.Document;
-import com.itextpdf.text.html.simpleparser.HTMLWorker;
-import com.itextpdf.text.pdf.PdfWriter;
-import com.itextpdf.tool.xml.XMLWorkerHelper;
 import main.app.Common;
-import main.app.Constraints;
 import main.app.HtmlContent;
 import main.app.enums.QuestionCategory;
 import main.app.enums.QuestionType;
 import main.app.orm.*;
-import main.app.orm.methods.AuditMethods;
 import main.app.orm.methods.QuestionMethods;
 import main.app.orm.methods.ResultMethods;
-import org.dom4j.DocumentException;
-import org.dom4j.io.HTMLWriter;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.json.simple.JSONArray;
@@ -28,7 +20,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import java.io.*;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.List;
 
 /**

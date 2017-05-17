@@ -1,9 +1,7 @@
 package main.app.orm.methods;
 
-import main.app.enums.QuestionCategory;
 import main.app.orm.Audit;
 import main.app.orm.HibernateUtil;
-import main.app.orm.Question;
 import org.hibernate.Session;
 
 import java.util.List;

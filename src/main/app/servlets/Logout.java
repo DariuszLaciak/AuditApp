@@ -29,16 +29,15 @@ public class Logout extends HttpServlet {
         boolean success = false;
         Object data = null;
         s.invalidate();
-        if(request.getSession(false) == null) {
+        if (request.getSession(false) == null) {
             data = HtmlContent.makeLoginForm();
             success = true;
-        }
-        else
+        } else
             responseMessage = "Problem z serwerem. Skontaktuj się z administratorem.";
 
-        json.put("success",success);
-        json.put("message",responseMessage);
-        json.put("data",data);
+        json.put("success", success);
+        json.put("message", responseMessage);
+        json.put("data", data);
 
         out.println(json);
     }
