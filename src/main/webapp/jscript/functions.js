@@ -108,16 +108,8 @@ function auditHistory(){
     switchTab("auditHistoryTab");
     if($("#auditHistoryTab").length ===0){
         $("#content").append("<div id='auditHistoryTab' class = 'innerContent'></div>");
+        getAuditHistory();
     }
-}
-
-function questionsLookout(){
-    switchTab("questionsLookoutTab");
-    if($("#questionsLookoutTab").length ===0){
-        $("#content").append("<div id='questionsLookoutTab' class = 'innerContent'></div>");
-        getQuestions($("#questionsLookoutTab"));
-    }
-
 }
 
 
@@ -125,15 +117,51 @@ function manageQuestions(){
     switchTab("manageQuestionsTab");
     if($("#manageQuestionsTab").length ===0){
         $("#content").append("<div id='manageQuestionsTab' class = 'innerContent'></div>");
-        $("#manageQuestionsTab").html("<input type='button' class='userMenuButton' onclick='newQuestion()' value='Dodaj nowe pytanie'/></div>" +
-            "");
-
-        getQuestions($("#manageQuestionsTab"));
+        getQuestions();
     }
 
 }
 
-function getQuestions(selector){
+function getAuditHistory() {
+    $.ajax({
+        url: "/AuditHistory",
+        method: "POST",
+        dataType: "json",
+        data: {
+            action: "table"
+        },
+        success: function (data) {
+            if (data.success) {
+                $("#auditHistoryTab").html(data.data);
+            }
+            else {
+                showInfo(false, data.message);
+            }
+        }
+    });
+}
+
+function makeReport(auditId) {
+    $.ajax({
+        url: "/AuditHistory",
+        method: "POST",
+        dataType: "json",
+        data: {
+            action: "report",
+            auditId: auditId
+        },
+        success: function (data) {
+            if (data.success) {
+                $("#auditHistoryTab").html(data.data);
+            }
+            else {
+                showInfo(false, data.message);
+            }
+        }
+    });
+}
+
+function getQuestions() {
     $.ajax({
         url: "/Question",
         method: "POST",
@@ -143,7 +171,7 @@ function getQuestions(selector){
         },
         success: function (data) {
             if (data.success) {
-                selector.append(data.data);
+                $("#manageQuestionsTab").append(data.data);
             }
             else {
                 showInfo(false, data.message);
@@ -175,36 +203,17 @@ function handleQuestionRequest(dataToSave) {
 }
 
 function nextQuestions(){
-    var dataToSave = new Array();
-    var numberOfQuestions = 0;
-    /*if($(".yesNoRadio").length > 0){
-        numberOfQuestions = $(".yesNoRadio").length / 2;
-        //yesNo
-        $.each($(".yesNoRadio").filter(":checked"),function(){
-            var singleData = new Object();
-            var thisRadio = $(this);
-            var real_id = thisRadio.attr("id");
-            var id = real_id.substring(0,real_id.indexOf("_"));
-            singleData.answer = thisRadio.filter(':checked').val();
-            singleData.id = id;
-            if(singleData.answer == 1)
-                singleData.yesVal = $("#"+id+"_yesVal").val();
-            dataToSave.push(singleData);
-        });
-    }
-     else {*/
-        numberOfQuestions = $(".lickertRadio").length / 7;
-            // lickert
+    var dataToSave = [];
+    var numberOfQuestions = $(".lickertRadio").length / 7;
         $.each($(".lickertRadio").filter(":checked"),function(){
             var singleData = new Object();
             var thisRadio = $(this);
-            var real_id = thisRadio.attr("id");
+            var real_id = thisRadio.attr("name");
             var id = real_id.substring(0,real_id.indexOf("_"));
             singleData.answer = thisRadio.filter(':checked').val();
             singleData.id = id;
             dataToSave.push(singleData);
         });
-    //}
     if(dataToSave.length == numberOfQuestions) {
         handleQuestionRequest(dataToSave);
     }
@@ -214,88 +223,10 @@ function nextQuestions(){
 }
 
 function finishAudit(){
-    // generowanie wyniku i zapisywanie w bazie
     nextQuestions();
-}
-
-function activateSwitchYes(){
-    $(function(){
-        if($(".yesNoRadio").length > 0){
-            $.each($(".yesNoRadio"),function(){
-                var thisRadio = $(this);
-                var id = thisRadio.attr("id");
-                id = id.substring(0,id.indexOf("_"));
-                thisRadio.change(function(){
-                    if(thisRadio.val() == 1){
-                        $("#"+id+"_yesVal").show();
-                    }
-                    else {
-                        $("#"+id+"_yesVal").hide();
-                    }
-                });
-            });
-        }
-    });
 }
 
 function switchTab(tabName){
     $(".innerContent").hide();
     $("#"+tabName).show();
-}
-
-function newQuestion(){
-    $("#manageQuestionsTab").html("<p>Treść pytania: <textarea id='questionContent' cols='60' rows='4'/></p>" +
-        "<p>Typ pytania: <select id='questionType' >" +
-        "<option value='Yes_No'>Tak/Nie</option>" +
-        "<option value='Lickert'>Skala Lickerta</option></select></p>");
-    $("#manageQuestionsTab").append("<p id='addYes'>Dodatkowe pytanie dla 'tak': <input type='checkbox' id='additionalYes' /></p>");
-    $("#questionType").change(function(){
-        if($("#questionType").val() == "Yes_No" && $("#additionalYes").length == 0) {
-            $("#confirmQuestion").before("<p id='addYes'>Dodatkowe pytanie dla 'tak': <input type='checkbox' id='additionalYes' /></p>");
-        }
-        else if($("#additionalYes").length == 1){
-            $("#addYes").remove();
-        }
-    });
-    $("#manageQuestionsTab").append("<p>Kategoria pytania: <select id='questionCategory' >" +
-        "<option value='General'>Ogólne</option>" +
-        "<option value='Strategic'>Strategia</option>" +
-        "<option value='Processes'>Procesy</option>" +
-        "<option value='Organization'>Organizacja</option>" +
-        "<option value='Couplings'>Powiązania</option>" +
-        "<option value='Learning'>Uczenie się</option></select></p>");
-    $("#manageQuestionsTab").append("<input type='button' class='userMenuButton' id='confirmQuestion' onclick='confirmQuestion()' value='Dodaj'/></div>");
-}
-
-function confirmQuestion(){
-    var questionContent = $("#questionContent").val();
-    var questionType = $("#questionType").val();
-    var addidtionalYes = $("#additionalYes").is(':checked');
-    var questionCategory = $("#questionCategory").val();
-
-    if(questionContent != "") {
-        $.ajax({
-            url: "/NewQuestion",
-            method: "POST",
-            dataType: "json",
-            data: {
-                content: questionContent,
-                type: questionType,
-                additional: addidtionalYes,
-                category: questionCategory
-            },
-            success: function (data) {
-                if (data.success) {
-                    newQuestion();
-                    showInfo(true, data.message);
-                }
-                else {
-                    showInfo(false, data.message);
-                }
-            }
-        });
-    }
-    else{
-        showInfo(false,"Wpisz treść pytania");
-    }
 }

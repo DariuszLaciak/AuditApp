@@ -34,7 +34,7 @@ public class Audit implements ObjectDTO {
         this.krs = krs;
         this.established = established;
         this.emloyees = emloyees;
-        this.auditDate = Date.from(Instant.now());
+        this.auditDate = new Date();
     }
 
     @Id
@@ -99,7 +99,7 @@ public class Audit implements ObjectDTO {
     }
 
     public void setAuditDate(Date auditDate) {
-        this.auditDate = Date.from(Instant.now());
+        this.auditDate = auditDate;
     }
 
     @ManyToOne(fetch = FetchType.EAGER)

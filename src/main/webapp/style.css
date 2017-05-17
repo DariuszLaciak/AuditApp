@@ -2,7 +2,7 @@
     width: 80%;
     border: 1px solid black;
     margin: 0 auto;
-    min-width: 700px;
+    min-width: 850px;
 }
 #header{
     height: 150px;
@@ -93,14 +93,14 @@ input[type='submit'] {
 
 
 .userMenuButton {
-    -moz-box-shadow: inset 0px 1px 0px 0px #d9b310;
-    -webkit-box-shadow: inset 0px 1px 0px 0px #d9b310;
-    box-shadow: inset 0px 1px 0px 0px #d9b310;
-    background-color: #d9b310;
+    -moz-box-shadow: inset 0px 1px 0px 0px #c9c9c9;
+    -webkit-box-shadow: inset 0px 1px 0px 0px #c9c9c9;
+    box-shadow: inset 0px 1px 0px 0px #c9c9c9;
+    background-color: #c9c9c9;
     -moz-border-radius:3px;
     -webkit-border-radius:3px;
     border-radius:3px;
-    border: 1px solid #d9b310;
+    border: 1px solid #c9c9c9;
     display:inline-block;
     cursor:pointer;
     color: black;
@@ -108,7 +108,7 @@ input[type='submit'] {
     font-size:13px;
     padding:6px 24px;
     text-decoration:none;
-    text-shadow: 0px 1px 0px #d9b310;
+    text-shadow: 0px 1px 0px #c9c9c9;
     margin-left: 5px;
     margin-top: 5px;
 }
@@ -145,11 +145,6 @@ input[type='submit'] {
     margin-left: 20px;
     width: 60px;
     margin-bottom: -1px;
-}
-
-.lickertRadio,.yesNoRadio{
-    /*margin-left: 5px;*/
-    margin-right: 20px;
 }
 
 .mainResult{
@@ -207,4 +202,48 @@ input[type='submit'] {
 
 .auditedCompany span {
     display: block;
+}
+
+input[type=radio] {
+    position: absolute;
+    visibility: hidden;
+    display: none;
+}
+
+label {
+    color: #9a929e;
+    display: inline-block;
+    cursor: pointer;
+    font-weight: bold;
+    padding: 5px 10px;
+    font-size: smaller;
+}
+
+input[type=radio]:checked + label {
+    color: #ccc8ce;
+    background: #1d2731;
+}
+
+label + input[type=radio] + label {
+    border-left: solid 3px #1d2731;
+}
+
+.radio-group {
+    border: solid 3px #1d2731;
+    display: inline-block;
+    margin: 10px;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.questionLabel {
+    display: block;
+}
+
+.hidden {
+    display: none;
+}
+
+table {
+    color: white;
 }

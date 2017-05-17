@@ -35,6 +35,12 @@ public class HtmlContent {
         return html;
     }
 
+    public static String makeButton(String nameToDisplay, String onclick, String argument) {
+        String html = "";
+        html += "<input class='userMenuButton' type='button' value='" + nameToDisplay + "' onclick='" + onclick + "(" + argument + ")'/>";
+        return html;
+    }
+
     public static String makeLoginForm(){
         String html = "";
 
@@ -67,7 +73,7 @@ public class HtmlContent {
         html += "<div id='userMenu'>";
         html += makeButton("Nowy audyt","newAudit");
         html += makeButton("Historia audytów","auditHistory");
-        if(userType != LoginType.USER)
+        if (userType == LoginType.ADMIN)
             html += makeButton("Zarządzaj pytaniami","manageQuestions");
         html += "</div>";
 
@@ -95,7 +101,7 @@ public class HtmlContent {
         }
         html += "<ol>";
         for (Question q : Common.getRandomQuestionsAndRemoveAskedFromSession(questions, session)) {
-            html += "<li><span>"+q.getContent()+"</span>";
+            html += "<li><span class='questionLabel'>" + q.getContent() + "</span>";
             html += makeLickertScale(q.getId());
             html += "</li>";
         }
@@ -104,14 +110,15 @@ public class HtmlContent {
         return html;
     }
 
+    //<input type="radio" id="option-one" name="selector"><label for="option-one">Tak</label><input type="radio" id="option-two" name="selector"><label for="option-two">Raczej tak</label><input type="radio" id="option-three" name="selector"><label for="option-three">Zdecydowanie tak</label>
     private static String makeLickertScale(long id){
-        String html ="<p>1 <input class='lickertRadio' type='radio' name='"+id+"_lickert' id='"+id+"_lickert' value='"+Constraints.LICKERT_1+"'/>";
-        html +="2 <input class='lickertRadio' type='radio' name='"+id+"_lickert' id='"+id+"_lickert' value='"+Constraints.LICKERT_2+"'/>" ;
-        html +="3 <input class='lickertRadio' type='radio' name='"+id+"_lickert' id='"+id+"_lickert' value='"+Constraints.LICKERT_3+"'/>" ;
-        html +="4 <input class='lickertRadio' type='radio' name='"+id+"_lickert' id='"+id+"_lickert' value='"+Constraints.LICKERT_4+"'/>" ;
-        html +="5 <input class='lickertRadio' type='radio' name='"+id+"_lickert' id='"+id+"_lickert' value='"+Constraints.LICKERT_5+"'/>" ;
-        html +="6 <input class='lickertRadio' type='radio' name='"+id+"_lickert' id='"+id+"_lickert' value='"+Constraints.LICKERT_6+"'/>" ;
-        html +="7 <input class='lickertRadio' type='radio' name='"+id+"_lickert' id='"+id+"_lickert' value='"+Constraints.LICKERT_7+"'/></p>" ;
+        String html = "<div class='radio-group'><input class='lickertRadio' type='radio' id='" + id + "_lickert_1' name='" + id + "_lickert' value='" + Constraints.LICKERT_1 + "'><label for='" + id + "_lickert_1'>Zdecydowanie nie</label>";
+        html += "<input class='lickertRadio' type='radio' id='" + id + "_lickert_2' name='" + id + "_lickert' value='" + Constraints.LICKERT_2 + "'><label for='" + id + "_lickert_2'>Raczej nie</label>";
+        html += "<input class='lickertRadio' type='radio' id='" + id + "_lickert_3' name='" + id + "_lickert' value='" + Constraints.LICKERT_3 + "'><label for='" + id + "_lickert_3'>Nie</label>";
+        html += "<input class='lickertRadio' type='radio' id='" + id + "_lickert_4' name='" + id + "_lickert' value='" + Constraints.LICKERT_4 + "'><label for='" + id + "_lickert_4'>Obojętne</label>";
+        html += "<input class='lickertRadio' type='radio' id='" + id + "_lickert_5' name='" + id + "_lickert' value='" + Constraints.LICKERT_5 + "'><label for='" + id + "_lickert_5'>Tak</label>";
+        html += "<input class='lickertRadio' type='radio' id='" + id + "_lickert_6' name='" + id + "_lickert' value='" + Constraints.LICKERT_6 + "'><label for='" + id + "_lickert_6'>Raczej tak</label>";
+        html += "<input class='lickertRadio' type='radio' id='" + id + "_lickert_7' name='" + id + "_lickert' value='" + Constraints.LICKERT_7 + "'><label for='" + id + "_lickert_7'>Zdecydowanie tak</label></div>";
         return html;
     }
 
@@ -197,6 +204,27 @@ public class HtmlContent {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        return html;
+    }
+
+    public static String getAuditHitory(List<Audit> audits) {
+        SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-YYYY");
+        String html = "<table>";
+        html += "<tr><th>Data audytu</th><th>Wynik</th><th></th></tr>";
+        for (Audit audit : audits) {
+            html += "<tr>";
+            html += "<td>" + sdf.format(audit.getAuditDate()) + "</td>";
+            html += "<td>" + audit.getResult().getResultValue() + "</td>";
+            html += "<td>" + makeButton("Raport", "makeReport", String.valueOf(audit.getId())) + "</td>";
+            html += "</tr>";
+        }
+        html += "</table>";
+        return html;
+    }
+
+    public static String getReport(Audit audit) {
+        String html = prepareResults(audit.getAnswers(), audit);
+        html += makeButton("Wróć", "getAuditHistory");
         return html;
     }
 }

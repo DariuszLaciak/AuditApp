@@ -3,6 +3,7 @@ package main.app;
 import main.app.enums.QuestionCategory;
 import main.app.enums.QuestionType;
 import main.app.orm.Answer;
+import main.app.orm.Audit;
 import main.app.orm.Question;
 
 import javax.servlet.http.HttpSession;
@@ -75,5 +76,14 @@ public class Common {
         }
         session.setAttribute("notAskedQuestions", questions);
         return randomQuestions;
+    }
+
+    public static Audit getAudit(List<Audit> audits, long id) {
+        for (Audit a : audits) {
+            if (a.getId() == id) {
+                return a;
+            }
+        }
+        return null;
     }
 }

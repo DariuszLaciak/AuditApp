@@ -1,5 +1,9 @@
 package main.app.servlets;
 
+import com.itextpdf.text.Document;
+import com.itextpdf.text.html.simpleparser.HTMLWorker;
+import com.itextpdf.text.pdf.PdfWriter;
+import com.itextpdf.tool.xml.XMLWorkerHelper;
 import main.app.Common;
 import main.app.Constraints;
 import main.app.HtmlContent;
@@ -9,6 +13,8 @@ import main.app.orm.*;
 import main.app.orm.methods.AuditMethods;
 import main.app.orm.methods.QuestionMethods;
 import main.app.orm.methods.ResultMethods;
+import org.dom4j.DocumentException;
+import org.dom4j.io.HTMLWriter;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.json.simple.JSONArray;
@@ -22,8 +28,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.*;
 import java.util.List;
 
 /**
@@ -117,7 +122,7 @@ public class QuestionServlet extends HttpServlet {
                         q.getAnswers().add(ans);
                         audit.getAnswers().add(ans);
                         session.merge(q);
-                        s.removeAttribute("notAskedQuestions");
+
                     }
                 }
                 session.getTransaction().commit();
@@ -141,17 +146,11 @@ public class QuestionServlet extends HttpServlet {
 
                     session.getTransaction().commit();
                     session.close();
+                    s.removeAttribute("notAskedQuestions");
 
                     data = HtmlContent.prepareResults(answers, audit); // + wynik punktowy
                 } else {
-                    session = HibernateUtil.getSessionFactory().getCurrentSession();
-                    if (!session.getTransaction().isActive())
-                        session.beginTransaction();
-                    Audit audit = session.load(Audit.class, 5L);
-                    //data = HtmlContent.makeQuestions(allQuestions,s);
-                    List<Answer> answers = ResultMethods.getAnswersForAudit(5);
-                    data = HtmlContent.prepareResults(answers, audit);
-                    session.close();
+                    data = HtmlContent.makeQuestions(allQuestions, s);
                 }
 
             }
