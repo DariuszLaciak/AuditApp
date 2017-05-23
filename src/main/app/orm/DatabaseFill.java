@@ -22,9 +22,11 @@ public class DatabaseFill {
         User user = new User(LoginType.USER, "user", "user", "user", "user", "email", true);
         User user2 = new User(LoginType.ADMIN, "admin", "admin", "user", "user", "email", true);
         User user3 = new User(LoginType.USER, "inactive", "inactive", "user", "user", "email", false);
+        User user4 = new User(LoginType.EMPLOYEE, "emp", "emp", "user", "user", "email", true);
 
         s.save(user);
         s.save(user2);
         s.save(user3);
+        s.save(user4);
     }
 }

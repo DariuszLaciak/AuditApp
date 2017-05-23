@@ -1,6 +1,8 @@
 package main.app.orm;
 
 import main.app.enums.LoginType;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 
 import javax.persistence.*;
 import java.util.List;
@@ -20,6 +22,8 @@ public class User implements ObjectDTO {
     private boolean active = false;
 
     private List<Audit> audits;
+    private List<Idea> ideas;
+    private List<Opinion> opinions;
 
     public User() {
     }
@@ -115,6 +119,7 @@ public class User implements ObjectDTO {
     }
 
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "auditor")
+    @Fetch(value = FetchMode.SUBSELECT)
     @PrimaryKeyJoinColumn
     public List<Audit> getAudits() {
         return audits;
@@ -122,5 +127,27 @@ public class User implements ObjectDTO {
 
     public void setAudits(List<Audit> audits) {
         this.audits = audits;
+    }
+
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "employee")
+    @Fetch(value = FetchMode.SUBSELECT)
+    @PrimaryKeyJoinColumn
+    public List<Idea> getIdeas() {
+        return ideas;
+    }
+
+    public void setIdeas(List<Idea> ideas) {
+        this.ideas = ideas;
+    }
+
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "author")
+    @Fetch(value = FetchMode.SUBSELECT)
+    @PrimaryKeyJoinColumn
+    public List<Opinion> getOpinions() {
+        return opinions;
+    }
+
+    public void setOpinions(List<Opinion> opinions) {
+        this.opinions = opinions;
     }
 }

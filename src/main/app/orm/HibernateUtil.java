@@ -15,6 +15,8 @@ public class HibernateUtil {
         configuration.addAnnotatedClass(AuditResult.class);
         configuration.addAnnotatedClass(Question.class);
         configuration.addAnnotatedClass(Answer.class);
+        configuration.addAnnotatedClass(Idea.class);
+        configuration.addAnnotatedClass(Opinion.class);
         configuration.configure();
         ServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder().applySettings(
                 configuration.getProperties()).build();

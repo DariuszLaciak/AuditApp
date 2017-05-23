@@ -12,3 +12,46 @@ function showInfo(success, message) {
         }, MESSAGE_TIME);
     });
 }
+
+function scrollUp() {
+    $("html, body").animate({scrollTop: 0}, "slow");
+}
+
+function makeOverlayWindow(id, element, width, height, title, content, buttons) {
+    var top = element.offset().top;
+    var left = element.offset().left - width;
+
+    var bodyW = $("body").width();
+    var bodyH = $("body").height();
+
+    if ((top + height) > bodyH) {
+        top = (bodyH - height - 10);
+    }
+    if ((left + width) > bodyW) {
+        left = (bodyW - width - 10);
+    }
+
+    var html = "<div id='overlayWindow_" + id + "' class='overlayWindow' style='width: " + width + "; height: " + height + " ;top: " + top + " ;left: " + left + "'>";
+    html += "<div class='innerOverlay'>";
+    html += "<div class='overlayTitle'>";
+    html += title;
+    html += "</div>";
+    html += "<div class='overlayContent'>";
+    html += content;
+    html += "</div>";
+    html += "<div class='overlayButtons'>";
+    $(buttons).each(function () {
+        html += "<input type='button' class='userMenuButton' value='" + $(this)[0].value + "' onclick='" + $(this)[0].onclick + "'>";
+    });
+    html += "</div>";
+    html += "</div>";
+    html += "</div>";
+    var background = "<div id='overlayBG'></div>";
+    $("body").append(background);
+    $("body").append(html);
+}
+
+function closeOverlay(id) {
+    $("#overlayWindow_" + id).remove();
+    $("#overlayBG").remove();
+}

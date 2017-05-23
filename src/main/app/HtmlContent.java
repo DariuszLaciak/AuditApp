@@ -3,10 +3,9 @@ package main.app;
 import com.mchange.io.FileUtils;
 import main.app.enums.LoginType;
 import main.app.enums.QuestionCategory;
-import main.app.orm.Answer;
-import main.app.orm.Audit;
-import main.app.orm.Question;
-import main.app.orm.User;
+import main.app.enums.Status;
+import main.app.orm.*;
+import main.app.servlets.Login;
 import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.labels.StandardCategoryItemLabelGenerator;
@@ -64,10 +63,16 @@ public class HtmlContent {
     public static String makeUserMenu(LoginType userType) {
         String html = "";
         html += "<div id='userMenu'>";
-        html += makeButton("Nowy audyt", "newAudit");
-        html += makeButton("Historia audytów", "auditHistory");
-        if (userType == LoginType.ADMIN)
-            html += makeButton("Zarządzaj pytaniami", "manageQuestions");
+        if (!userType.equals(LoginType.EMPLOYEE)) {
+            html += makeButton("Nowy audyt", "newAudit");
+            html += makeButton("Historia audytów", "auditHistory");
+        }
+        html += makeButton("Zgłoś pomysł", "newIdea");
+        html += makeButton("Zgłoszone pomysły", "listIdeas");
+        if (userType == LoginType.ADMIN) {
+            html += makeButton("Wszystkie pytania", "manageQuestions");
+            html += makeButton("Zarządzaj użytkownikami", "manageUsers");
+        }
         html += "</div>";
 
 
@@ -75,12 +80,12 @@ public class HtmlContent {
     }
 
     public static String makeQuestionTable(List<Question> questions) {
-        StringBuilder html = new StringBuilder("<table>");
-        html.append("<tr><th>Id</th><th>Treść</th><th>Typ</th><th>Wartość TAK</th><th>Kategoria</th></tr>");
+        StringBuilder html = new StringBuilder("<div id='tableWrapper'><table class='myTable'>");
+        html.append("<thead><tr><th>Id</th><th class='widestCol'>Treść</th><th>Typ</th><th>Wartość TAK</th><th>Kategoria</th></tr></thead><tbody>");
         for (Question q : questions) {
-            html.append("<tr><td>").append(q.getId()).append("</td><td>").append(q.getContent()).append("</td><td>").append(q.getType()).append("").append("</td><td>").append(q.getYesValue()).append("</td><td>").append(q.getCategory()).append("</td></tr>");
+            html.append("<tr><td>").append(q.getId()).append("</td><td class='widestCol'>").append(q.getContent()).append("</td><td>").append(q.getType()).append("").append("</td><td>").append(q.getYesValue()).append("</td><td>").append(q.getCategory()).append("</td></tr>");
         }
-        html.append("</table>");
+        html.append("</tbody></table></div>");
         return html.toString();
     }
 
@@ -114,7 +119,8 @@ public class HtmlContent {
         return html;
     }
 
-    public static String prepareResults(List<Answer> answers, Audit audit) {
+    public static String prepareResults(Audit audit) {
+        List<Answer> answers = audit.getAnswers();
         StringBuilder html = new StringBuilder("<div class='auditResults'>");
         int resultTotal = Math.round(Common.getResultFromAnswers(answers) * 100);
         html.append(prepareAuditResultHeader(audit));
@@ -200,8 +206,8 @@ public class HtmlContent {
 
     public static String getAuditHitory(List<Audit> audits) {
         SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-YYYY");
-        StringBuilder html = new StringBuilder("<table>");
-        html.append("<tr><th>Data audytu</th><th>Wynik</th><th></th></tr>");
+        StringBuilder html = new StringBuilder("<div id='tableWrapper'><table class='myTable'>");
+        html.append("<thead><tr><th>Data audytu</th><th>Wynik</th><th></th></tr></thead><tbody>");
         for (Audit audit : audits) {
             html.append("<tr>");
             html.append("<td>").append(sdf.format(audit.getAuditDate())).append("</td>");
@@ -209,13 +215,74 @@ public class HtmlContent {
             html.append("<td>").append(makeButton("Raport", "makeReport", String.valueOf(audit.getId()))).append("</td>");
             html.append("</tr>");
         }
-        html.append("</table>");
+        html.append("</tbody></table></div>");
         return html.toString();
     }
 
     public static String getReport(Audit audit) {
-        String html = prepareResults(audit.getAnswers(), audit);
+        String html = prepareResults(audit);
         html += makeButton("Wróć", "getAuditHistory");
+        return html;
+    }
+
+    public static String displayIdeas(List<Idea> ideas, LoginType userType) {
+        String html = "";
+        if (!ideas.isEmpty()) {
+            SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-YYYY");
+            int numberOfTDs = 5;
+            html += "<div id='tableWrapper'>";
+            html += "<table class='myTable'><thead>";
+            html += "<tr><th class='widestCol'>Tutuł pomysłu</th><th>Kategoria</th><th>Status</th><th>Data dodania</th>";
+            if (!userType.equals(LoginType.EMPLOYEE)) {
+                html += "<th>Autor</th>";
+                numberOfTDs++;
+            }
+            html += "<th>Data decyzji</th>";
+            if (!userType.equals(LoginType.EMPLOYEE)) {
+                html += "<th>Akcje</th>";
+                numberOfTDs++;
+            }
+            html += "</tr></thead><tbody>";
+            for (Idea i : ideas) {
+                html += "<tr class='tableTR'><td onclick='moreInfoIdea(" + i.getId() + ")' title='Szczegółowy opis pomysłu' class='widestCol moreInfo'>" + i.getName() + "</td><td  class='widestCol'>" + i.getType().getValue() + "</td><td>" + i.getStatus().getValue() + "</td><td>" + sdf.format(i.getAddedDate()) + "</td>";
+                if (!userType.equals(LoginType.EMPLOYEE)) {
+                    html += "<td>" + i.getEmployee().getName() + " " + i.getEmployee().getName() + "</td>";
+                }
+                html += "<td>";
+                if (i.getActionDate() != null) {
+                    html += sdf.format(i.getActionDate());
+                } else {
+                    html += "BRAK";
+                }
+                html += "</td>";
+                if (!userType.equals(LoginType.EMPLOYEE)) {
+                    html += "<td>";
+                    if (i.getStatus().equals(Status.PENDING)) {
+                        html += "<img src='images/accept.png' id='accept_" + i.getId() + "' class='ideaOption' onclick='acceptIdea(" + i.getId() + ")' title='Zaakceptuj'/>" +
+                                "<img src='images/reject.png' id='reject_" + i.getId() + "' class='ideaOption'  onclick='rejectIdea(" + i.getId() + ")' title='Odrzuć'/>";
+                    } else {
+                        html += "<img src='images/more.png' id='decisionIdea_" + i.getId() + "' class='ideaOption' onclick='decisionIdea(" + i.getId() + ")' title='Pokaż komentarz decyzji'/>";
+                    }
+                    html += "</td>";
+                }
+                html += "</tr>";
+                html += "<tr class='moreInfoTR'><td colspan='" + numberOfTDs + "'><div id='idea_" + i.getId() + "' class='hidden' >" + i.getContent() + "</div></td></tr>";
+            }
+            html += "</tbody></table></div>";
+            html += "</html>";
+        } else {
+            html += "<h1>Nie dodano jeszcze zgłoszeń pomysłów</h1>";
+        }
+        return html;
+    }
+
+    public static String makeMoreInfoIdea(Idea i) {
+        String html = "";
+        html += "<div id='ideaOpinionAuthor'>";
+        html += "Autor decyzji: " + i.getOpinion().getAuthor().getName() + " " + i.getOpinion().getAuthor().getSurname();
+        html += "</div><div id='ideaOpinionContent'>";
+        html += i.getOpinion().getContent();
+        html += "</div>";
         return html;
     }
 }

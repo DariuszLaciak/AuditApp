@@ -121,16 +121,19 @@ public class QuestionServlet extends HttpServlet {
                 session.getTransaction().commit();
                 session.close();
                 if (numberOfQuestions == 0) {
-                    List<Answer> answers = ResultMethods.getAnswersForAudit((Long) s.getAttribute("auditId"));
-                    float result = Common.getResultFromAnswers(answers);
-                    result *= 100;
-                    int percent = Math.round(result);
+
 
                     session = HibernateUtil.getSessionFactory().getCurrentSession();
                     if (!session.getTransaction().isActive())
                         session.beginTransaction();
                     AuditResult auditResult = new AuditResult();
                     Audit audit = session.load(Audit.class, (Long) s.getAttribute("auditId"));
+
+                    List<Answer> answers = audit.getAnswers();
+                    float result = Common.getResultFromAnswers(answers);
+                    result *= 100;
+                    int percent = Math.round(result);
+
                     auditResult.setAudit(audit);
                     auditResult.setResultValue(percent);
                     session.persist(auditResult);
@@ -141,7 +144,7 @@ public class QuestionServlet extends HttpServlet {
                     session.close();
                     s.removeAttribute("notAskedQuestions");
 
-                    data = HtmlContent.prepareResults(answers, audit); // + wynik punktowy
+                    data = HtmlContent.prepareResults(audit); // + wynik punktowy
                 } else {
                     data = HtmlContent.makeQuestions(allQuestions, s);
                 }
