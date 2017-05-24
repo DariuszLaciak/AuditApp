@@ -9,11 +9,7 @@ import java.util.List;
 @Entity
 public class Audit implements ObjectDTO {
     private long id;
-    private String name;
-    private String regon;
-    private String krs;
-    private Date established;
-    private int emloyees;
+
     private Date auditDate;
 
     private User auditor;
@@ -22,15 +18,6 @@ public class Audit implements ObjectDTO {
     private AuditResult result;
 
     public Audit() {
-    }
-
-    public Audit(String name, String regon, String krs, Date established, int emloyees) {
-        this.name = name;
-        this.regon = regon;
-        this.krs = krs;
-        this.established = established;
-        this.emloyees = emloyees;
-        this.auditDate = new Date();
     }
 
     @Id
@@ -44,51 +31,6 @@ public class Audit implements ObjectDTO {
         this.id = id;
     }
 
-    @Column(nullable = false, length = 70)
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    @Column(nullable = false, length = 20)
-    public String getRegon() {
-        return regon;
-    }
-
-    public void setRegon(String regon) {
-        this.regon = regon;
-    }
-
-    @Column(nullable = false, length = 20)
-    public String getKrs() {
-        return krs;
-    }
-
-    public void setKrs(String krs) {
-        this.krs = krs;
-    }
-
-    @Column(nullable = false)
-    public Date getEstablished() {
-        return established;
-    }
-
-    public void setEstablished(Date established) {
-        this.established = established;
-    }
-
-    @Column(nullable = false, length = 5)
-    public int getEmloyees() {
-        return emloyees;
-    }
-
-    public void setEmloyees(int emloyees) {
-        this.emloyees = emloyees;
-    }
-
     @Column(nullable = false)
     public Date getAuditDate() {
         return auditDate;
@@ -98,7 +40,7 @@ public class Audit implements ObjectDTO {
         this.auditDate = auditDate;
     }
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne
     @JoinColumn(name = "auditorId", nullable = false)
     public User getAuditor() {
         return auditor;
@@ -108,7 +50,7 @@ public class Audit implements ObjectDTO {
         this.auditor = auditor;
     }
 
-    @OneToMany(fetch = FetchType.EAGER, mappedBy = "audit")
+    @OneToMany(mappedBy = "audit")
     @PrimaryKeyJoinColumn
     public List<Answer> getAnswers() {
         return answers;
@@ -118,7 +60,7 @@ public class Audit implements ObjectDTO {
         this.answers = answers;
     }
 
-    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "audit")
+    @OneToOne(cascade = CascadeType.ALL, mappedBy = "audit")
     public AuditResult getResult() {
         return result;
     }

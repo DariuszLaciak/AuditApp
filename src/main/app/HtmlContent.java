@@ -91,7 +91,7 @@ public class HtmlContent {
 
     public static String makeQuestions(List<Question> questions, HttpSession session) {
 
-        StringBuilder html = new StringBuilder("<h3>1- Zdecydowanie nie 2- Nie 3- Raczej nie 4- Nie wiem  5- Raczej tak 6- Tak 7-Zdecydowanie tak</h3>");
+        StringBuilder html = new StringBuilder("");
         String buttonValue = "Następne pytania";
         if (questions.size() <= Constraints.NUMBER_OF_QUESTIONS_PER_PAGE) {
             buttonValue = "Zakończ audyt";
@@ -149,7 +149,6 @@ public class HtmlContent {
         SimpleDateFormat sdf = new SimpleDateFormat("YYYY-MM-dd");
         String html = "<div class='auditResultHeader'>";
         html += "<div class='auditedCompany'>" +
-                "<span class='importantSpan'>Audyt innowacji firmy: " + audit.getName() + "</span>" +
                 "<span>Data przeprowadzenia audytu: " + sdf.format(audit.getAuditDate()) + "</span></div>";
         html += "<div class='auditorData'>Audytor: " + audit.getAuditor().getName() + " " + audit.getAuditor().getSurname() + "</div>";
         html += "</div>";

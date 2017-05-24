@@ -41,7 +41,7 @@ public class Answer implements ObjectDTO {
         this.yesValueAnswer = yesValueAnswer;
     }
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne
     @JoinColumn(name = "auditId", nullable = false)
     public Audit getAudit() {
         return audit;
@@ -51,7 +51,7 @@ public class Answer implements ObjectDTO {
         this.audit = auditId;
     }
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne
     @JoinColumn(name = "questionId", nullable = false)
     public Question getQuestion() {
         return question;

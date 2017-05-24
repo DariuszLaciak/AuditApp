@@ -118,7 +118,7 @@ public class User implements ObjectDTO {
         this.active = active;
     }
 
-    @OneToMany(fetch = FetchType.EAGER, mappedBy = "auditor")
+    @OneToMany(mappedBy = "auditor")
     @Fetch(value = FetchMode.SUBSELECT)
     @PrimaryKeyJoinColumn
     public List<Audit> getAudits() {
@@ -129,7 +129,7 @@ public class User implements ObjectDTO {
         this.audits = audits;
     }
 
-    @OneToMany(fetch = FetchType.EAGER, mappedBy = "employee")
+    @OneToMany(mappedBy = "employee")
     @Fetch(value = FetchMode.SUBSELECT)
     @PrimaryKeyJoinColumn
     public List<Idea> getIdeas() {
@@ -140,7 +140,7 @@ public class User implements ObjectDTO {
         this.ideas = ideas;
     }
 
-    @OneToMany(fetch = FetchType.EAGER, mappedBy = "author")
+    @OneToMany(mappedBy = "author")
     @Fetch(value = FetchMode.SUBSELECT)
     @PrimaryKeyJoinColumn
     public List<Opinion> getOpinions() {

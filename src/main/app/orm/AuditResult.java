@@ -32,7 +32,7 @@ public class AuditResult implements ObjectDTO {
         this.resultValue = resultValue;
     }
 
-    @OneToOne(fetch = FetchType.EAGER, optional = false)
+    @OneToOne(optional = false)
     @JoinColumn(name = "auditId")
     public Audit getAudit() {
         return audit;

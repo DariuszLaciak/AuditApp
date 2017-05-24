@@ -14,7 +14,7 @@ public class QuestionMethods {
     private static Session s;
 
     public static List<Question> getQuestions() {
-        List<Question> lista = null;
+        List<Question> lista;
         s = HibernateUtil.getSessionFactory().getCurrentSession();
         if (!s.getTransaction().isActive())
             s.beginTransaction();

@@ -70,7 +70,7 @@ public class Question implements ObjectDTO {
         this.yesValue = yesValue;
     }
 
-    @OneToMany(fetch = FetchType.EAGER, mappedBy = "question", orphanRemoval = true)
+    @OneToMany(mappedBy = "question", orphanRemoval = true)
     @PrimaryKeyJoinColumn
     public List<Answer> getAnswers() {
         return answers;

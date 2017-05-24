@@ -49,54 +49,31 @@ function newAudit() {
     switchTab("newAuditTab");
     if ($("#newAuditTab").length === 0) {
         $("#content").append("<div id='newAuditTab' class = 'innerContent'></div>");
+        newAuditProcess();
     }
-    if ($("#contentTitle").length === 0)
-        $("#newAuditTab").append("<div id='contentTitle'>Nowy audyt innowacji przedsiębiorstwa</div>");
-    if ($("#contentData").length === 0)
-        $("#newAuditTab").append("<div id='contentData'><span>Podaj dane przedsiębiorstwa: </span>" +
-            "<p>Nazwa: <input type='text' id='companyName' /></p>" +
-            "<p>Nr REGON: <input type='text' id='companyREGON' /></p>" +
-            "<p>Nr KRS: <input type='text' id='companyKRS' /></p>" +
-            "<p>Rok założenia: <input type='text' id='companyYear' /></p>" +
-            "<p>Ilość zatrudnionych pracowników: <input type='text' id='companyEmployees' /></p>" +
-            "<input type='button' class='userMenuButton' onclick='newAuditProcess()' value='Rozpocznij'/></div>");
+
 
 }
 
 function nextAudit() {
     $("#newAuditTab").html("");
-    newAudit();
+    newAuditProcess();
 }
 
 function newAuditProcess() {
-    var inputs = $("#contentData").find("input[type='text']");
-    var allChecked = true;
-    var data = {};
-    $.each(inputs, function () {
-        data["" + $(this).attr("id")] = $(this).val();
-        if ($(this).val() === "") {
-            allChecked = false;
+    $.ajax({
+        url: "/BeginAudit",
+        method: "POST",
+        dataType: "json",
+        success: function (data) {
+            if (data.success) {
+                generateQuestions();
+            }
+            else {
+                showInfo(false, data.message);
+            }
         }
     });
-    if (!allChecked) {
-        showInfo(false, "Wszystkie pola są wymagane!");
-    }
-    else {
-        $.ajax({
-            url: "/BeginAudit",
-            method: "POST",
-            dataType: "json",
-            data: data,
-            success: function (data) {
-                if (data.success) {
-                    generateQuestions();
-                }
-                else {
-                    showInfo(false, data.message);
-                }
-            }
-        });
-    }
 }
 
 function generateQuestions() {
@@ -192,7 +169,7 @@ function handleQuestionRequest(dataToSave) {
         },
         success: function (data) {
             if (data.success) {
-                $("#contentData").html(data.data);
+                $("#newAuditTab").html(data.data);
                 //activateSwitchYes();
                 scrollUp();
             }

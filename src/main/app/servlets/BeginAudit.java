@@ -34,37 +34,16 @@ public class BeginAudit extends HttpServlet {
         String responseMessage = "";
         boolean success = false;
         Object data = null;
-
-        String companyName = request.getParameter("companyName");
-        String companyREGON = request.getParameter("companyREGON");
-        String companyKRS = request.getParameter("companyKRS");
-        String companyYear = request.getParameter("companyYear");
-        String companyEmployees = request.getParameter("companyEmployees");
-
-        Date companyEstrabished = null;
-        SimpleDateFormat sdl = new SimpleDateFormat("YYYY");
-        try {
-            companyEstrabished = sdl.parse(companyYear);
-        } catch (ParseException e) {
-            responseMessage = "Zły format roku założenia firmy (RRRR)";
-        }
-
-        int employees = 0;
-        try {
-            employees = Integer.parseInt(companyEmployees);
-        } catch (NumberFormatException e) {
-            responseMessage = "Liczba pracowników musi być liczbą!";
-        }
-
-
-        if (employees > 0 && companyEstrabished != null && auditor != null) {
-            Audit newAudit = new Audit(companyName, companyREGON, companyKRS, companyEstrabished, employees);
+        if (auditor != null) {
+            Audit newAudit = new Audit();
             Session session = HibernateUtil.getSessionFactory().getCurrentSession();
             if (!session.getTransaction().isActive())
                 session.beginTransaction();
             newAudit.setAuditor(auditor);
+            newAudit.setAuditDate(new Date());
             long id = (long) session.save(newAudit);
             s.setAttribute("auditId", id);
+            s.setAttribute("notAskedQuestions", null);
 
             responseMessage = "";
             success = true;

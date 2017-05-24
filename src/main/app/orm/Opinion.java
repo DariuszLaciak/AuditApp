@@ -41,7 +41,7 @@ public class Opinion implements ObjectDTO {
         this.content = content;
     }
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne
     @JoinColumn(name = "author", nullable = false)
     public User getAuthor() {
         return author;
@@ -51,7 +51,7 @@ public class Opinion implements ObjectDTO {
         this.author = author;
     }
 
-    @OneToOne(fetch = FetchType.EAGER, optional = false)
+    @OneToOne(optional = false)
     @JoinColumn(name = "ideaId")
     public Idea getIdea() {
         return idea;

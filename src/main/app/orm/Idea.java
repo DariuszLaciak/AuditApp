@@ -61,7 +61,7 @@ public class Idea implements ObjectDTO {
         this.status = status;
     }
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne
     @JoinColumn(name = "employee", nullable = false)
     public User getEmployee() {
         return employee;
@@ -107,7 +107,7 @@ public class Idea implements ObjectDTO {
         this.actionDate = actionDate;
     }
 
-    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "idea")
+    @OneToOne(cascade = CascadeType.ALL, mappedBy = "idea")
     public Opinion getOpinion() {
         return opinion;
     }

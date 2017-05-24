@@ -92,10 +92,11 @@ public class QuestionServlet extends HttpServlet {
                     e.printStackTrace();
                 }
 
-                Session session = HibernateUtil.getSessionFactory().getCurrentSession();
-                if (!session.getTransaction().isActive())
-                    session.beginTransaction();
+
                 if (toSaveJson != null) {
+                    Session session = HibernateUtil.getSessionFactory().getCurrentSession();
+                    if (!session.getTransaction().isActive())
+                        session.beginTransaction();
                     for (Object jo : toSaveJson) {
 
                         JSONObject ob = (JSONObject) jo;
@@ -117,13 +118,12 @@ public class QuestionServlet extends HttpServlet {
                         session.merge(q);
 
                     }
+                    session.getTransaction().commit();
+                    session.close();
                 }
-                session.getTransaction().commit();
-                session.close();
+
                 if (numberOfQuestions == 0) {
-
-
-                    session = HibernateUtil.getSessionFactory().getCurrentSession();
+                    Session session = HibernateUtil.getSessionFactory().getCurrentSession();
                     if (!session.getTransaction().isActive())
                         session.beginTransaction();
                     AuditResult auditResult = new AuditResult();
