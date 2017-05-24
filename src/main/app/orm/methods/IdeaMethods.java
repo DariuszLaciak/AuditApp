@@ -13,12 +13,12 @@ import java.util.List;
 public class IdeaMethods {
     private static Session s;
 
-    public static List<Idea> getIdeasNotForGivenUser(User user) {
+    public static List<Idea> getIdeas() {
         List<Idea> ideas;
         s = HibernateUtil.getSessionFactory().getCurrentSession();
         if (!s.getTransaction().isActive())
             s.beginTransaction();
-        ideas = s.createQuery("from Idea where employee <> :emp").setParameter("emp", user).list();
+        ideas = s.createQuery("from Idea").list();
         s.getTransaction().commit();
         if (s.isOpen())
             s.close();

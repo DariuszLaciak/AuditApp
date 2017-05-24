@@ -56,8 +56,7 @@ function newAudit() {
 }
 
 function nextAudit() {
-    $("#newAuditTab").html("");
-    newAuditProcess();
+    newAudit();
 }
 
 function newAuditProcess() {

@@ -13,7 +13,6 @@ import org.hibernate.Session;
 import org.json.simple.JSONObject;
 
 import javax.servlet.ServletException;
-import javax.servlet.annotation.HandlesTypes;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -68,13 +67,13 @@ public class Ideas extends HttpServlet {
                     session.refresh(user);
                     ideas = user.getIdeas();
                 } else {
-                    ideas = IdeaMethods.getIdeasNotForGivenUser(user);
+                    ideas = IdeaMethods.getIdeas();
                 }
                 session = HibernateUtil.getSessionFactory().getCurrentSession();
                 if (!session.getTransaction().isActive())
                     session.beginTransaction();
                 String html = "<h2>Zgłoszone pomysły: </h2>";
-                html += HtmlContent.displayIdeas(ideas, user.getRole());
+                html += HtmlContent.displayIdeas(ideas, user);
                 data = html;
 
                 session.getTransaction().commit();
@@ -111,7 +110,7 @@ public class Ideas extends HttpServlet {
                 session.getTransaction().commit();
                 session.close();
 
-                data = HtmlContent.displayIdeas(IdeaMethods.getIdeasNotForGivenUser(user), user.getRole());
+                data = HtmlContent.displayIdeas(IdeaMethods.getIdeas(), user);
 
                 break;
             case "moreInfoIdea":

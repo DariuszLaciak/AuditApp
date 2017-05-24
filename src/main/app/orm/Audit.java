@@ -50,7 +50,7 @@ public class Audit implements ObjectDTO {
         this.auditor = auditor;
     }
 
-    @OneToMany(mappedBy = "audit")
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "audit")
     @PrimaryKeyJoinColumn
     public List<Answer> getAnswers() {
         return answers;

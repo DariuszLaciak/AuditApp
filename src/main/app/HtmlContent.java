@@ -208,11 +208,13 @@ public class HtmlContent {
         StringBuilder html = new StringBuilder("<div id='tableWrapper'><table class='myTable'>");
         html.append("<thead><tr><th>Data audytu</th><th>Wynik</th><th></th></tr></thead><tbody>");
         for (Audit audit : audits) {
-            html.append("<tr>");
-            html.append("<td>").append(sdf.format(audit.getAuditDate())).append("</td>");
-            html.append("<td>").append(audit.getResult().getResultValue()).append("</td>");
-            html.append("<td>").append(makeButton("Raport", "makeReport", String.valueOf(audit.getId()))).append("</td>");
-            html.append("</tr>");
+            if (audit.getResult() != null) {
+                html.append("<tr>");
+                html.append("<td>").append(sdf.format(audit.getAuditDate())).append("</td>");
+                html.append("<td>").append(audit.getResult().getResultValue()).append("</td>");
+                html.append("<td>").append(makeButton("Raport", "makeReport", String.valueOf(audit.getId()))).append("</td>");
+                html.append("</tr>");
+            }
         }
         html.append("</tbody></table></div>");
         return html.toString();
@@ -224,7 +226,7 @@ public class HtmlContent {
         return html;
     }
 
-    public static String displayIdeas(List<Idea> ideas, LoginType userType) {
+    public static String displayIdeas(List<Idea> ideas, User user) {
         String html = "";
         if (!ideas.isEmpty()) {
             SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-YYYY");
@@ -232,19 +234,19 @@ public class HtmlContent {
             html += "<div id='tableWrapper'>";
             html += "<table class='myTable'><thead>";
             html += "<tr><th class='widestCol'>Tutuł pomysłu</th><th>Kategoria</th><th>Status</th><th>Data dodania</th>";
-            if (!userType.equals(LoginType.EMPLOYEE)) {
+            if (!user.getRole().equals(LoginType.EMPLOYEE)) {
                 html += "<th>Autor</th>";
                 numberOfTDs++;
             }
             html += "<th>Data decyzji</th>";
-            if (!userType.equals(LoginType.EMPLOYEE)) {
+            if (!user.getRole().equals(LoginType.EMPLOYEE)) {
                 html += "<th>Akcje</th>";
                 numberOfTDs++;
             }
             html += "</tr></thead><tbody>";
             for (Idea i : ideas) {
                 html += "<tr class='tableTR'><td onclick='moreInfoIdea(" + i.getId() + ")' title='Szczegółowy opis pomysłu' class='widestCol moreInfo'>" + i.getName() + "</td><td  class='widestCol'>" + i.getType().getValue() + "</td><td>" + i.getStatus().getValue() + "</td><td>" + sdf.format(i.getAddedDate()) + "</td>";
-                if (!userType.equals(LoginType.EMPLOYEE)) {
+                if (!user.getRole().equals(LoginType.EMPLOYEE)) {
                     html += "<td>" + i.getEmployee().getName() + " " + i.getEmployee().getName() + "</td>";
                 }
                 html += "<td>";
@@ -254,16 +256,17 @@ public class HtmlContent {
                     html += "BRAK";
                 }
                 html += "</td>";
-                if (!userType.equals(LoginType.EMPLOYEE)) {
-                    html += "<td>";
+                html += "<td>";
+                if (!user.getRole().equals(LoginType.EMPLOYEE) && i.getEmployee().getId() != user.getId()) {
                     if (i.getStatus().equals(Status.PENDING)) {
                         html += "<img src='images/accept.png' id='accept_" + i.getId() + "' class='ideaOption' onclick='acceptIdea(" + i.getId() + ")' title='Zaakceptuj'/>" +
                                 "<img src='images/reject.png' id='reject_" + i.getId() + "' class='ideaOption'  onclick='rejectIdea(" + i.getId() + ")' title='Odrzuć'/>";
-                    } else {
-                        html += "<img src='images/more.png' id='decisionIdea_" + i.getId() + "' class='ideaOption' onclick='decisionIdea(" + i.getId() + ")' title='Pokaż komentarz decyzji'/>";
                     }
-                    html += "</td>";
                 }
+                if (!i.getStatus().equals(Status.PENDING)) {
+                    html += "<img src='images/more.png' id='decisionIdea_" + i.getId() + "' class='ideaOption' onclick='decisionIdea(" + i.getId() + ")' title='Pokaż komentarz decyzji'/>";
+                }
+                html += "</td>";
                 html += "</tr>";
                 html += "<tr class='moreInfoTR'><td colspan='" + numberOfTDs + "'><div id='idea_" + i.getId() + "' class='hidden' >" + i.getContent() + "</div></td></tr>";
             }
