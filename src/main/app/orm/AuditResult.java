@@ -1,5 +1,7 @@
 package main.app.orm;
 
+import main.app.enums.SwotResult;
+
 import javax.persistence.*;
 
 
@@ -9,6 +11,7 @@ public class AuditResult implements ObjectDTO {
     private long id;
 
     private int resultValue;
+    private SwotResult swotResult;
 
     private Audit audit;
 
@@ -40,5 +43,14 @@ public class AuditResult implements ObjectDTO {
 
     public void setAudit(Audit audit) {
         this.audit = audit;
+    }
+
+    @Column
+    public SwotResult getSwotResult() {
+        return swotResult;
+    }
+
+    public void setSwotResult(SwotResult swotResult) {
+        this.swotResult = swotResult;
     }
 }

@@ -1,11 +1,10 @@
 package main.app;
 
 import com.mchange.io.FileUtils;
-import main.app.enums.LoginType;
-import main.app.enums.QuestionCategory;
-import main.app.enums.Status;
+import main.app.enums.*;
 import main.app.orm.*;
 import main.app.servlets.Login;
+import org.hibernate.Session;
 import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.labels.StandardCategoryItemLabelGenerator;
@@ -140,6 +139,8 @@ public class HtmlContent {
                         "<div class='resultSeparator'></div></div>");
             }
         }
+
+        html.append(makeSwotResult(audit));
         html.append("</div>");
         html.append(HtmlContent.makeButton("Rozpocznij nowy audyt", "nextAudit"));
         return html.toString();
@@ -162,7 +163,7 @@ public class HtmlContent {
         DefaultCategoryDataset dataset = new DefaultCategoryDataset();
         for (QuestionCategory qc : QuestionCategory.values()) {
             if (!qc.equals(QuestionCategory.GENERAL)) {
-                int result = Math.round(Common.getResultFromAnswersForLickert(answers, qc, false) / 3);
+                float result = Common.getResultFromAnswersForLickert(answers, qc, false) / 3;
                 dataset.addValue(result, "wynik", qc.getVisible());
                 dataset.addValue(10, "max10", qc.getVisible());
                 dataset.addValue(8, "max8", qc.getVisible());
@@ -200,6 +201,14 @@ public class HtmlContent {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        return html;
+    }
+
+    private static String makeSwotResult(Audit audit) {
+        String html = "<h2>Wynik analizy SWOT</h2>";
+        SwotResult result = Common.getSwotResultDescription(audit.getSwot());
+        html += "<div class='otherResult bold'>Zalecana strategia: " + result.getStrategy() + "</div>";
+        html += "<div class='otherResultDesc'>" + result.getDescription() + "</div>";
         return html;
     }
 
@@ -285,6 +294,78 @@ public class HtmlContent {
         html += "</div><div id='ideaOpinionContent'>";
         html += i.getOpinion().getContent();
         html += "</div>";
+        return html;
+    }
+
+    public static String makeSwotTables(List<SwotAlternatives> list, long auditId) {
+        String html = "<h2>Analiza SWOT</h2>";
+        for (SwotCategory category : SwotCategory.values()) {
+            html += "<div class='row style-select'>";
+            html += "<div class='tableHeader'>" + category.getValue() + "</div>";
+            html += "<div class='col-md-12'>";
+            html += "<div class='subject-info-box-1'>";
+            html += "<label>Dostępne</label>";
+            html += "<select multiple id='source_" + category.toString().toLowerCase() + "'>";
+            for (SwotAlternatives sw : list) {
+                if (sw.getCategory().equals(category)) {
+                    html += "<option value='swot_" + sw.getId() + "'>" + sw.getText() + "</option>";
+                }
+            }
+            html += "</select>";
+            html += "</div>";
+            html += "<div class='subject-info-arrows text-center'>";
+            html += "</br></br>";
+            html += "<input type='button' class='userMenuButton' id='btnAllRight_" + category.toString().toLowerCase() + "' value='>>'/>";
+            html += "</br>";
+            html += "<input type='button' class='userMenuButton' id='btnRight_" + category.toString().toLowerCase() + "' value='>'/>";
+            html += "</br>";
+            html += "<input type='button' class='userMenuButton' id='btnLeft_" + category.toString().toLowerCase() + "' value='<'/>";
+            html += "</br>";
+            html += "<input type='button' class='userMenuButton' id='btnAllLeft_" + category.toString().toLowerCase() + "' value='<<'/>";
+            html += "</div>";
+
+            html += "<div class='subject-info-box-2'>";
+            html += "<label>Wybrane</label>";
+            html += "<select multiple class='form-control' id='destination_" + category.toString().toLowerCase() + "'></select>";
+            html += "</div>";
+            html += "<div class='clearfix'></div>";
+
+            html += "</div></div>";
+
+            String script = "$('#btnRight_" + category.toString().toLowerCase() + "').click(function(e) {\n" +
+                    "    $('select').moveToListAndDelete('#source_" + category.toString().toLowerCase() + "', '#destination_" + category.toString().toLowerCase() + "');\n" +
+                    "    e.preventDefault();\n" +
+                    "  });\n" +
+                    "\n" +
+                    "  $('#btnAllRight_" + category.toString().toLowerCase() + "').click(function(e) {\n" +
+                    "    $('select').moveAllToListAndDelete('#source_" + category.toString().toLowerCase() + "', '#destination_" + category.toString().toLowerCase() + "');\n" +
+                    "    e.preventDefault();\n" +
+                    "  });\n" +
+                    "\n" +
+                    "  $('#btnLeft_" + category.toString().toLowerCase() + "').click(function(e) {\n" +
+                    "    $('select').moveToListAndDelete('#destination_" + category.toString().toLowerCase() + "', '#source_" + category.toString().toLowerCase() + "');\n" +
+                    "    e.preventDefault();\n" +
+                    "  });\n" +
+                    "\n" +
+                    "  $('#btnAllLeft_" + category.toString().toLowerCase() + "').click(function(e) {\n" +
+                    "    $('select').moveAllToListAndDelete('#destination_" + category.toString().toLowerCase() + "', '#source_" + category.toString().toLowerCase() + "');\n" +
+                    "    e.preventDefault();\n" +
+                    "  });";
+
+            html += makeJS(script);
+        }
+
+        html += makeButton("Zapisz", "saveSwot", String.valueOf(auditId));
+
+
+        return html;
+    }
+
+    private static String makeJS(String script) {
+        String html = "<script type='application/javascript'>$(function($) {";
+        html += script;
+        html += "});</script>";
+
         return html;
     }
 }

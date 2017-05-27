@@ -5,6 +5,7 @@
     <script src="lib/jquery-3.1.1.min.js" type="application/javascript"></script>
     <script src="jscript/functions.js" type="application/javascript"></script>
     <script src="jscript/common.js" type="application/javascript"></script>
+    <script src="lib/jquery.selectlistactions.js" type='application/javascript'></script>
     <title>Audyt innowacojności przedsiębiorstwa</title>
 </head>
 <body>

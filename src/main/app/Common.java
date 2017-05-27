@@ -2,14 +2,13 @@ package main.app;
 
 import main.app.enums.QuestionCategory;
 import main.app.enums.QuestionType;
-import main.app.orm.Answer;
-import main.app.orm.Audit;
-import main.app.orm.Question;
+import main.app.enums.SwotCategory;
+import main.app.enums.SwotResult;
+import main.app.orm.*;
+import org.hibernate.Session;
 
 import javax.servlet.http.HttpSession;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 /**
  * Created by Darek on 2017-03-05.
@@ -84,5 +83,57 @@ public class Common {
             }
         }
         return null;
+    }
+
+    public static List<SwotAlternatives> getSwotOfCategory(List<SwotAlternatives> swot, SwotCategory cat) {
+        List<SwotAlternatives> result = new ArrayList<>();
+        for (SwotAlternatives sw : swot) {
+            if (sw.getCategory().equals(cat)) {
+                result.add(sw);
+            }
+        }
+        return result;
+    }
+
+    public static SwotResult getSwotResultDescription(List<SwotAlternatives> swot) {
+        Map<SwotResult, Integer> resultMap = new HashMap<>();
+        resultMap.put(SwotResult.MAXI_MAXI, 0);
+        resultMap.put(SwotResult.MINI_MAXI, 0);
+        resultMap.put(SwotResult.MAXI_MINI, 0);
+        resultMap.put(SwotResult.MINI_MINI, 0);
+
+        for (SwotCategory cat : SwotCategory.values()) {
+            switch (cat) {
+                case OPPORTUNITES:
+                    resultMap.put(SwotResult.MAXI_MAXI, resultMap.get(SwotResult.MAXI_MAXI) + Common.getSwotOfCategory(swot, cat).size());
+                    resultMap.put(SwotResult.MINI_MAXI, resultMap.get(SwotResult.MINI_MAXI) + Common.getSwotOfCategory(swot, cat).size());
+                    break;
+                case THREATS:
+                    resultMap.put(SwotResult.MAXI_MINI, resultMap.get(SwotResult.MAXI_MINI) + Common.getSwotOfCategory(swot, cat).size());
+                    resultMap.put(SwotResult.MINI_MINI, resultMap.get(SwotResult.MINI_MINI) + Common.getSwotOfCategory(swot, cat).size());
+                    break;
+                case STRENGHTS:
+                    resultMap.put(SwotResult.MAXI_MAXI, resultMap.get(SwotResult.MAXI_MAXI) + Common.getSwotOfCategory(swot, cat).size());
+                    resultMap.put(SwotResult.MAXI_MINI, resultMap.get(SwotResult.MAXI_MINI) + Common.getSwotOfCategory(swot, cat).size());
+                    break;
+                case WEAKNESSES:
+                    resultMap.put(SwotResult.MINI_MAXI, resultMap.get(SwotResult.MINI_MAXI) + Common.getSwotOfCategory(swot, cat).size());
+                    resultMap.put(SwotResult.MINI_MINI, resultMap.get(SwotResult.MINI_MINI) + Common.getSwotOfCategory(swot, cat).size());
+                    break;
+                default:
+                    break;
+            }
+        }
+        int currentMax = 0;
+        SwotResult result = SwotResult.MAXI_MAXI;
+        for (Map.Entry<SwotResult, Integer> entry : resultMap.entrySet()) {
+            if (entry.getValue() > currentMax) {
+                result = entry.getKey();
+                currentMax = entry.getValue();
+            } else if (entry.getValue() == currentMax) {
+                result = entry.getKey().getPriority() < result.getPriority() ? entry.getKey() : result;
+            }
+        }
+        return result;
     }
 }

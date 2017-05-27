@@ -1,5 +1,6 @@
 body {
     margin: 0;
+    overflow: auto;
 }
 #main {
     margin: 0 auto;
@@ -10,7 +11,6 @@ body {
     height: 150px;
     background: #328cc1 url(images/logo.png) no-repeat;
     background-blend-mode: luminosity;
-
 }
 
 #content {
@@ -19,6 +19,8 @@ body {
     background-color: #0b3c5d;
     min-height: calc(100% - 150px - 30px - 20px);
     color: white;
+    overflow: auto;
+    padding-bottom: 20px;
 }
 
 #footer {
@@ -154,9 +156,13 @@ input[type='submit'] {
     margin: 50px 0 0 0;
 }
 
+.bold {
+    font-weight: bold;
+}
+
 .auditResults {
-    width: 650px;
-    margin: 0 auto;
+    margin: 20px auto;
+    text-align: justify;
 }
 
 .otherResult {
@@ -356,4 +362,78 @@ textarea {
     z-index: 10;
     top: 0;
     left: 0;
+}
+
+.style-select {
+    width: 100%;
+    height: 370px;
+    margin-bottom: 30px;
+}
+
+.tableHeader {
+    font-size: 15pt;
+    margin: 40px 0 20px 0;
+    display: block;
+    font-weight: bold;
+    text-align: center;
+}
+
+.style-select select {
+    padding: 0;
+    width: 100%;
+}
+
+.style-select select option {
+    padding: 4px 10px 4px 10px;
+}
+
+.style-select select option:hover {
+    background: #EEEEEE;
+}
+
+.subject-info-box-1, .subject-info-box-2 {
+    float: left;
+    width: 43%;
+}
+
+.subject-info-box-1 select {
+    height: 300px;
+    padding: 0;
+}
+
+.subject-info-box-2 select {
+    height: 300px;
+    padding: 0;
+}
+
+.subject-info-box-1 select option {
+    padding: 4px 10px 4px 10px;
+}
+
+.subject-info-box-2 select option {
+    padding: 4px 10px 4px 10px;
+}
+
+.subject-info-box-2 select option:hover {
+    background: #EEEEEE;
+}
+
+.subject-info-box-1 select option:hover {
+    background: #EEEEEE;
+}
+
+.subject-info-arrows {
+    float: left;
+    width: 10%;
+}
+
+.subject-info-arrows input {
+    width: 70%;
+    display: block;
+    margin: 0 auto;
+}
+
+.swotResult {
+    display: block;
+    margin: 10px;
 }

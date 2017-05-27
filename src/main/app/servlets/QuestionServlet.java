@@ -22,6 +22,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -144,11 +145,34 @@ public class QuestionServlet extends HttpServlet {
                     session.close();
                     s.removeAttribute("notAskedQuestions");
 
-                    data = HtmlContent.prepareResults(audit); // + wynik punktowy
+                    data = HtmlContent.makeSwotTables(QuestionMethods.getSwot(), audit.getId());
                 } else {
                     data = HtmlContent.makeQuestions(allQuestions, s);
                 }
 
+            }
+            break;
+            case "saveSwot": {
+                String[] alternatives = request.getParameterValues("selected[]");
+                long auditId = Long.parseLong(request.getParameter("auditId"));
+
+                Session session = HibernateUtil.getSessionFactory().getCurrentSession();
+                if (!session.getTransaction().isActive())
+                    session.beginTransaction();
+
+                Audit audit = session.load(Audit.class, auditId);
+                List<SwotAlternatives> alternativesObjects = new ArrayList<>();
+                for (String alt : alternatives) {
+                    alternativesObjects.add(session.load(SwotAlternatives.class, Long.parseLong(alt)));
+                }
+                audit.getSwot().addAll(alternativesObjects);
+
+                session.update(audit);
+
+                session.getTransaction().commit();
+                session.close();
+
+                data = HtmlContent.prepareResults(audit);
             }
             break;
         }

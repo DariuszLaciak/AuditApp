@@ -3,6 +3,7 @@ package main.app.orm.methods;
 import main.app.enums.QuestionCategory;
 import main.app.orm.HibernateUtil;
 import main.app.orm.Question;
+import main.app.orm.SwotAlternatives;
 import org.hibernate.Session;
 
 import java.util.List;
@@ -47,5 +48,17 @@ public class QuestionMethods {
         if (s.isOpen())
             s.close();
         return q;
+    }
+
+    public static List<SwotAlternatives> getSwot() {
+        List<SwotAlternatives> lista = null;
+        s = HibernateUtil.getSessionFactory().getCurrentSession();
+        if (!s.getTransaction().isActive())
+            s.beginTransaction();
+        lista = s.createQuery("from SwotAlternatives").list();
+        s.getTransaction().commit();
+        if (s.isOpen())
+            s.close();
+        return lista;
     }
 }

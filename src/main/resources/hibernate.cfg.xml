@@ -32,6 +32,7 @@
         <!-- Bind the getCurrentSession() method to the thread. -->
         <property name="hibernate.current_session_context_class">thread</property>
         <property name="hibernate.connection.pool_size">1</property>
+        <property name="hibernate.enable_lazy_load_no_trans">true</property>
         <!--<property name="c3p0.acquire_increment">1</property>-->
         <!--<property name="c3p0.idle_test_period">100</property> &lt;!&ndash; seconds &ndash;&gt;-->
         <!--<property name="c3p0.max_size">100</property>-->

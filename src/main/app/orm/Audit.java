@@ -1,5 +1,10 @@
 package main.app.orm;
 
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
+
 import javax.persistence.*;
 import java.util.Date;
 import java.util.List;
@@ -16,6 +21,9 @@ public class Audit implements ObjectDTO {
 
     private List<Answer> answers;
     private AuditResult result;
+
+    @LazyCollection(LazyCollectionOption.FALSE)
+    private List<SwotAlternatives> swot;
 
     public Audit() {
     }
@@ -67,5 +75,19 @@ public class Audit implements ObjectDTO {
 
     public void setResult(AuditResult result) {
         this.result = result;
+    }
+
+    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @Fetch(value = FetchMode.SUBSELECT)
+    @JoinTable(name = "auditSwot", joinColumns = {
+            @JoinColumn(name = "auditId", nullable = false, updatable = false)},
+            inverseJoinColumns = {@JoinColumn(name = "swotAlternativeId",
+                    nullable = false, updatable = false)})
+    public List<SwotAlternatives> getSwot() {
+        return swot;
+    }
+
+    public void setSwot(List<SwotAlternatives> swot) {
+        this.swot = swot;
     }
 }

@@ -1,6 +1,7 @@
 package main.app.orm;
 
 import main.app.enums.LoginType;
+import main.app.enums.SwotCategory;
 import org.hibernate.Session;
 
 
@@ -10,7 +11,7 @@ public class DatabaseFill {
         Session s = HibernateUtil.getSessionFactory().getCurrentSession();
         s.beginTransaction();
 
-        users(s);
+        swot(s);
 
         s.getTransaction().commit();
         s.close();
@@ -28,5 +29,17 @@ public class DatabaseFill {
         s.save(user2);
         s.save(user3);
         s.save(user4);
+    }
+
+    private static void swot(Session s) {
+        SwotAlternatives swot = new SwotAlternatives(SwotCategory.STRENGHTS, "Znacząca pozycja");
+        SwotAlternatives swot2 = new SwotAlternatives(SwotCategory.WEAKNESSES, "Brak jasno wytyczonej strategii");
+        SwotAlternatives swot3 = new SwotAlternatives(SwotCategory.OPPORTUNITES, "Pojawienie się nowych grup klientów");
+        SwotAlternatives swot4 = new SwotAlternatives(SwotCategory.THREATS, "Możliwość pojawienia się nowych konkurentów");
+
+        s.save(swot);
+        s.save(swot2);
+        s.save(swot3);
+        s.save(swot4);
     }
 }

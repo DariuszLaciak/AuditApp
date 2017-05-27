@@ -51,12 +51,11 @@ function newAudit() {
         $("#content").append("<div id='newAuditTab' class = 'innerContent'></div>");
         newAuditProcess();
     }
-
-
 }
 
 function nextAudit() {
-    newAudit();
+    switchTab("newAuditTab");
+    newAuditProcess();
 }
 
 function newAuditProcess() {
@@ -396,4 +395,33 @@ function decisionIdea(id) {
             }
         }
     });
+}
+
+function saveSwot(auditId) {
+    var chosenOptions = $(".form-control").find("option");
+    var toSend = [];
+    chosenOptions.each(function () {
+        var opt = $(this).val().substr($(this).val().indexOf("_") + 1, $(this).val().length);
+        toSend.push(opt);
+    });
+
+    $.ajax({
+        url: "/Question",
+        method: "POST",
+        dataType: "json",
+        data: {
+            action: "saveSwot",
+            auditId: auditId,
+            selected: toSend
+        },
+        success: function (data) {
+            if (data.success) {
+                $("#newAuditTab").html(data.data);
+            }
+            else {
+                showInfo(false, data.message);
+            }
+        }
+    });
+
 }
