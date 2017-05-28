@@ -372,7 +372,6 @@ public class HtmlContent {
 
     public static String makeOverviewContent(List<Audit> audits) {
         String html = "";
-        html += audits.size();
         if (audits.size() >= 2) {
             html += makeOverviewChart(audits);
             html += makeSwotOverview(audits);
