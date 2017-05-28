@@ -2,10 +2,13 @@
 <html>
 <head>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="lib/jquery-ui.min.css">
     <script src="lib/jquery-3.1.1.min.js" type="application/javascript"></script>
     <script src="jscript/functions.js" type="application/javascript"></script>
     <script src="jscript/common.js" type="application/javascript"></script>
     <script src="lib/jquery.selectlistactions.js" type='application/javascript'></script>
+    <script src="lib/jquery-ui.min.js" type="application/javascript"></script>
+    <script src="lib/UI-pl.js" type="application/javascript"></script>
     <title>Audyt innowacojności przedsiębiorstwa</title>
 </head>
 <body>

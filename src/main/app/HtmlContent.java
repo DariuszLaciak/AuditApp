@@ -3,13 +3,16 @@ package main.app;
 import com.mchange.io.FileUtils;
 import main.app.enums.*;
 import main.app.orm.*;
-import main.app.servlets.Login;
-import org.hibernate.Session;
+import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.labels.StandardCategoryItemLabelGenerator;
 import org.jfree.chart.plot.SpiderWebPlot;
+import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.category.DefaultCategoryDataset;
+import org.jfree.data.time.Day;
+import org.jfree.data.time.TimeSeries;
+import org.jfree.data.time.TimeSeriesCollection;
 
 import javax.servlet.http.HttpSession;
 import java.awt.*;
@@ -17,9 +20,12 @@ import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Base64;
+import java.util.Collections;
 import java.util.List;
 
 public class HtmlContent {
+    private SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
+
     private static String makeButton(String nameToDisplay, String onclick) {
         String html = "";
         html += "<input class='userMenuButton' type='button' value='" + nameToDisplay + "' onclick='" + onclick + "()'/>";
@@ -39,7 +45,7 @@ public class HtmlContent {
         html += "<input type='text' id='user_id' name='user_id' placeholder='Login' />";
         html += "<input type='password' id='user_password' name='user_password' placeholder='Hasło'/>";
         html += "<input type='submit' value='Zaloguj się'/>";
-        html += "<div id='registerUser' class='registerNew link'>Zarejestruj się</div>";
+        html += "<div id='registerUser' class='registerNew link'>Zapomniałem hasło się</div>";
         html += "</form>";
 
         return html;
@@ -65,6 +71,7 @@ public class HtmlContent {
         if (!userType.equals(LoginType.EMPLOYEE)) {
             html += makeButton("Nowy audyt", "newAudit");
             html += makeButton("Historia audytów", "auditHistory");
+            html += makeButton("Zestawienie", "auditOverview");
         }
         html += makeButton("Zgłoś pomysł", "newIdea");
         html += makeButton("Zgłoszone pomysły", "listIdeas");
@@ -126,7 +133,6 @@ public class HtmlContent {
         html.append("<div class='mainResult'>Całkowity wynik: ").append(resultTotal).append(" % </div>");
         html.append(prepareSpiderChart(answers));
         for (QuestionCategory category : QuestionCategory.values()) {
-            if (!category.equals(QuestionCategory.GENERAL)) {
                 html.append("<div class='otherResult'>" + "<div class='otherResultHeader'>").
                         append(category.getVisible().toUpperCase()).
                         append("</div>").
@@ -137,7 +143,6 @@ public class HtmlContent {
                         append(Math.round(Common.getResultFromAnswersForLickert(answers, category, true) * 100)).
                         append(" % </div>" +
                         "<div class='resultSeparator'></div></div>");
-            }
         }
 
         html.append(makeSwotResult(audit));
@@ -162,7 +167,6 @@ public class HtmlContent {
 
         DefaultCategoryDataset dataset = new DefaultCategoryDataset();
         for (QuestionCategory qc : QuestionCategory.values()) {
-            if (!qc.equals(QuestionCategory.GENERAL)) {
                 float result = Common.getResultFromAnswersForLickert(answers, qc, false) / 3;
                 dataset.addValue(result, "wynik", qc.getVisible());
                 dataset.addValue(10, "max10", qc.getVisible());
@@ -170,7 +174,6 @@ public class HtmlContent {
                 dataset.addValue(6, "max6", qc.getVisible());
                 dataset.addValue(4, "max4", qc.getVisible());
                 dataset.addValue(2, "max2", qc.getVisible());
-            }
         }
 
         SpiderWebPlot spiderWebPlot = new SpiderWebPlot(dataset);
@@ -216,6 +219,7 @@ public class HtmlContent {
         SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-YYYY");
         StringBuilder html = new StringBuilder("<div id='tableWrapper'><table class='myTable'>");
         html.append("<thead><tr><th>Data audytu</th><th>Wynik</th><th></th></tr></thead><tbody>");
+        Collections.sort(audits, (o1, o2) -> o2.getAuditDate().compareTo(o1.getAuditDate()));
         for (Audit audit : audits) {
             if (audit.getResult() != null) {
                 html.append("<tr>");
@@ -239,7 +243,7 @@ public class HtmlContent {
         String html = "";
         if (!ideas.isEmpty()) {
             SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-YYYY");
-            int numberOfTDs = 5;
+            int numberOfTDs = 6;
             html += "<div id='tableWrapper'>";
             html += "<table class='myTable'><thead>";
             html += "<tr><th class='widestCol'>Tutuł pomysłu</th><th>Kategoria</th><th>Status</th><th>Data dodania</th>";
@@ -248,10 +252,7 @@ public class HtmlContent {
                 numberOfTDs++;
             }
             html += "<th>Data decyzji</th>";
-            if (!user.getRole().equals(LoginType.EMPLOYEE)) {
-                html += "<th>Akcje</th>";
-                numberOfTDs++;
-            }
+            html += "<th>Akcje</th>";
             html += "</tr></thead><tbody>";
             for (Idea i : ideas) {
                 html += "<tr class='tableTR'><td onclick='moreInfoIdea(" + i.getId() + ")' title='Szczegółowy opis pomysłu' class='widestCol moreInfo'>" + i.getName() + "</td><td  class='widestCol'>" + i.getType().getValue() + "</td><td>" + i.getStatus().getValue() + "</td><td>" + sdf.format(i.getAddedDate()) + "</td>";
@@ -365,6 +366,144 @@ public class HtmlContent {
         String html = "<script type='application/javascript'>$(function($) {";
         html += script;
         html += "});</script>";
+
+        return html;
+    }
+
+    public static String makeOverviewContent(List<Audit> audits) {
+        String html = "";
+        html += audits.size();
+        if (audits.size() >= 2) {
+            html += makeOverviewChart(audits);
+            html += makeSwotOverview(audits);
+        } else {
+            html += "<h1>Do zestawienia są potrzebne co najmniej dwa audyty</h1>";
+        }
+        return html;
+    }
+
+    private static String makeOverviewChart(List<Audit> audits) {
+        String html = "";
+
+        TimeSeriesCollection collection = new TimeSeriesCollection();
+        TimeSeries series = new TimeSeries("Końcowy wynik");
+        for (Audit audit : audits) {
+            series.addOrUpdate(new Day(audit.getAuditDate()), Common.getResultFromAnswers(audit.getAnswers()) * 100);
+        }
+        collection.addSeries(series);
+
+        html += makeTimeChart(collection, new BasicStroke(5.0f), "Wyniki końcowe", false);
+
+        collection = new TimeSeriesCollection();
+
+        for (QuestionCategory cat : QuestionCategory.values()) {
+            series = new TimeSeries(cat.getVisible());
+            for (Audit audit : audits) {
+                series.addOrUpdate(new Day(audit.getAuditDate()), Common.getResultFromAnswersForLickert(audit.getAnswers(), cat, true) * 100);
+            }
+            collection.addSeries(series);
+        }
+
+
+        html += makeTimeChart(collection, new BasicStroke(3.0f), "Wyniki poszczególnych kategorii", true);
+
+
+        return html;
+    }
+
+    private static String makeTimeChart(TimeSeriesCollection collection, Stroke lineStroke, String title, boolean showLegend) {
+        String html = "";
+        JFreeChart chart = ChartFactory.createTimeSeriesChart(title, "Data", "Wynik [%]", collection, showLegend, false, false);
+        chart.setBackgroundPaint(null);
+        if (showLegend) {
+            chart.getLegend().setBackgroundPaint(Color.lightGray);
+        }
+        chart.getTitle().setPaint(Color.WHITE);
+        chart.getXYPlot().getDomainAxis().setTickLabelPaint(Color.WHITE);
+        chart.getXYPlot().getDomainAxis().setLabelPaint(Color.WHITE);
+        XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer();
+        for (int i = 0; i < chart.getXYPlot().getSeriesCount(); ++i) {
+            renderer.setSeriesStroke(i, lineStroke);
+            renderer.setSeriesShapesFilled(i, true);
+        }
+        chart.getXYPlot().setRenderer(renderer);
+        chart.getXYPlot().getRangeAxis().setTickLabelPaint(Color.WHITE);
+        chart.getXYPlot().getRangeAxis().setLabelPaint(Color.WHITE);
+
+        File tempFile = new File("temporary.png");
+        try {
+            ChartUtilities.saveChartAsPNG(tempFile, chart, 640, 480);
+            html += "<img class='resultTimeChart' src=\"data:image/png;base64, " + Base64.getEncoder().encodeToString(FileUtils.getBytes(tempFile)) + "\"/>";
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return html;
+    }
+
+    private static String makeSwotOverview(List<Audit> audits) {
+        String html = "<h1>Zestawienie wyników analizy SWOT</h1>";
+        boolean areSwotChanges = false;
+        Audit firstAudit = audits.get(0);
+        Audit lastAudit = audits.get(audits.size() - 1);
+
+        if (firstAudit.getSwot().isEmpty() && lastAudit.getSwot().isEmpty()) {
+            html += "<h2>Brak danych SWOT dla podanego okresu</h2>";
+        } else
+            for (SwotCategory cat : SwotCategory.values()) {
+                html += "<h2>" + cat.getValue() + "</h2><ul>";
+
+                for (SwotAlternatives sw : firstAudit.getSwot()) {
+                    if (sw.getCategory().equals(cat)) {
+                        areSwotChanges = true;
+                        if (lastAudit.getSwot().contains(sw)) {
+                            html += "<li>" + sw.getText() + "</li>";
+                        } else {
+                            if (cat.equals(SwotCategory.OPPORTUNITES) || cat.equals(SwotCategory.STRENGHTS)) {
+                                html += "<li>" + printIconOverview(false, false) + sw.getText() + "</li>";
+                            } else {
+                                html += "<li>" + printIconOverview(false, true) + sw.getText() + "</li>";
+                            }
+                        }
+                    }
+                }
+                for (SwotAlternatives sw : lastAudit.getSwot()) {
+                    if (sw.getCategory().equals(cat)) {
+                        areSwotChanges = true;
+                        if (!firstAudit.getSwot().contains(sw)) {
+                            if (cat.equals(SwotCategory.OPPORTUNITES) || cat.equals(SwotCategory.STRENGHTS)) {
+                                html += "<li>" + printIconOverview(true, true) + sw.getText() + "</li>";
+                            } else {
+                                html += "<li>" + printIconOverview(true, false) + sw.getText() + "</li>";
+                            }
+                        }
+                    }
+                }
+                if (!areSwotChanges) {
+                    html += "<li>BRAK ZMIAN</li>";
+                }
+                html += "</ul>";
+            }
+
+        return html;
+    }
+
+    private static String printIconOverview(boolean isPlus, boolean positive) {
+        String html = "<img src='images/";
+        if (isPlus) {
+            if (!positive) {
+                html += "plus.png";
+            } else {
+                html += "plusG.png";
+            }
+        } else {
+            if (positive) {
+                html += "minus.png";
+            } else {
+                html += "minusR.png";
+            }
+        }
+        html += "' class='swotOverviewIcon'/>";
 
         return html;
     }

@@ -136,4 +136,17 @@ public class Common {
         }
         return result;
     }
+
+    public static List<Audit> getAuditsBetweendDates(List<Audit> allAudits, Date start, Date end) {
+        List<Audit> audits = new ArrayList<>();
+
+        for (Audit audit : allAudits) {
+            if (audit.getAuditDate().compareTo(start) >= 0 && audit.getAuditDate().compareTo(end) <= 0
+                    && audit.getResult() != null) {
+                audits.add(audit);
+            }
+        }
+        audits.sort(Comparator.comparing(Audit::getAuditDate));
+        return audits;
+    }
 }

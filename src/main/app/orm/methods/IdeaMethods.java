@@ -18,7 +18,19 @@ public class IdeaMethods {
         s = HibernateUtil.getSessionFactory().getCurrentSession();
         if (!s.getTransaction().isActive())
             s.beginTransaction();
-        ideas = s.createQuery("from Idea").list();
+        ideas = s.createQuery("from Idea order by actionDate desc, addedDate desc").list();
+        s.getTransaction().commit();
+        if (s.isOpen())
+            s.close();
+        return ideas;
+    }
+
+    public static List<Idea> getIdeasForUser(User user) {
+        List<Idea> ideas;
+        s = HibernateUtil.getSessionFactory().getCurrentSession();
+        if (!s.getTransaction().isActive())
+            s.beginTransaction();
+        ideas = s.createQuery("from Idea where employee = :user order by actionDate desc, addedDate desc").setParameter("user", user).list();
         s.getTransaction().commit();
         if (s.isOpen())
             s.close();

@@ -65,7 +65,7 @@ public class Ideas extends HttpServlet {
                 List<Idea> ideas;
                 if (user.getRole().equals(LoginType.EMPLOYEE)) {
                     session.refresh(user);
-                    ideas = user.getIdeas();
+                    ideas = IdeaMethods.getIdeasForUser(user);
                 } else {
                     ideas = IdeaMethods.getIdeas();
                 }

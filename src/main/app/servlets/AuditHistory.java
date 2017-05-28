@@ -16,6 +16,10 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -35,6 +39,7 @@ public class AuditHistory extends HttpServlet {
         boolean success = true;
         User loggedUser = (User) s.getAttribute("userData");
         List<Audit> allAudits = AuditMethods.getAudits();
+        SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
         if (!loggedUser.getRole().equals(LoginType.EMPLOYEE)) {
             switch (action) {
                 case "table":
@@ -48,6 +53,26 @@ public class AuditHistory extends HttpServlet {
                         success = false;
                         responseMessage = "Błąd serwera. Skontaktuj się z administratorem!";
                     }
+                    break;
+                case "overview":
+                    String startDate = request.getParameter("startDate");
+                    String endDate = request.getParameter("endDate");
+                    Date start = null, end = null;
+                    try {
+                        start = sdf.parse(startDate);
+                        end = sdf.parse(endDate);
+                    } catch (ParseException e) {
+                        success = false;
+                        responseMessage = "Zły format daty!";
+                        break;
+                    }
+                    Calendar c = Calendar.getInstance();
+                    c.setTime(end);
+                    c.add(Calendar.DATE, 1);
+
+                    end = c.getTime();
+                    List<Audit> auditsToMakeOverview = Common.getAuditsBetweendDates(allAudits, start, end);
+                    data = HtmlContent.makeOverviewContent(auditsToMakeOverview);
                     break;
             }
         } else {

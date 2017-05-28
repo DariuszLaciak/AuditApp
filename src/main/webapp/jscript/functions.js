@@ -54,7 +54,7 @@ function newAudit() {
 }
 
 function nextAudit() {
-    switchTab("newAuditTab");
+    newAudit();
     newAuditProcess();
 }
 
@@ -424,4 +424,43 @@ function saveSwot(auditId) {
         }
     });
 
+}
+
+function auditOverview() {
+    switchTab("auditOverviewTab")
+    if ($("#auditOverviewTab").length === 0) {
+        $("#content").append("<div id='auditOverviewTab' class = 'innerContent'></div>");
+        var html = "<input type='text' name='beginDate' id='beginDate' placeholder='Data początkowa'/>";
+        html += "<input type='text' name='endDate' id='endDate' placeholder='Data końcowa'/>";
+        html += "<input type='button' value='Pokaż zestawienie' onclick='makeAuditOverview()' class='userMenuButton'/>";
+        html += "<script type='application/javascript'>$(function (){" +
+            "$('#beginDate').datepicker(); $('#endDate').datepicker();" +
+            "$('#beginDate').datepicker('option', 'dateFormat', 'dd-mm-yy'); $('#endDate').datepicker('option', 'dateFormat', 'dd-mm-yy');" +
+            "})</script>";
+        html += "<div id='overviewContent'></div>";
+        $("#auditOverviewTab").html(html);
+    }
+}
+
+function makeAuditOverview() {
+    var startDate = $("#beginDate").val();
+    var endDate = $("#endDate").val();
+    $.ajax({
+        url: "/AuditHistory",
+        method: "POST",
+        dataType: "json",
+        data: {
+            action: "overview",
+            startDate: startDate,
+            endDate: endDate
+        },
+        success: function (data) {
+            if (data.success) {
+                $("#overviewContent").html(data.data);
+            }
+            else {
+                showInfo(false, data.message);
+            }
+        }
+    });
 }

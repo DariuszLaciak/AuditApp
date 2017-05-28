@@ -166,8 +166,12 @@ input[type='submit'] {
 }
 
 .otherResult {
-    text-align: center;
+    text-align: justify;
     font-size: 20px;
+}
+
+.otherResultHeader {
+    text-align: center;
 }
 
 .resultSpider {
@@ -179,6 +183,7 @@ input[type='submit'] {
     font-size: larger;
     font-weight: bold;
     margin-bottom: 15px;
+    text-align: center;
 }
 
 .otherResultDesc {
@@ -317,6 +322,10 @@ textarea {
     cursor: pointer;
 }
 
+.moreInfo:hover {
+    background-color: #1d2731;
+}
+
 .overlayWindow {
     display: block;
     position: absolute;
@@ -436,4 +445,23 @@ textarea {
 .swotResult {
     display: block;
     margin: 10px;
+}
+
+#auditOverviewTab input[type='text'] {
+    margin: 10px;
+}
+
+.ui-datepicker th {
+    color: black;
+}
+
+#overviewContent {
+    display: block;
+    text-align: justify;
+}
+
+.swotOverviewIcon {
+    width: 15px;
+    margin-right: 5px;
+
 }

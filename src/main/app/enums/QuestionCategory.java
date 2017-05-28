@@ -3,7 +3,6 @@ package main.app.enums;
 import main.app.Constraints;
 
 public enum QuestionCategory {
-    GENERAL("Metryki"),
     STRATEGIC("Strategia"),
     PROCESSES("Procesy"),
     ORGANIZATION("Organizacja"),
