@@ -100,7 +100,7 @@ public class HtmlContent {
         StringBuilder html = new StringBuilder("");
         String buttonValue = "Następne pytania";
         if (questions.size() <= Constraints.NUMBER_OF_QUESTIONS_PER_PAGE) {
-            buttonValue = "Zakończ audyt";
+            buttonValue = "Analiza SWOT";
         }
         html.append("<ol>");
         for (Question q : Common.getRandomQuestionsAndRemoveAskedFromSession(questions, session)) {
