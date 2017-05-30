@@ -256,7 +256,7 @@ public class HtmlContent {
         for (User user : users) {
             html += "<tr class='tableTR'><td>" + user.getUsername() + "</td><td>" + user.getName() + "</td><td>" + user.getSurname() + "</td>" +
                     "<td>" + user.getEmail() + "</td><td>" + sdf.format(user.getAccountCreated()) + "</td><td>" + user.getRole().getDisplayName() + "</td>" +
-                    "<td>" + (user.getManager() == null ? user.getManager().getName() + " " + user.getManager().getSurname() : "BRAK") +
+                    "<td>" + (user.getManager() != null ? user.getManager().getName() + " " + user.getManager().getSurname() : "BRAK") +
                     "</td><td>" + (user.isActive() ? "tak" : "nie") + "</td><td>";
             html += "<img src='images/edit.png' title='Edytuj użytkownika' class='ideaOption' onclick='editUser(" + user.getId() + ")' />";
             html += "<img src='images/reject.png' title='Usuń użytkownika' class='ideaOption' onclick='deleteUser(" + user.getId() + ")' />";
@@ -321,7 +321,9 @@ public class HtmlContent {
         String html = "";
         List<List<Idea>> listsOfIdeas = Common.getIdeasOfEmployeesOfManager(ideas, user);
         if (!listsOfIdeas.get(0).isEmpty()) {
+            html += "<h2>Pomysły podwładnych</h2>";
             html += displayIdeasTable(listsOfIdeas.get(0), user);
+            html += "<h2>Pozostałe pomysły</h2>";
             html += displayIdeasTable(listsOfIdeas.get(1), user);
         } else {
             html += displayIdeasTable(ideas, user);

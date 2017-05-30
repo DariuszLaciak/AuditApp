@@ -74,7 +74,7 @@ public class Ideas extends HttpServlet {
                 session = HibernateUtil.getSessionFactory().getCurrentSession();
                 if (!session.getTransaction().isActive())
                     session.beginTransaction();
-                String html = "<h2>Zgłoszone pomysły: </h2>";
+                String html = "<h1>Zgłoszone pomysły: </h1>";
                 html += HtmlContent.displayIdeas(ideas, user);
                 data = html;
 

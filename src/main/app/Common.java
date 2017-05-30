@@ -165,10 +165,12 @@ public class Common {
         List<List<Idea>> returnValue = new ArrayList<>();
         if (!manager.getEmployees().isEmpty()) {
             for (Idea i : ideas) {
-                if (manager.getEmployees().contains(i.getEmployee())) {
-                    empIdeas.add(i);
-                } else {
-                    nonEmpIdeas.add(i);
+                for (User emp : manager.getEmployees()) {
+                    if (emp.getId() == i.getEmployee().getId()) {
+                        empIdeas.add(i);
+                    } else {
+                        nonEmpIdeas.add(i);
+                    }
                 }
             }
         }
