@@ -326,6 +326,42 @@ function deleteUser(userId) {
 
 }
 
+function newSwotPosition(category) {
+    $("#swot_" + category).hide();
+    $("#div_" + category).append("<div class='newSwotDiv' id='newSwotDiv_" + category + "' ><input type='text' id='newSwot_" + category + "' class='newSwot' placeholder='Wartość cechy' />" +
+        "<img src='images/accept.png' class='swotIcon' onclick='addSwot(\"" + category + "\")'/></div>");
+}
+
+function addSwot(category) {
+    var swotValue = $("#newSwot_" + category).val();
+    if (swotValue != "") {
+        $.ajax({
+            url: "/Question",
+            method: "POST",
+            dataType: "json",
+            data: {
+                action: "newSwotPosition",
+                value: swotValue,
+                category: category
+            },
+            success: function (data) {
+                if (data.success) {
+                    showInfo(true, data.message);
+                    $("#destination_" + category.toLowerCase()).append(data.data);
+                    $("#newSwotDiv_" + category).remove();
+                    $("#swot_" + category).show();
+                }
+                else {
+                    showInfo(false, data.message);
+                }
+            }
+        });
+    }
+    else {
+        showInfo(false, "Wpisz wartość cechy!");
+    }
+}
+
 function sendIdea() {
     var form = $("#newIdeaForm");
     var content = form.find($('#ideaIdeaContent'));

@@ -4,9 +4,9 @@ import main.app.Common;
 import main.app.HtmlContent;
 import main.app.enums.QuestionCategory;
 import main.app.enums.QuestionType;
+import main.app.enums.SwotCategory;
 import main.app.orm.*;
 import main.app.orm.methods.QuestionMethods;
-import main.app.orm.methods.ResultMethods;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.json.simple.JSONArray;
@@ -173,6 +173,26 @@ public class QuestionServlet extends HttpServlet {
                 session.close();
 
                 data = HtmlContent.prepareResults(audit);
+            }
+            break;
+            case "newSwotPosition": {
+                String category = request.getParameter("category");
+                String value = request.getParameter("value");
+                SwotCategory cat = SwotCategory.valueOf(category);
+
+                Session session = HibernateUtil.getSessionFactory().getCurrentSession();
+                if (!session.getTransaction().isActive())
+                    session.beginTransaction();
+
+                SwotAlternatives alt = new SwotAlternatives(cat, value);
+                long altId = (long) session.save(alt);
+
+                responseMessage = "Pomyślnie dodano cechę.";
+
+                session.getTransaction().commit();
+                session.close();
+
+                data = HtmlContent.getSingleAlternativeOption(altId, value);
             }
             break;
         }

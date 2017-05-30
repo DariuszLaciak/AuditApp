@@ -38,6 +38,12 @@ public class HtmlContent {
         return html;
     }
 
+    private static String makeButton(String nameToDisplay, String onclick, String argument, String id) {
+        String html = "";
+        html += "<input id= '" + id + "' class='userMenuButton' type='button' value='" + nameToDisplay + "' onclick='" + onclick + "(" + argument + ")'/>";
+        return html;
+    }
+
     public static String makeLoginForm() {
         String html = "";
 
@@ -325,7 +331,7 @@ public class HtmlContent {
             html += "<div class='row style-select'>";
             html += "<div class='tableHeader'>" + category.getValue() + "</div>";
             html += "<div class='col-md-12'>";
-            html += "<div class='subject-info-box-1'>";
+            html += "<div id='div_" + category.toString() + "' class='subject-info-box-1'>";
             html += "<label>Dostępne</label>";
             html += "<select multiple id='source_" + category.toString().toLowerCase() + "'>";
             for (SwotAlternatives sw : list) {
@@ -334,6 +340,9 @@ public class HtmlContent {
                 }
             }
             html += "</select>";
+
+            html += makeButton("Dodaj nową pozycję", "newSwotPosition", "\"" + category.toString() + "\"", "swot_" + category.toString());
+
             html += "</div>";
             html += "<div class='subject-info-arrows text-center'>";
             html += "</br></br>";
@@ -380,6 +389,11 @@ public class HtmlContent {
         html += makeButton("Zapisz", "saveSwot", String.valueOf(auditId));
 
 
+        return html;
+    }
+
+    public static String getSingleAlternativeOption(long id, String text) {
+        String html = "<option value='swot_" + id + "'>" + text + "</option>";
         return html;
     }
 
