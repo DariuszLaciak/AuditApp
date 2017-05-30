@@ -16,7 +16,6 @@ public class Question implements ObjectDTO {
     private long id;
     private String content;
     private QuestionType type;
-    private boolean yesValue;
     private QuestionCategory category;
 
     private List<Answer> answers;
@@ -25,10 +24,9 @@ public class Question implements ObjectDTO {
     public Question() {
     }
 
-    public Question(String content, QuestionType type, boolean yesValue, QuestionCategory category) {
+    public Question(String content, QuestionType type, QuestionCategory category) {
         this.content = content;
         this.type = type;
-        this.yesValue = yesValue;
         this.category = category;
     }
 
@@ -59,15 +57,6 @@ public class Question implements ObjectDTO {
 
     public void setType(QuestionType type) {
         this.type = type;
-    }
-
-    @Column(length = 10)
-    public boolean getYesValue() {
-        return yesValue;
-    }
-
-    public void setYesValue(boolean yesValue) {
-        this.yesValue = yesValue;
     }
 
     @OneToMany(mappedBy = "question", orphanRemoval = true)

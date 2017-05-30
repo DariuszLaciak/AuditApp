@@ -196,6 +196,12 @@ input[type='submit'] {
     width: 50%;
 }
 
+.ideaSeparator {
+    border-bottom: 1px solid;
+    margin: 10px auto;
+    width: 90%;
+}
+
 .auditResultHeader {
     margin-bottom: 5px;
     text-align: center;
@@ -347,19 +353,28 @@ textarea {
     padding: 10px;
 }
 
+.fixedH80 {
+    height: 80%;
+    overflow: auto;
+}
+
 .overlayButtons {
     position: absolute;
     bottom: 0px;
-    margin: 10px;
+    margin: 30px 10px 10px;
 }
 
-#ideaOpinionAuthor {
-    font-size: 17pt;
+#newComment {
+    margin-bottom: 15px;
 }
 
-#ideaOpinionContent {
+.ideaOpinionAuthor {
     margin-top: 20px;
     font-style: italic;
+}
+
+.ideaOpinionContent {
+    font-size: 17pt;
 }
 
 #overlayBG {

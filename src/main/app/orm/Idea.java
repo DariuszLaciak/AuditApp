@@ -2,9 +2,12 @@ package main.app.orm;
 
 import main.app.enums.IdeaTypes;
 import main.app.enums.Status;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 
 import javax.persistence.*;
 import java.util.Date;
+import java.util.List;
 
 @Table
 @Entity
@@ -19,7 +22,7 @@ public class Idea implements ObjectDTO {
 
     private User employee;
 
-    private Opinion opinion;
+    private List<Opinion> opinion;
 
     public Idea() {
     }
@@ -27,7 +30,7 @@ public class Idea implements ObjectDTO {
     public Idea(String name, String content, IdeaTypes type) {
         this.name = name;
         this.content = content;
-        this.status = Status.PENDING;
+        this.status = Status.OPEN;
         this.type = type;
         this.addedDate = new Date();
     }
@@ -107,12 +110,14 @@ public class Idea implements ObjectDTO {
         this.actionDate = actionDate;
     }
 
-    @OneToOne(cascade = CascadeType.ALL, mappedBy = "idea")
-    public Opinion getOpinion() {
+    @OneToMany(mappedBy = "idea")
+    @Fetch(value = FetchMode.SUBSELECT)
+    @PrimaryKeyJoinColumn
+    public List<Opinion> getOpinions() {
         return opinion;
     }
 
-    public void setOpinion(Opinion opinion) {
+    public void setOpinions(List<Opinion> opinion) {
         this.opinion = opinion;
     }
 }

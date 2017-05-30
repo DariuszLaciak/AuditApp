@@ -4,10 +4,7 @@ import main.app.enums.QuestionCategory;
 import main.app.enums.QuestionType;
 import main.app.enums.SwotCategory;
 import main.app.enums.SwotResult;
-import main.app.orm.Answer;
-import main.app.orm.Audit;
-import main.app.orm.Question;
-import main.app.orm.SwotAlternatives;
+import main.app.orm.*;
 
 import javax.servlet.http.HttpSession;
 import java.util.*;
@@ -160,5 +157,23 @@ public class Common {
         }
 
         return string;
+    }
+
+    public static List<List<Idea>> getIdeasOfEmployeesOfManager(List<Idea> ideas, User manager) {
+        List<Idea> empIdeas = new ArrayList<>();
+        List<Idea> nonEmpIdeas = new ArrayList<>();
+        List<List<Idea>> returnValue = new ArrayList<>();
+        if (!manager.getEmployees().isEmpty()) {
+            for (Idea i : ideas) {
+                if (manager.getEmployees().contains(i.getEmployee())) {
+                    empIdeas.add(i);
+                } else {
+                    nonEmpIdeas.add(i);
+                }
+            }
+        }
+        returnValue.add(empIdeas);
+        returnValue.add(nonEmpIdeas);
+        return returnValue;
     }
 }

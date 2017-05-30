@@ -45,15 +45,10 @@ public class QuestionServlet extends HttpServlet {
                 responseMessage = "Pomyślnie dodano pytanie";
                 String questionContent = request.getParameter("content");
                 String questionType = request.getParameter("type");
-                String additional = request.getParameter("additional");
                 String category = request.getParameter("category");
-                boolean additionalYes = false;
                 QuestionType type = QuestionType.valueOf(questionType.toUpperCase());
                 QuestionCategory questionCategory = QuestionCategory.valueOf(category.toUpperCase());
-                if (type.equals(QuestionType.YES_NO)) {
-                    additionalYes = Boolean.valueOf(additional);
-                }
-                Question question = new Question(questionContent, type, additionalYes, questionCategory);
+                Question question = new Question(questionContent, type, questionCategory);
 
                 try {
                     Session session = HibernateUtil.getSessionFactory().getCurrentSession();

@@ -1,6 +1,7 @@
 package main.app.orm;
 
 import javax.persistence.*;
+import java.util.Date;
 
 /**
  * Created by darek on 22.05.17.
@@ -10,6 +11,7 @@ import javax.persistence.*;
 public class Opinion implements ObjectDTO {
     private long id;
     private String content;
+    private Date opinionDate;
 
     private User author;
     private Idea idea;
@@ -19,6 +21,7 @@ public class Opinion implements ObjectDTO {
 
     public Opinion(String content) {
         this.content = content;
+        this.opinionDate = new Date();
     }
 
     @Id
@@ -51,13 +54,22 @@ public class Opinion implements ObjectDTO {
         this.author = author;
     }
 
-    @OneToOne(optional = false)
-    @JoinColumn(name = "ideaId")
+    @ManyToOne
+    @JoinColumn(name = "ideaId", nullable = false)
     public Idea getIdea() {
         return idea;
     }
 
     public void setIdea(Idea idea) {
         this.idea = idea;
+    }
+
+    @Column
+    public Date getOpinionDate() {
+        return opinionDate;
+    }
+
+    public void setOpinionDate(Date opinionDate) {
+        this.opinionDate = opinionDate;
     }
 }

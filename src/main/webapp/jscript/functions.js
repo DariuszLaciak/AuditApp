@@ -266,22 +266,39 @@ function getUsersFromDB() {
 }
 
 function addUser() {
-    var html = "<input class='newUserInput' type='text' placeholder='Nazwa użytkownika' id='username' />";
-    html += "<input class='newUserInput' type='text' placeholder='Imię' id='name' />";
-    html += "<input class='newUserInput' type='text' placeholder='Nazwisko' id='surname' />";
-    html += "<input class='newUserInput' type='text' placeholder='E-mail' id='mail' />";
-    html += "<br /><span class='labelSpan'>Typ: </span><select class='newUserInput' id='role' ><option value='admin'>Admin</option>" +
-        "<option value='user'>Manager</option><option value='employee' selected='selected'>Pracownik</option></select>";
-    html += "<br />Aktywny: <input class='newUserInput' type='checkbox' id='active' checked='checked' />";
-    var button = {};
-    button.value = "Dodaj";
-    button.onclick = "confirmAddUser()";
+    $.ajax({
+        url: "/Manage",
+        method: "POST",
+        dataType: "json",
+        data: {
+            action: "getManagers"
+        },
+        success: function (data) {
+            if (data.success) {
+                var html = "<input class='newUserInput' type='text' placeholder='Nazwa użytkownika' id='username' />";
+                html += "<input class='newUserInput' type='text' placeholder='Imię' id='name' />";
+                html += "<input class='newUserInput' type='text' placeholder='Nazwisko' id='surname' />";
+                html += "<input class='newUserInput' type='text' placeholder='E-mail' id='mail' />";
+                html += "<br /><span class='labelSpan'>Typ: </span><select class='newUserInput' id='role' ><option value='admin'>Admin</option>" +
+                    "<option value='user'>Manager</option><option value='employee' selected='selected'>Pracownik</option></select>";
+                html += "<br />Aktywny: <input class='newUserInput' type='checkbox' id='active' checked='checked' />";
+                html += data.data;
+                var button = {};
+                button.value = "Dodaj";
+                button.onclick = "confirmAddUser()";
 
-    var button2 = {};
-    button2.value = "Anuluj";
-    button2.onclick = "closeOverlay(\"new\")";
-    var buttons = [button, button2];
-    makeOverlayWindow("new", "center", 220, 350, "Dodaj użytkownika", html, buttons);
+                var button2 = {};
+                button2.value = "Anuluj";
+                button2.onclick = "closeOverlay(\"new\")";
+                var buttons = [button, button2];
+                makeOverlayWindow("new", "center", 220, 350, "Dodaj użytkownika", html, buttons);
+            }
+            else {
+                showInfo(false, data.message);
+            }
+        }
+    });
+
 }
 
 function confirmAddUser() {
@@ -291,6 +308,8 @@ function confirmAddUser() {
     var email = $("#mail").val();
     var role = $('#role').find(":selected").val();
     var active = $("#active").is(':checked');
+    var manager = $("#manager").val();
+    manager = manager.substr(manager.indexOf("_") + 1, manager.length);
 
     $.ajax({
         url: "/Manage",
@@ -303,7 +322,8 @@ function confirmAddUser() {
             surname: surname,
             mail: email,
             role: role,
-            active: active
+            active: active,
+            manager: manager
         },
         success: function (data) {
             if (data.success) {
@@ -421,46 +441,66 @@ function moreInfoIdea(id) {
 }
 
 function acceptIdea(id) {
-    var button = {};
-    button.value = "Potwierdź";
-    button.onclick = "saveAccepted(" + id + ")";
-
-    var button2 = {};
-    button2.value = "Anuluj";
-    button2.onclick = "closeOverlay(" + id + ")";
-    var buttons = [button, button2];
-
-    var form = "<form id='acceptIdeaForm'>";
-    form += "<textarea id='ideaOpinion' placeholder='Treść opinii' rows='10' cols='45'/>";
-    form += "</form>";
-    makeOverlayWindow(id, $("#accept_" + id), 400, 300, "Akceptuj: wystaw opinię", form, buttons);
+    makeConfirmWindowChangeIdeaStatus(id, true);
 }
 
 function rejectIdea(id) {
+    makeConfirmWindowChangeIdeaStatus(id, false);
+}
+
+function makeConfirmWindowChangeIdeaStatus(id, open) {
     var button = {};
     button.value = "Potwierdź";
-    button.onclick = "saveRejected(" + id + ")";
+    button.onclick = "changeIdeaStatus(" + id + "," + open + ")";
 
     var button2 = {};
     button2.value = "Anuluj";
     button2.onclick = "closeOverlay(" + id + ")";
     var buttons = [button, button2];
 
-    var form = "<form id='acceptIdeaForm'>";
-    form += "<textarea id='ideaOpinion' placeholder='Treść opinii' rows='10' cols='45'/>";
-    form += "</form>";
-    makeOverlayWindow(id, $("#accept_" + id), 400, 300, "Odrzuć: wystaw opinię", form, buttons);
+    var html = "Czy na pewno chcesz ";
+    if (open) {
+        html += "otworzyć ";
+    }
+    else {
+        html += "zamknąć ";
+    }
+
+    html += "pomysł?";
+    var elem;
+    if (open) {
+        elem = $("#accept_" + id);
+    }
+    else {
+        elem = $("#reject" + id);
+    }
+    makeOverlayWindow(id, elem, 225, 200, "Odrzuć: wystaw opinię", html, buttons);
 }
 
-function saveAccepted(id) {
-    saveOpinion(true, id);
+function changeIdeaStatus(id, open) {
+    $.ajax({
+        url: "/Ideas",
+        method: "POST",
+        dataType: "json",
+        data: {
+            action: "changeIdeaStatus",
+            ideaId: id,
+            isOpen: open
+        },
+        success: function (data) {
+            if (data.success) {
+                showInfo(true, data.message);
+                $("#listIdeasTab").html(data.data);
+                closeOverlay(id);
+            }
+            else {
+                showInfo(false, data.message);
+            }
+        }
+    });
 }
 
-function saveRejected(id) {
-    saveOpinion(false, id);
-}
-
-function saveOpinion(positive, id) {
+function saveOpinion(id) {
     if ($("#ideaOpinion").val() == "") {
         showInfo(false, "Napisz opinię");
     }
@@ -472,15 +512,15 @@ function saveOpinion(positive, id) {
             data: {
                 action: "saveOpinion",
                 value: $("#ideaOpinion").val(),
-                positive: positive,
                 ideaId: id
             },
             success: function (data) {
                 if (data.success) {
                     showInfo(true, data.message);
-                    closeOverlay(id);
-                    $("#listIdeasTab").html(data.data);
-
+                    $(".overlayContent").html(data.data.opinion);
+                    $("#listIdeasTab").html(data.data.ideas);
+                    $("#acceptIdeaForm").remove();
+                    $("#newComment").show();
                 }
                 else {
                     showInfo(false, data.message);
@@ -505,13 +545,22 @@ function decisionIdea(id) {
                 button.value = "Zamknij";
                 button.onclick = "closeOverlay(" + id + ")";
                 var buttons = [button];
-                makeOverlayWindow(id, $("#decisionIdea_" + id), 400, 300, "Szczegóły decyzji: ", data.data, buttons);
+                makeOverlayWindow(id, $("#decisionIdea_" + id), 400, 600, "Historia: ", data.data, buttons, true);
             }
             else {
                 showInfo(false, data.message);
             }
         }
     });
+}
+
+function newIdeaComment(id) {
+    $("#newComment").hide();
+    var form = "<form id='acceptIdeaForm'>";
+    form += "<textarea id='ideaOpinion' placeholder='Treść opinii' rows='4' cols='43'/>";
+    form += "<input type='button' value='Dodaj' onclick='saveOpinion(" + id + ")'/>";
+    form += "</form>";
+    $(".overlayContent").prepend(form);
 }
 
 function saveSwot(auditId) {

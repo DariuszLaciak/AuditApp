@@ -1,5 +1,6 @@
 package main.app.orm.methods;
 
+import main.app.enums.LoginType;
 import main.app.orm.HibernateUtil;
 import main.app.orm.User;
 import org.hibernate.Session;
@@ -20,6 +21,18 @@ public class UserMethods {
         if (!s.getTransaction().isActive())
             s.beginTransaction();
         lista = s.createQuery("from User").list();
+        s.getTransaction().commit();
+        if (s.isOpen())
+            s.close();
+        return lista;
+    }
+
+    public static List<User> getManagers() {
+        List<User> lista = null;
+        s = HibernateUtil.getSessionFactory().getCurrentSession();
+        if (!s.getTransaction().isActive())
+            s.beginTransaction();
+        lista = s.createQuery("from User where role =:role").setParameter("role", LoginType.USER).list();
         s.getTransaction().commit();
         if (s.isOpen())
             s.close();

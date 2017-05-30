@@ -38,7 +38,7 @@ public class HtmlContent {
         return html;
     }
 
-    private static String makeButton(String nameToDisplay, String onclick, String argument, String id) {
+    public static String makeButton(String nameToDisplay, String onclick, String argument, String id) {
         String html = "";
         html += "<input id= '" + id + "' class='userMenuButton' type='button' value='" + nameToDisplay + "' onclick='" + onclick + "(" + argument + ")'/>";
         return html;
@@ -93,9 +93,9 @@ public class HtmlContent {
 
     public static String makeQuestionTable(List<Question> questions) {
         StringBuilder html = new StringBuilder("<div id='tableWrapper'><table class='myTable'>");
-        html.append("<thead><tr><th>Id</th><th class='widestCol'>Treść</th><th>Typ</th><th>Wartość TAK</th><th>Kategoria</th></tr></thead><tbody>");
+        html.append("<thead><tr><th>Id</th><th class='widestCol'>Treść</th><th>Kategoria</th></tr></thead><tbody>");
         for (Question q : questions) {
-            html.append("<tr><td>").append(q.getId()).append("</td><td class='widestCol'>").append(q.getContent()).append("</td><td>").append(q.getType()).append("").append("</td><td>").append(q.getYesValue()).append("</td><td>").append(q.getCategory()).append("</td></tr>");
+            html.append("<tr><td>").append(q.getId()).append("</td><td class='widestCol'>").append(q.getContent()).append("</td><td>").append(q.getCategory().getVisible()).append("</td></tr>");
         }
         html.append("</tbody></table></div>");
         return html.toString();
@@ -251,12 +251,13 @@ public class HtmlContent {
         html += "<div id='tableWrapper'>";
         html += "<table class='myTable'><thead>";
         html += "<tr><th>Nazwa użytkownika</th><th>Imię</th><th>Nazwisko</th><th>E-mail</th><th>Data dodania</th>" +
-                "<th>Typ</th><th>Aktywny</th><th>Akcje</th>";
+                "<th>Typ</th><th>Przełożony</th><th>Aktywny</th><th>Akcje</th>";
         html += "</tr></thead><tbody>";
         for (User user : users) {
             html += "<tr class='tableTR'><td>" + user.getUsername() + "</td><td>" + user.getName() + "</td><td>" + user.getSurname() + "</td>" +
                     "<td>" + user.getEmail() + "</td><td>" + sdf.format(user.getAccountCreated()) + "</td><td>" + user.getRole().getDisplayName() + "</td>" +
-                    "<td>" + (user.isActive() ? "tak" : "nie") + "</td><td>";
+                    "<td>" + (user.getManager() == null ? user.getManager().getName() + " " + user.getManager().getSurname() : "BRAK") +
+                    "</td><td>" + (user.isActive() ? "tak" : "nie") + "</td><td>";
             html += "<img src='images/edit.png' title='Edytuj użytkownika' class='ideaOption' onclick='editUser(" + user.getId() + ")' />";
             html += "<img src='images/reject.png' title='Usuń użytkownika' class='ideaOption' onclick='deleteUser(" + user.getId() + ")' />";
             html += "</td></tr>";
@@ -266,7 +267,7 @@ public class HtmlContent {
         return html;
     }
 
-    public static String displayIdeas(List<Idea> ideas, User user) {
+    private static String displayIdeasTable(List<Idea> ideas, User user) {
         String html = "";
         if (!ideas.isEmpty()) {
             SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-YYYY");
@@ -278,7 +279,7 @@ public class HtmlContent {
                 html += "<th>Autor</th>";
                 numberOfTDs++;
             }
-            html += "<th>Data decyzji</th>";
+            html += "<th>Data aktualizacji</th>";
             html += "<th>Akcje</th>";
             html += "</tr></thead><tbody>";
             for (Idea i : ideas) {
@@ -295,14 +296,14 @@ public class HtmlContent {
                 html += "</td>";
                 html += "<td>";
                 if (!user.getRole().equals(LoginType.EMPLOYEE) && i.getEmployee().getId() != user.getId()) {
-                    if (i.getStatus().equals(Status.PENDING)) {
-                        html += "<img src='images/accept.png' id='accept_" + i.getId() + "' class='ideaOption' onclick='acceptIdea(" + i.getId() + ")' title='Zaakceptuj'/>" +
-                                "<img src='images/reject.png' id='reject_" + i.getId() + "' class='ideaOption'  onclick='rejectIdea(" + i.getId() + ")' title='Odrzuć'/>";
+                    if (i.getStatus().equals(Status.OPEN)) {
+                        html += "<img src='images/reject.png' id='reject_" + i.getId() + "' class='ideaOption'  onclick='rejectIdea(" + i.getId() + ")' title='Zamknij'/>";
+                    } else {
+                        html += "<img src='images/accept.png' id='accept_" + i.getId() + "' class='ideaOption'  onclick='acceptIdea(" + i.getId() + ")' title='Otwórz'/>";
                     }
                 }
-                if (!i.getStatus().equals(Status.PENDING)) {
-                    html += "<img src='images/more.png' id='decisionIdea_" + i.getId() + "' class='ideaOption' onclick='decisionIdea(" + i.getId() + ")' title='Pokaż komentarz decyzji'/>";
-                }
+                html += "<img src='images/comment.png' id='decisionIdea_" + i.getId() + "' class='ideaOption' onclick='decisionIdea(" + i.getId() + ")' title='Pokaż historię komentarzy'/>";
+
                 html += "</td>";
                 html += "</tr>";
                 html += "<tr class='moreInfoTR'><td colspan='" + numberOfTDs + "'><div id='idea_" + i.getId() + "' class='hidden' >" + i.getContent() + "</div></td></tr>";
@@ -312,16 +313,35 @@ public class HtmlContent {
         } else {
             html += "<h1>Nie dodano jeszcze zgłoszeń pomysłów</h1>";
         }
+
+        return html;
+    }
+
+    public static String displayIdeas(List<Idea> ideas, User user) {
+        String html = "";
+        List<List<Idea>> listsOfIdeas = Common.getIdeasOfEmployeesOfManager(ideas, user);
+        if (!listsOfIdeas.get(0).isEmpty()) {
+            html += displayIdeasTable(listsOfIdeas.get(0), user);
+            html += displayIdeasTable(listsOfIdeas.get(1), user);
+        } else {
+            html += displayIdeasTable(ideas, user);
+        }
         return html;
     }
 
     public static String makeMoreInfoIdea(Idea i) {
         String html = "";
-        html += "<div id='ideaOpinionAuthor'>";
-        html += "Autor decyzji: " + i.getOpinion().getAuthor().getName() + " " + i.getOpinion().getAuthor().getSurname();
-        html += "</div><div id='ideaOpinionContent'>";
-        html += i.getOpinion().getContent();
-        html += "</div>";
+        html += HtmlContent.makeButton("Dodaj komentarz", "newIdeaComment", "" + i.getId(), "newComment");
+        i.getOpinions().sort((o1, o2) -> o2.getOpinionDate().compareTo(o1.getOpinionDate()));
+        for (Opinion o : i.getOpinions()) {
+            html += "<div class='ideaOpinionContent'>";
+            html += o.getContent();
+            html += "</div>";
+            html += "<div class='ideaOpinionAuthor'>";
+            html += "(" + sdf.format(o.getOpinionDate()) + ") Autor: " + o.getAuthor().getName() + " " + o.getAuthor().getSurname();
+            html += "</div>";
+            html += "<div class='ideaSeparator'></div>";
+        }
         return html;
     }
 
@@ -539,6 +559,16 @@ public class HtmlContent {
         }
         html += "' class='swotOverviewIcon'/>";
 
+        return html;
+    }
+
+    public static String getManagersSelect(List<User> managers) {
+        String html = "";
+        html += "<br /><span class='labelSpan'>Manager: </span><select id='manager' class='newUserInput'>";
+        for (User manager : managers) {
+            html += "<option value='manager_" + manager.getId() + "'>" + manager.getName() + " " + manager.getSurname() + "</option>";
+        }
+        html += "</select>";
         return html;
     }
 }

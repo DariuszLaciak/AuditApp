@@ -1,7 +1,7 @@
 package main.app.enums;
 
 public enum Status {
-    PENDING("Oczekujące"), ACCEPTED("Zaakceptowane"), NOT_ACCEPTED("Odrzucone");
+    OPEN("Otwarte"), CLOSED("Zamknięte");
 
     private String status;
 

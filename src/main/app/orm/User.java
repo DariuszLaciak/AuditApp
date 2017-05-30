@@ -23,6 +23,9 @@ public class User implements ObjectDTO {
     private boolean active = false;
     private Date accountCreated;
 
+    private User manager;
+    private List<User> employees;
+
     private List<Audit> audits;
     private List<Idea> ideas;
     private List<Opinion> opinions;
@@ -161,5 +164,24 @@ public class User implements ObjectDTO {
 
     public void setAccountCreated(Date accountCreated) {
         this.accountCreated = accountCreated;
+    }
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "manager_id")
+    public User getManager() {
+        return manager;
+    }
+
+    public void setManager(User manager) {
+        this.manager = manager;
+    }
+
+    @OneToMany(mappedBy = "manager", cascade = CascadeType.ALL, orphanRemoval = true)
+    public List<User> getEmployees() {
+        return employees;
+    }
+
+    public void setEmployees(List<User> employees) {
+        this.employees = employees;
     }
 }

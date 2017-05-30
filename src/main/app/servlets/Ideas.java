@@ -38,6 +38,14 @@ public class Ideas extends HttpServlet {
         Session session;
 
         User user = (User) s.getAttribute("userData");
+
+        List<Idea> ideas;
+        if (user.getRole().equals(LoginType.EMPLOYEE)) {
+            ideas = IdeaMethods.getIdeasForUser(user);
+        } else {
+            ideas = IdeaMethods.getIdeas();
+        }
+
         switch (action) {
             case "newIdea":
                 session = HibernateUtil.getSessionFactory().getCurrentSession();
@@ -62,13 +70,7 @@ public class Ideas extends HttpServlet {
                 session = HibernateUtil.getSessionFactory().getCurrentSession();
                 if (!session.getTransaction().isActive())
                     session.beginTransaction();
-                List<Idea> ideas;
-                if (user.getRole().equals(LoginType.EMPLOYEE)) {
-                    session.refresh(user);
-                    ideas = IdeaMethods.getIdeasForUser(user);
-                } else {
-                    ideas = IdeaMethods.getIdeas();
-                }
+
                 session = HibernateUtil.getSessionFactory().getCurrentSession();
                 if (!session.getTransaction().isActive())
                     session.beginTransaction();
@@ -81,7 +83,7 @@ public class Ideas extends HttpServlet {
                 break;
             case "saveOpinion":
                 String opinionContent = request.getParameter("value");
-                boolean opintionPositive = Boolean.parseBoolean(request.getParameter("positive"));
+
                 long ideaId = Integer.parseInt(request.getParameter("ideaId"));
 
                 session = HibernateUtil.getSessionFactory().getCurrentSession();
@@ -92,11 +94,6 @@ public class Ideas extends HttpServlet {
 
                 session.refresh(user);
 
-                if (opintionPositive) {
-                    ideaToSave.setStatus(Status.ACCEPTED);
-                } else {
-                    ideaToSave.setStatus(Status.NOT_ACCEPTED);
-                }
                 Opinion opinion = new Opinion(opinionContent);
                 opinion.setIdea(ideaToSave);
                 opinion.setAuthor(user);
@@ -110,8 +107,40 @@ public class Ideas extends HttpServlet {
                 session.getTransaction().commit();
                 session.close();
 
-                data = HtmlContent.displayIdeas(IdeaMethods.getIdeas(), user);
+                if (user.getRole().equals(LoginType.EMPLOYEE)) {
+                    ideas = IdeaMethods.getIdeasForUser(user);
+                } else {
+                    ideas = IdeaMethods.getIdeas();
+                }
 
+                JSONObject dataInner = new JSONObject();
+                dataInner.put("opinion", HtmlContent.makeMoreInfoIdea(ideaToSave));
+                dataInner.put("ideas", HtmlContent.displayIdeas(ideas, user));
+                data = dataInner;
+
+                break;
+            case "changeIdeaStatus":
+                boolean isOpen = Boolean.parseBoolean(request.getParameter("isOpen"));
+                long id = Long.parseLong(request.getParameter("ideaId"));
+                session = HibernateUtil.getSessionFactory().getCurrentSession();
+                if (!session.getTransaction().isActive())
+                    session.beginTransaction();
+
+                Idea ideaTochange = session.load(Idea.class, id);
+                if (isOpen) {
+                    ideaTochange.setStatus(Status.OPEN);
+                } else {
+                    ideaTochange.setStatus(Status.CLOSED);
+                }
+
+                session.update(ideaTochange);
+
+                session.getTransaction().commit();
+                session.close();
+
+                responseMessage = "Pomyślnie zmieniono status pomysłu";
+
+                data = HtmlContent.displayIdeas(IdeaMethods.getIdeas(), user);
                 break;
             case "moreInfoIdea":
                 ideaId = Long.parseLong(request.getParameter("ideaId"));

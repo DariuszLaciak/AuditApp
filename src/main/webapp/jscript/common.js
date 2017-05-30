@@ -17,7 +17,7 @@ function scrollUp() {
     $("html, body").animate({scrollTop: 0}, "slow");
 }
 
-function makeOverlayWindow(id, element, width, height, title, content, buttons) {
+function makeOverlayWindow(id, element, width, height, title, content, buttons, heightFixed) {
     var top = 0;
     var left = 0;
     if (element === "center") {
@@ -39,8 +39,11 @@ function makeOverlayWindow(id, element, width, height, title, content, buttons) 
     if ((left + width) > bodyW) {
         left = (bodyW - width - 10);
     }
-
-    var html = "<div id='overlayWindow_" + id + "' class='overlayWindow' style='width: " + width + "; height: " + height + " ;top: " + top + " ;left: " + left + "'>";
+    var classToAdd = "";
+    if (heightFixed) {
+        classToAdd = "fixedH80";
+    }
+    var html = "<div id='overlayWindow_" + id + "' class='overlayWindow " + classToAdd + "' style='width: " + width + "; height: " + height + " ;top: " + top + " ;left: " + left + "'>";
     html += "<div class='innerOverlay'>";
     html += "<div class='overlayTitle'>";
     html += title;

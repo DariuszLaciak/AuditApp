@@ -42,6 +42,9 @@ public class Manage extends HttpServlet {
 
                     data = HtmlContent.makeUsersForm(allUsers);
                     break;
+                case "getManagers":
+                    data = HtmlContent.getManagersSelect(UserMethods.getManagers());
+                    break;
                 case "addUser":
                     String username = request.getParameter("username");
                     String name = request.getParameter("name");
@@ -49,7 +52,9 @@ public class Manage extends HttpServlet {
                     String mail = request.getParameter("mail");
                     String role = request.getParameter("role");
                     String active = request.getParameter("active");
+                    String manager = request.getParameter("manager");
 
+                    long managerId = Long.parseLong(manager);
                     boolean activeB = Boolean.valueOf(active);
                     LoginType userType = LoginType.valueOf(role.toUpperCase());
 
@@ -57,9 +62,13 @@ public class Manage extends HttpServlet {
 
                     User newUser = new User(userType, username, password, name, surname, mail, activeB);
 
+
                     Session session = HibernateUtil.getSessionFactory().getCurrentSession();
                     if (!session.getTransaction().isActive())
                         session.beginTransaction();
+
+                    User managerO = session.load(User.class, managerId);
+                    newUser.setManager(managerO);
 
                     session.save(newUser);
 
