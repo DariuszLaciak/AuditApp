@@ -465,3 +465,11 @@ textarea {
     margin-right: 5px;
 
 }
+
+.newUserInput {
+    margin: 10px 0;
+}
+
+.labelSpan {
+    margin-right: 10px;
+}

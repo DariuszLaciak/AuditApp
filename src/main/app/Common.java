@@ -4,8 +4,10 @@ import main.app.enums.QuestionCategory;
 import main.app.enums.QuestionType;
 import main.app.enums.SwotCategory;
 import main.app.enums.SwotResult;
-import main.app.orm.*;
-import org.hibernate.Session;
+import main.app.orm.Answer;
+import main.app.orm.Audit;
+import main.app.orm.Question;
+import main.app.orm.SwotAlternatives;
 
 import javax.servlet.http.HttpSession;
 import java.util.*;
@@ -148,5 +150,15 @@ public class Common {
         }
         audits.sort(Comparator.comparing(Audit::getAuditDate));
         return audits;
+    }
+
+    public static String stripPolishCharacters(String string) {
+        char[] polish = "ąęłćźżó".toCharArray();
+        char[] nonPolish = "aelzzzo".toCharArray();
+        for (int i = 0; i < polish.length; ++i) {
+            string = string.replace(polish[i], nonPolish[i]);
+        }
+
+        return string;
     }
 }

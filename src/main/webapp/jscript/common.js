@@ -18,8 +18,17 @@ function scrollUp() {
 }
 
 function makeOverlayWindow(id, element, width, height, title, content, buttons) {
-    var top = element.offset().top;
-    var left = element.offset().left - width;
+    var top = 0;
+    var left = 0;
+    if (element === "center") {
+        top = $(window).height() / 2 - height / 2;
+        left = $(window).width() / 2 - width / 2;
+    }
+    else {
+        top = element.offset().top;
+        left = element.offset().left - width;
+    }
+
 
     var bodyW = $("body").width();
     var bodyH = $("body").height();

@@ -5,6 +5,7 @@ import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 
 import javax.persistence.*;
+import java.util.Date;
 import java.util.List;
 
 @Table
@@ -20,6 +21,7 @@ public class User implements ObjectDTO {
     private String surname;
     private String email;
     private boolean active = false;
+    private Date accountCreated;
 
     private List<Audit> audits;
     private List<Idea> ideas;
@@ -42,6 +44,7 @@ public class User implements ObjectDTO {
         this.surname = surname;
         this.email = email;
         this.active = active;
+        this.accountCreated = new Date();
     }
 
     @Id
@@ -149,5 +152,14 @@ public class User implements ObjectDTO {
 
     public void setOpinions(List<Opinion> opinions) {
         this.opinions = opinions;
+    }
+
+    @Column
+    public Date getAccountCreated() {
+        return accountCreated;
+    }
+
+    public void setAccountCreated(Date accountCreated) {
+        this.accountCreated = accountCreated;
     }
 }

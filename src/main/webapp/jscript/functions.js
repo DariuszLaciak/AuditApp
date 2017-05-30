@@ -182,7 +182,7 @@ function nextQuestions() {
     var dataToSave = [];
     var numberOfQuestions = $(".lickertRadio").length / 7;
     $.each($(".lickertRadio").filter(":checked"), function () {
-        var singleData = new Object();
+        var singleData = {};
         var thisRadio = $(this);
         var real_id = thisRadio.attr("name");
         var id = real_id.substring(0, real_id.indexOf("_"));
@@ -242,7 +242,88 @@ function manageUsers() {
     switchTab("manageUsersTab");
     if ($("#manageUsersTab").length === 0) {
         $("#content").append("<div id='manageUsersTab' class = 'innerContent'></div>");
+        getUsersFromDB();
     }
+}
+
+function getUsersFromDB() {
+    $.ajax({
+        url: "/Manage",
+        method: "POST",
+        dataType: "json",
+        data: {
+            action: "getUsers"
+        },
+        success: function (data) {
+            if (data.success) {
+                $("#manageUsersTab").html(data.data);
+            }
+            else {
+                showInfo(false, data.message);
+            }
+        }
+    });
+}
+
+function addUser() {
+    var html = "<input class='newUserInput' type='text' placeholder='Nazwa użytkownika' id='username' />";
+    html += "<input class='newUserInput' type='text' placeholder='Imię' id='name' />";
+    html += "<input class='newUserInput' type='text' placeholder='Nazwisko' id='surname' />";
+    html += "<input class='newUserInput' type='text' placeholder='E-mail' id='mail' />";
+    html += "<br /><span class='labelSpan'>Typ: </span><select class='newUserInput' id='role' ><option value='admin'>Admin</option>" +
+        "<option value='user'>Manager</option><option value='employee' selected='selected'>Pracownik</option></select>";
+    html += "<br />Aktywny: <input class='newUserInput' type='checkbox' id='active' checked='checked' />";
+    var button = {};
+    button.value = "Dodaj";
+    button.onclick = "confirmAddUser()";
+
+    var button2 = {};
+    button2.value = "Anuluj";
+    button2.onclick = "closeOverlay(\"new\")";
+    var buttons = [button, button2];
+    makeOverlayWindow("new", "center", 220, 350, "Dodaj użytkownika", html, buttons);
+}
+
+function confirmAddUser() {
+    var username = $("#username").val();
+    var name = $("#name").val();
+    var surname = $("#surname").val();
+    var email = $("#mail").val();
+    var role = $('#role').find(":selected").val();
+    var active = $("#active").is(':checked');
+
+    $.ajax({
+        url: "/Manage",
+        method: "POST",
+        dataType: "json",
+        data: {
+            action: "addUser",
+            username: username,
+            name: name,
+            surname: surname,
+            mail: email,
+            role: role,
+            active: active
+        },
+        success: function (data) {
+            if (data.success) {
+                $("#manageUsersTab").html(data.data);
+                showInfo(true, data.message);
+                closeOverlay("new");
+            }
+            else {
+                showInfo(false, data.message);
+            }
+        }
+    });
+}
+
+function editUser(userId) {
+
+}
+
+function deleteUser(userId) {
+
 }
 
 function sendIdea() {
@@ -427,7 +508,7 @@ function saveSwot(auditId) {
 }
 
 function auditOverview() {
-    switchTab("auditOverviewTab")
+    switchTab("auditOverviewTab");
     if ($("#auditOverviewTab").length === 0) {
         $("#content").append("<div id='auditOverviewTab' class = 'innerContent'></div>");
         var html = "<input type='text' name='beginDate' id='beginDate' placeholder='Data początkowa'/>";

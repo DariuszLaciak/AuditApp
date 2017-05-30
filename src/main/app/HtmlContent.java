@@ -24,7 +24,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class HtmlContent {
-    private SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
+    private static SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
 
     private static String makeButton(String nameToDisplay, String onclick) {
         String html = "";
@@ -236,6 +236,27 @@ public class HtmlContent {
     public static String getReport(Audit audit) {
         String html = prepareResults(audit);
         html += makeButton("Wróć", "getAuditHistory");
+        return html;
+    }
+
+    public static String makeUsersForm(List<User> users) {
+        String html = "";
+        html += makeButton("Dodaj użytkownika", "addUser");
+        html += "<div id='tableWrapper'>";
+        html += "<table class='myTable'><thead>";
+        html += "<tr><th>Nazwa użytkownika</th><th>Imię</th><th>Nazwisko</th><th>E-mail</th><th>Data dodania</th>" +
+                "<th>Typ</th><th>Aktywny</th><th>Akcje</th>";
+        html += "</tr></thead><tbody>";
+        for (User user : users) {
+            html += "<tr class='tableTR'><td>" + user.getUsername() + "</td><td>" + user.getName() + "</td><td>" + user.getSurname() + "</td>" +
+                    "<td>" + user.getEmail() + "</td><td>" + sdf.format(user.getAccountCreated()) + "</td><td>" + user.getRole().getDisplayName() + "</td>" +
+                    "<td>" + (user.isActive() ? "tak" : "nie") + "</td><td>";
+            html += "<img src='images/edit.png' title='Edytuj użytkownika' class='ideaOption' onclick='editUser(" + user.getId() + ")' />";
+            html += "<img src='images/reject.png' title='Usuń użytkownika' class='ideaOption' onclick='deleteUser(" + user.getId() + ")' />";
+            html += "</td></tr>";
+        }
+        html += "</tbody></table></div>";
+
         return html;
     }
 
