@@ -285,7 +285,7 @@ public class HtmlContent {
             for (Idea i : ideas) {
                 html += "<tr class='tableTR'><td onclick='moreInfoIdea(" + i.getId() + ")' title='Szczegółowy opis pomysłu' class='widestCol moreInfo'>" + i.getName() + "</td><td  class='widestCol'>" + i.getType().getValue() + "</td><td>" + i.getStatus().getValue() + "</td><td>" + sdf.format(i.getAddedDate()) + "</td>";
                 if (!user.getRole().equals(LoginType.EMPLOYEE)) {
-                    html += "<td>" + i.getEmployee().getName() + " " + i.getEmployee().getName() + "</td>";
+                    html += "<td>" + i.getEmployee().getName() + " " + i.getEmployee().getSurname() + "</td>";
                 }
                 html += "<td>";
                 if (i.getActionDate() != null) {
