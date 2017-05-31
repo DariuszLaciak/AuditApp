@@ -51,7 +51,7 @@ public class HtmlContent {
         html += "<input type='text' id='user_id' name='user_id' placeholder='Login' />";
         html += "<input type='password' id='user_password' name='user_password' placeholder='Hasło'/>";
         html += "<input type='submit' value='Zaloguj się'/>";
-        html += "<div id='registerUser' class='registerNew link'>Zapomniałem hasło się</div>";
+        //html += "<div id='registerUser' class='registerNew link'>Zapomniałem hasła</div>";
         html += "</form>";
 
         return html;
