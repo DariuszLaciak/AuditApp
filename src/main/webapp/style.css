@@ -120,6 +120,10 @@ input[type='submit'] {
     padding: 30px;
 }
 
+#innerContent {
+    margin: 10px;
+}
+
 #contentTitle {
     font-weight: bold;
     font-size: 30px;
@@ -503,4 +507,53 @@ textarea {
     cursor: pointer;
     display: block;
     margin: 10px;
+}
+
+.footer {
+    text-align: center;
+    font-weight: bold;
+    padding: 5px;
+}
+
+.myTable input[type='number'] {
+    width: 30px;
+}
+
+.myTable tr {
+    height: 35px;
+}
+
+.myTable tr:hover {
+    background: #1d2731;
+}
+
+.rotate {
+    /* Safari */
+    -webkit-transform: rotate(-90deg);
+
+    /* Firefox */
+    -moz-transform: rotate(-90deg);
+
+    /* IE */
+    -ms-transform: rotate(-90deg);
+
+    /* Opera */
+    -o-transform: rotate(-90deg);
+
+    /* Internet Explorer */
+    filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=3);
+    width: 16px;
+    margin: 0 auto;
+}
+
+.fixedWidth {
+    width: 30px;
+}
+
+.positive {
+    color: lightgreen;
+}
+
+.negative {
+    color: #ff6666
 }

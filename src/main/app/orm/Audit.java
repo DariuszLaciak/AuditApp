@@ -25,6 +25,9 @@ public class Audit implements ObjectDTO {
     @LazyCollection(LazyCollectionOption.FALSE)
     private List<SwotAlternatives> swot;
 
+    @LazyCollection(LazyCollectionOption.FALSE)
+    private List<SwotRelations> relations;
+
     public Audit() {
     }
 
@@ -89,5 +92,16 @@ public class Audit implements ObjectDTO {
 
     public void setSwot(List<SwotAlternatives> swot) {
         this.swot = swot;
+    }
+
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "audit")
+    @Fetch(value = FetchMode.SUBSELECT)
+    @PrimaryKeyJoinColumn
+    public List<SwotRelations> getRelations() {
+        return relations;
+    }
+
+    public void setRelations(List<SwotRelations> relations) {
+        this.relations = relations;
     }
 }

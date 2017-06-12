@@ -12,5 +12,7 @@
 %>
 <div id="innerContent"></div>
 <%
+    } else {
+        out.println(HtmlContent.makeNonLoggedMessage());
     }
 %>

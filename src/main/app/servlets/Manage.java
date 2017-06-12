@@ -36,6 +36,7 @@ public class Manage extends HttpServlet {
         boolean success = true;
         User loggedUser = (User) s.getAttribute("userData");
         List<User> allUsers = UserMethods.getUsers();
+        Session session;
         if (loggedUser.getRole().equals(LoginType.ADMIN)) {
             switch (action) {
                 case "getUsers":
@@ -63,7 +64,7 @@ public class Manage extends HttpServlet {
                     User newUser = new User(userType, username, password, name, surname, mail, activeB);
 
 
-                    Session session = HibernateUtil.getSessionFactory().getCurrentSession();
+                    session = HibernateUtil.getSessionFactory().getCurrentSession();
                     if (!session.getTransaction().isActive())
                         session.beginTransaction();
 
@@ -79,6 +80,23 @@ public class Manage extends HttpServlet {
 
                     data = HtmlContent.makeUsersForm(allUsers);
 
+                    break;
+                case "changePass":
+                    long userId = Long.parseLong(request.getParameter("userId"));
+                    String newPassword = request.getParameter("password");
+                    session = HibernateUtil.getSessionFactory().getCurrentSession();
+                    if (!session.getTransaction().isActive())
+                        session.beginTransaction();
+
+                    User editedUser = session.load(User.class, userId);
+                    editedUser.setPassword(newPassword);
+
+                    session.update(editedUser);
+
+                    session.getTransaction().commit();
+                    session.close();
+
+                    responseMessage = "Hasło użytkownika zostało zmienione.";
                     break;
             }
         } else {

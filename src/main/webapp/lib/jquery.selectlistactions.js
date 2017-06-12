@@ -10,7 +10,7 @@
     $.fn.moveToList = function (sourceList, destinationList) {
         var opts = $(sourceList + ' option:selected');
         if (opts.length == 0) {
-            alert("Nothing to move");
+            showInfo(false, "Brak elementów do przeniesienia");
         }
 
         $(destinationList).append($(opts).clone());
@@ -20,7 +20,7 @@
     $.fn.moveAllToList = function (sourceList, destinationList) {
         var opts = $(sourceList + ' option');
         if (opts.length == 0) {
-            alert("Nothing to move");
+            showInfo(false, "Brak elementów do przeniesienia");
         }
 
         $(destinationList).append($(opts).clone());
@@ -31,7 +31,7 @@
     $.fn.moveToListAndDelete = function (sourceList, destinationList) {
         var opts = $(sourceList + ' option:selected');
         if (opts.length == 0) {
-            alert("Nothing to move");
+            showInfo(false, "Brak elementów do przeniesienia");
         }
 
         $(opts).remove();
@@ -43,7 +43,7 @@
     $.fn.moveAllToListAndDelete = function (sourceList, destinationList) {
         var opts = $(sourceList + ' option');
         if (opts.length == 0) {
-            alert("Nothing to move");
+            showInfo(false, "Brak elementów do przeniesienia");
         }
 
         $(opts).remove();
@@ -54,7 +54,7 @@
     $.fn.removeSelected = function (list) {
         var opts = $(list + ' option:selected');
         if (opts.length == 0) {
-            alert("Nothing to remove");
+            showInfo(false, "Brak elementów do przeniesienia");
         }
 
         $(opts).remove();
@@ -64,7 +64,7 @@
     $.fn.moveUpDown = function (list, btnUp, btnDown) {
         var opts = $(list + ' option:selected');
         if (opts.length == 0) {
-            alert("Nothing to move");
+            showInfo(false, "Brak elementów do przeniesienia");
         }
 
         if (btnUp) {

@@ -1,6 +1,8 @@
 package main.app.orm;
 
 import main.app.enums.SwotCategory;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 
 import javax.persistence.*;
 import java.util.List;
@@ -13,6 +15,9 @@ public class SwotAlternatives {
     private String text;
 
     private List<Audit> audits;
+
+    private List<SwotRelations> relations1;
+    private List<SwotRelations> relations2;
 
     public SwotAlternatives() {
     }
@@ -58,5 +63,27 @@ public class SwotAlternatives {
 
     public void setAudits(List<Audit> audits) {
         this.audits = audits;
+    }
+
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "relationPartner1")
+    @Fetch(value = FetchMode.SUBSELECT)
+    @PrimaryKeyJoinColumn
+    public List<SwotRelations> getRelations1() {
+        return relations1;
+    }
+
+    public void setRelations1(List<SwotRelations> relations1) {
+        this.relations1 = relations1;
+    }
+
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "relationPartner2")
+    @Fetch(value = FetchMode.SUBSELECT)
+    @PrimaryKeyJoinColumn
+    public List<SwotRelations> getRelations2() {
+        return relations2;
+    }
+
+    public void setRelations2(List<SwotRelations> relations2) {
+        this.relations2 = relations2;
     }
 }

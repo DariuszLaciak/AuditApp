@@ -18,6 +18,7 @@ public class HibernateUtil {
         configuration.addAnnotatedClass(Idea.class);
         configuration.addAnnotatedClass(Opinion.class);
         configuration.addAnnotatedClass(SwotAlternatives.class);
+        configuration.addAnnotatedClass(SwotRelations.class);
         configuration.configure();
         ServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder().applySettings(
                 configuration.getProperties()).build();

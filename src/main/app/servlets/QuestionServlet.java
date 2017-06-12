@@ -167,7 +167,7 @@ public class QuestionServlet extends HttpServlet {
                 session.getTransaction().commit();
                 session.close();
 
-                data = HtmlContent.prepareResults(audit);
+                data = HtmlContent.makeSwotRelations(audit);
             }
             break;
             case "newSwotPosition": {
@@ -188,6 +188,44 @@ public class QuestionServlet extends HttpServlet {
                 session.close();
 
                 data = HtmlContent.getSingleAlternativeOption(altId, value);
+            }
+            break;
+            case "swotRelations": {
+                long auditId = Long.parseLong(request.getParameter("auditId"));
+                String toSave = request.getParameter("relations");
+
+
+                JSONArray toSaveJson = null;
+                JSONParser parser = new JSONParser();
+                try {
+                    toSaveJson = (JSONArray) parser.parse(toSave);
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+
+                Session session = HibernateUtil.getSessionFactory().getCurrentSession();
+                if (!session.getTransaction().isActive())
+                    session.beginTransaction();
+
+                Audit auditToAnalyse = session.load(Audit.class, auditId);
+
+                for (Object jo : toSaveJson) {
+                    JSONObject ob = (JSONObject) jo;
+                    //value, id1, id2
+                    SwotAlternatives alt1 = session.load(SwotAlternatives.class, Long.parseLong(ob.get("id1").toString()));
+                    SwotAlternatives alt2 = session.load(SwotAlternatives.class, Long.parseLong(ob.get("id2").toString()));
+                    int value = Integer.parseInt(ob.get("value").toString());
+
+                    SwotRelations relation = new SwotRelations(value, auditToAnalyse, alt1, alt2);
+
+                    session.save(relation);
+                }
+
+                data = HtmlContent.prepareResults(auditToAnalyse);
+
+                session.getTransaction().commit();
+                session.close();
+
             }
             break;
         }

@@ -221,8 +221,8 @@ function newIdea() {
     if ($("#newIdeaTab").length === 0) {
         $("#content").append("<div id='newIdeaTab' class = 'innerContent'></div>");
         var html = "";
-        html += "<form id='newIdeaForm'>Nowy pomysł: " +
-            "<br /><input type='text' name='ideaName' id='ideaName' placeholder='Tytuł pomysłu'/>" +
+        html += "<form id='newIdeaForm'><h2>Nowy pomysł</h2>" +
+            "<input type='text' name='ideaName' id='ideaName' placeholder='Tytuł pomysłu'/>" +
             "<textarea id='ideaIdeaContent' name='content' rows='15' cols='70' placeholder='Opis'/>" +
             "Kategoria:<select id='ideaType' name='type'>";
         $($ideaType).each(function (ind, val) {
@@ -344,6 +344,47 @@ function editUser(userId) {
 
 function deleteUser(userId) {
 
+}
+
+function changePass(userId) {
+    var html = "<input type='password' id='newPassword' class='newUserInput' placeholder='Nowe hasło'/><input class='newUserInput' type='password' id='confNewPassword' placeholder='Potwierdź nowe hasło'/>";
+    var button2 = {};
+    button2.value = "Anuluj";
+    button2.onclick = "closeOverlay(" + userId + ")";
+    var button = {};
+    button.value = "Zapisz";
+    button.onclick = "saveNewPassword(" + userId + ")";
+    var buttons = [button, button2];
+    makeOverlayWindow(userId, $("#password_" + userId), 228, 200, "Zmień hasło", html, buttons);
+}
+
+function saveNewPassword(userId) {
+    var newPass = $("#newPassword").val();
+    var newPassRepeated = $("#confNewPassword").val();
+    if (newPass != newPassRepeated) {
+        showInfo(false, "Hasła nie mogą się od siebie różnić!");
+    }
+    else {
+        $.ajax({
+            url: "/Manage",
+            method: "POST",
+            dataType: "json",
+            data: {
+                action: "changePass",
+                userId: userId,
+                password: newPass
+            },
+            success: function (data) {
+                if (data.success) {
+                    showInfo(true, data.message);
+                    closeOverlay(userId);
+                }
+                else {
+                    showInfo(false, data.message);
+                }
+            }
+        });
+    }
 }
 
 function newSwotPosition(category) {
@@ -563,12 +604,19 @@ function newIdeaComment(id) {
     $(".overlayContent").prepend(form);
 }
 
-function saveSwot(auditId) {
-    var chosenOptions = $(".form-control").find("option");
-    var toSend = [];
-    chosenOptions.each(function () {
-        var opt = $(this).val().substr($(this).val().indexOf("_") + 1, $(this).val().length);
-        toSend.push(opt);
+function swotRelations(auditId) {
+    // swot_id_id
+    $(".numberInput");
+    var dataToSave = [];
+    $.each($(".numberInput"), function () {
+        var singleData = {};
+        var real_id = $(this).attr("id");
+        var id1 = real_id.substring(real_id.indexOf("_") + 1, real_id.lastIndexOf("_"));
+        var id2 = real_id.substring(real_id.lastIndexOf("_") + 1, real_id.length);
+        singleData.value = $(this).val();
+        singleData.id1 = id1;
+        singleData.id2 = id2;
+        dataToSave.push(singleData);
     });
 
     $.ajax({
@@ -576,9 +624,9 @@ function saveSwot(auditId) {
         method: "POST",
         dataType: "json",
         data: {
-            action: "saveSwot",
+            action: "swotRelations",
             auditId: auditId,
-            selected: toSend
+            relations: JSON.stringify(dataToSave)
         },
         success: function (data) {
             if (data.success) {
@@ -589,7 +637,45 @@ function saveSwot(auditId) {
             }
         }
     });
+}
 
+function saveSwot(auditId) {
+    var chosenOptions = $(".form-control").find("option");
+    var toSend = [];
+    var areTablesFilled = true;
+    $.each($(".form-control"), function () {
+        if ($(this).find("option").length == 0) {
+            areTablesFilled = false;
+        }
+    });
+    if (!areTablesFilled) {
+        showInfo(false, "Proszę uzupełnić wszystkie kategorie!");
+    }
+    else {
+        chosenOptions.each(function () {
+            var opt = $(this).val().substr($(this).val().indexOf("_") + 1, $(this).val().length);
+            toSend.push(opt);
+        });
+
+        $.ajax({
+            url: "/Question",
+            method: "POST",
+            dataType: "json",
+            data: {
+                action: "saveSwot",
+                auditId: auditId,
+                selected: toSend
+            },
+            success: function (data) {
+                if (data.success) {
+                    $("#newAuditTab").html(data.data);
+                }
+                else {
+                    showInfo(false, data.message);
+                }
+            }
+        });
+    }
 }
 
 function auditOverview() {

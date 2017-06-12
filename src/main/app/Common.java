@@ -94,14 +94,61 @@ public class Common {
         return result;
     }
 
-    public static SwotResult getSwotResultDescription(List<SwotAlternatives> swot) {
+    private static SwotResult getCategoryResultOfRelation(SwotRelations relation) {
+        SwotResult category = SwotResult.MINI_MINI;
+        SwotCategory cat1 = relation.getRelationPartner1().getCategory();
+        SwotCategory cat2 = relation.getRelationPartner2().getCategory();
+
+        if (cat1.equals(SwotCategory.OPPORTUNITES)) {
+            if (cat2.equals(SwotCategory.STRENGHTS)) {
+                category = SwotResult.MAXI_MAXI;
+            } else if (cat2.equals(SwotCategory.WEAKNESSES)) {
+                category = SwotResult.MINI_MAXI;
+            }
+        }
+
+        if (cat2.equals(SwotCategory.OPPORTUNITES)) {
+            if (cat1.equals(SwotCategory.STRENGHTS)) {
+                category = SwotResult.MAXI_MAXI;
+            } else if (cat1.equals(SwotCategory.WEAKNESSES)) {
+                category = SwotResult.MINI_MAXI;
+            }
+        }
+
+        if (cat1.equals(SwotCategory.THREATS)) {
+            if (cat2.equals(SwotCategory.STRENGHTS)) {
+                category = SwotResult.MAXI_MINI;
+            } else if (cat2.equals(SwotCategory.WEAKNESSES)) {
+                category = SwotResult.MINI_MINI;
+            }
+        }
+
+        if (cat2.equals(SwotCategory.THREATS)) {
+            if (cat1.equals(SwotCategory.STRENGHTS)) {
+                category = SwotResult.MAXI_MINI;
+            } else if (cat1.equals(SwotCategory.WEAKNESSES)) {
+                category = SwotResult.MINI_MINI;
+            }
+        }
+
+        return category;
+    }
+
+    public static SwotResult getSwotResultDescription(Audit audit) {
         Map<SwotResult, Integer> resultMap = new HashMap<>();
         resultMap.put(SwotResult.MAXI_MAXI, 0);
         resultMap.put(SwotResult.MINI_MAXI, 0);
         resultMap.put(SwotResult.MAXI_MINI, 0);
         resultMap.put(SwotResult.MINI_MINI, 0);
 
-        for (SwotCategory cat : SwotCategory.values()) {
+
+        for (SwotRelations relation : audit.getRelations()) {
+            resultMap.put(Common.getCategoryResultOfRelation(relation),
+                    resultMap.get(Common.getCategoryResultOfRelation(relation)) + relation.getRelation());
+        }
+
+        // old version
+        /*for (SwotCategory cat : SwotCategory.values()) {
             switch (cat) {
                 case OPPORTUNITES:
                     resultMap.put(SwotResult.MAXI_MAXI, resultMap.get(SwotResult.MAXI_MAXI) + Common.getSwotOfCategory(swot, cat).size());
@@ -122,7 +169,7 @@ public class Common {
                 default:
                     break;
             }
-        }
+        }*/
         int currentMax = 0;
         SwotResult result = SwotResult.MAXI_MAXI;
         for (Map.Entry<SwotResult, Integer> entry : resultMap.entrySet()) {
@@ -157,6 +204,37 @@ public class Common {
         }
 
         return string;
+    }
+
+    public static Map<String, List<SwotAlternatives>> separateCategoriesOfSwot(List<SwotAlternatives> swotAlternatives) {
+        Map<String, List<SwotAlternatives>> map = new HashMap<>();
+        for (SwotAlternatives sw : swotAlternatives) {
+            if (sw.getCategory().equals(SwotCategory.OPPORTUNITES) ||
+                    sw.getCategory().equals(SwotCategory.THREATS)) {
+                if (!map.containsKey("rows")) {
+                    map.put("rows", new ArrayList<>());
+                }
+                map.get("rows").add(sw);
+            } else {
+                if (!map.containsKey("cols")) {
+                    map.put("cols", new ArrayList<>());
+                }
+                map.get("cols").add(sw);
+            }
+        }
+
+        return map;
+    }
+
+    public static int getValueOfRelation(SwotAlternatives sw1, SwotAlternatives sw2, List<SwotRelations> relations) {
+        int value = 0;
+        for (SwotRelations relation : relations) {
+            if ((relation.getRelationPartner1().getId() == sw1.getId() && relation.getRelationPartner2().getId() == sw2.getId()) ||
+                    (relation.getRelationPartner2().getId() == sw1.getId() && relation.getRelationPartner1().getId() == sw2.getId())) {
+                value = relation.getRelation();
+            }
+        }
+        return value;
     }
 
     public static List<List<Idea>> getIdeasOfEmployeesOfManager(List<Idea> ideas, User manager) {

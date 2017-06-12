@@ -91,6 +91,16 @@ public class HtmlContent {
         return html;
     }
 
+    public static String makeNonLoggedMessage() {
+        String html = "";
+        html += "<div id='innerContent'>";
+        html += "<h1>Witaj w aplikacji zarządzającej innowacjami w przedsiębiorstwie</h1>";
+        html += "<h2>Zaloguj się, aby uzyskać dostęp</h2>";
+        html += "</div>";
+
+        return html;
+    }
+
     public static String makeQuestionTable(List<Question> questions) {
         StringBuilder html = new StringBuilder("<div id='tableWrapper'><table class='myTable'>");
         html.append("<thead><tr><th>Id</th><th class='widestCol'>Treść</th><th>Kategoria</th></tr></thead><tbody>");
@@ -215,7 +225,7 @@ public class HtmlContent {
 
     private static String makeSwotResult(Audit audit) {
         String html = "<h2>Wynik analizy SWOT</h2>";
-        SwotResult result = Common.getSwotResultDescription(audit.getSwot());
+        SwotResult result = Common.getSwotResultDescription(audit);
         html += "<div class='otherResult bold'>Zalecana strategia: " + result.getStrategy() + "</div>";
         html += "<div class='otherResultDesc'>" + result.getDescription() + "</div>";
         return html;
@@ -254,12 +264,13 @@ public class HtmlContent {
                 "<th>Typ</th><th>Przełożony</th><th>Aktywny</th><th>Akcje</th>";
         html += "</tr></thead><tbody>";
         for (User user : users) {
-            html += "<tr class='tableTR'><td>" + user.getUsername() + "</td><td>" + user.getName() + "</td><td>" + user.getSurname() + "</td>" +
+            html += "<tr id='user_" + user.getId() + "' class='tableTR'><td>" + user.getUsername() + "</td><td>" + user.getName() + "</td><td>" + user.getSurname() + "</td>" +
                     "<td>" + user.getEmail() + "</td><td>" + sdf.format(user.getAccountCreated()) + "</td><td>" + user.getRole().getDisplayName() + "</td>" +
                     "<td>" + (user.getManager() != null ? user.getManager().getName() + " " + user.getManager().getSurname() : "BRAK") +
                     "</td><td>" + (user.isActive() ? "tak" : "nie") + "</td><td>";
             html += "<img src='images/edit.png' title='Edytuj użytkownika' class='ideaOption' onclick='editUser(" + user.getId() + ")' />";
-            html += "<img src='images/reject.png' title='Usuń użytkownika' class='ideaOption' onclick='deleteUser(" + user.getId() + ")' />";
+            html += "<img id='delete_" + user.getId() + "' src='images/reject.png' title='Usuń użytkownika' class='ideaOption' onclick='deleteUser(" + user.getId() + ")' />";
+            html += "<img id='password_" + user.getId() + "' src='images/password.png' title='Zmień hasło użytkownikowi' class='ideaOption' onclick='changePass(" + user.getId() + ")' />";
             html += "</td></tr>";
         }
         html += "</tbody></table></div>";
@@ -408,9 +419,52 @@ public class HtmlContent {
             html += makeJS(script);
         }
 
-        html += makeButton("Zapisz", "saveSwot", String.valueOf(auditId));
+        html += makeButton("Dalej", "saveSwot", String.valueOf(auditId));
 
 
+        return html;
+    }
+
+    public static String makeSwotRelations(Audit audit) {
+        String html = "<h2>Czy mocne strony pozwalają na pełne wykorzystanie szans?\n" +
+                "Czy słabe strony mogą uniemożliwić wykorzystanie szans?\n" +
+                "Czy mocne strony pomogą w likwidacji zagrożeń?\n" +
+                "Czy słabe strony wpływają negatywnie na zagrożenia?</h2>";
+        html += "<div id='tableWrapper'>";
+        html += "<table class='myTable'><tbody>";
+        html += "<tr class='firstRowRelations'><td></td>";
+        String swotClass = "negative";
+        for (SwotAlternatives col : Common.separateCategoriesOfSwot(audit.getSwot()).get("cols")) {
+            if (col.getCategory().equals(SwotCategory.OPPORTUNITES) || col.getCategory().equals(SwotCategory.STRENGHTS)) {
+                swotClass = "positive";
+            } else {
+                swotClass = "negative";
+            }
+            html += "<td class='" + swotClass + "'>" + col.getText() + "</td>";
+        }
+        html += "</tr>";
+        for (SwotAlternatives row : Common.separateCategoriesOfSwot(audit.getSwot()).get("rows")) {
+            if (row.getCategory().equals(SwotCategory.OPPORTUNITES) || row.getCategory().equals(SwotCategory.STRENGHTS)) {
+                swotClass = "positive";
+            } else {
+                swotClass = "negative";
+            }
+            html += "<tr><td class='firstColRelations " + swotClass + "'>" + row.getText() + "</td>";
+            for (SwotAlternatives col : Common.separateCategoriesOfSwot(audit.getSwot()).get("cols")) {
+                html += "<td class='fixedWidth'>" + makeNumber(0, 2, 1,
+                        Common.getValueOfRelation(row, col, audit.getRelations()), "swot_" + row.getId() + "_" + col.getId()) + "</td>";
+            }
+            html += "</tr>";
+        }
+        html += "<tbody></table></div>";
+
+        html += makeButton("Zapisz i pokaż raport", "swotRelations", String.valueOf(audit.getId()));
+
+        return html;
+    }
+
+    private static String makeNumber(int min, int max, int step, int value, String id) {
+        String html = "<input class='numberInput' type='number' min='" + min + "' max='" + max + "' step='" + step + "' id='" + id + "' value='" + value + "'/>";
         return html;
     }
 
