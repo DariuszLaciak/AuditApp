@@ -519,10 +519,6 @@ textarea {
     width: 30px;
 }
 
-.myTable tr {
-    height: 35px;
-}
-
 .myTable tr:hover {
     background: #1d2731;
 }
