@@ -291,7 +291,7 @@ function addUser() {
                 button2.value = "Anuluj";
                 button2.onclick = "closeOverlay(\"new\")";
                 var buttons = [button, button2];
-                makeOverlayWindow("new", "center", 220, 350, "Dodaj użytkownika", html, buttons);
+                makeOverlayWindow("new", "center", 220, 390, "Dodaj użytkownika", html, buttons);
             }
             else {
                 showInfo(false, data.message);
