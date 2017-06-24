@@ -56,7 +56,7 @@ public class SwotAlternatives {
         this.text = text;
     }
 
-    @ManyToMany(mappedBy = "swot")
+    @ManyToMany(mappedBy = "swot", cascade = CascadeType.ALL)
     public List<Audit> getAudits() {
         return audits;
     }
@@ -65,7 +65,7 @@ public class SwotAlternatives {
         this.audits = audits;
     }
 
-    @OneToMany(fetch = FetchType.EAGER, mappedBy = "relationPartner1")
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "relationPartner1", cascade = CascadeType.ALL)
     @Fetch(value = FetchMode.SUBSELECT)
     @PrimaryKeyJoinColumn
     public List<SwotRelations> getRelations1() {
@@ -76,7 +76,7 @@ public class SwotAlternatives {
         this.relations1 = relations1;
     }
 
-    @OneToMany(fetch = FetchType.EAGER, mappedBy = "relationPartner2")
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "relationPartner2", cascade = CascadeType.ALL)
     @Fetch(value = FetchMode.SUBSELECT)
     @PrimaryKeyJoinColumn
     public List<SwotRelations> getRelations2() {

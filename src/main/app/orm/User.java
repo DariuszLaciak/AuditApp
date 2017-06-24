@@ -124,7 +124,7 @@ public class User implements ObjectDTO {
         this.active = active;
     }
 
-    @OneToMany(mappedBy = "auditor")
+    @OneToMany(mappedBy = "auditor", cascade = CascadeType.ALL)
     @Fetch(value = FetchMode.SUBSELECT)
     @PrimaryKeyJoinColumn
     public List<Audit> getAudits() {
@@ -135,7 +135,7 @@ public class User implements ObjectDTO {
         this.audits = audits;
     }
 
-    @OneToMany(mappedBy = "employee")
+    @OneToMany(mappedBy = "employee", cascade = CascadeType.ALL)
     @Fetch(value = FetchMode.SUBSELECT)
     @PrimaryKeyJoinColumn
     public List<Idea> getIdeas() {
@@ -146,7 +146,7 @@ public class User implements ObjectDTO {
         this.ideas = ideas;
     }
 
-    @OneToMany(mappedBy = "author")
+    @OneToMany(mappedBy = "author", cascade = CascadeType.ALL)
     @Fetch(value = FetchMode.SUBSELECT)
     @PrimaryKeyJoinColumn
     public List<Opinion> getOpinions() {
@@ -166,7 +166,7 @@ public class User implements ObjectDTO {
         this.accountCreated = accountCreated;
     }
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "manager_id")
     public User getManager() {
         return manager;

@@ -64,6 +64,8 @@ public class HtmlContent {
         String username = loggedUser.getUsername();
 
         html += "<div id='loggedPanel'>";
+        html += "<div id='editProfile'>";
+        html += makeButton("Profil", "editUser", loggedUser.getId() + "") + "</div>";
         html += "<div class='loggedIn'>Witaj " + username + "! </div>";
         html += "<div class='link logoutUser'>Wyloguj</div>";
         html += "</div>";
@@ -264,7 +266,7 @@ public class HtmlContent {
                 "<th>Typ</th><th>Przełożony</th><th>Aktywny</th><th>Akcje</th>";
         html += "</tr></thead><tbody>";
         for (User user : users) {
-            html += "<tr id='user_" + user.getId() + "' class='tableTR'><td>" + user.getUsername() + "</td><td>" + user.getName() + "</td><td>" + user.getSurname() + "</td>" +
+            html += "<tr id='user_" + user.getId() + "' class='tableTR'><td id='username_" + user.getId() + "'>" + user.getUsername() + "</td><td>" + user.getName() + "</td><td>" + user.getSurname() + "</td>" +
                     "<td>" + user.getEmail() + "</td><td>" + sdf.format(user.getAccountCreated()) + "</td><td>" + user.getRole().getDisplayName() + "</td>" +
                     "<td>" + (user.getManager() != null ? user.getManager().getName() + " " + user.getManager().getSurname() : "BRAK") +
                     "</td><td>" + (user.isActive() ? "tak" : "nie") + "</td><td>";
@@ -308,9 +310,9 @@ public class HtmlContent {
                 html += "<td>";
                 if (!user.getRole().equals(LoginType.EMPLOYEE) && i.getEmployee().getId() != user.getId()) {
                     if (i.getStatus().equals(Status.OPEN)) {
-                        html += "<img src='images/reject.png' id='reject_" + i.getId() + "' class='ideaOption'  onclick='rejectIdea(" + i.getId() + ")' title='Zamknij'/>";
+                        html += "<img src='images/circle-close.png' id='reject_" + i.getId() + "' class='ideaOption'  onclick='rejectIdea(" + i.getId() + ")' title='Zamknij'/>";
                     } else {
-                        html += "<img src='images/accept.png' id='accept_" + i.getId() + "' class='ideaOption'  onclick='acceptIdea(" + i.getId() + ")' title='Otwórz'/>";
+                        html += "<img src='images/play.png' id='accept_" + i.getId() + "' class='ideaOption'  onclick='acceptIdea(" + i.getId() + ")' title='Otwórz'/>";
                     }
                 }
                 html += "<img src='images/comment.png' id='decisionIdea_" + i.getId() + "' class='ideaOption' onclick='decisionIdea(" + i.getId() + ")' title='Pokaż historię komentarzy'/>";
@@ -474,7 +476,7 @@ public class HtmlContent {
     }
 
     private static String makeJS(String script) {
-        String html = "<script type='application/javascript'>$(function($) {";
+        String html = "<script type='application/javascript'>$(function() {";
         html += script;
         html += "});</script>";
 
@@ -625,6 +627,36 @@ public class HtmlContent {
             html += "<option value='manager_" + manager.getId() + "'>" + manager.getName() + " " + manager.getSurname() + "</option>";
         }
         html += "</select>";
+        return html;
+    }
+
+    public static String makeEditUserHtml(User user, User loggedUser) {
+        String html = "";
+        if (!loggedUser.getRole().equals(LoginType.ADMIN)) {
+            html += "</br>";
+        }
+        html += "<p>Imię: <input type='text' id='name' value='" + user.getName() + "' placeholder='Imię'/></p>";
+        html += "<p>Nazwisko: <input type='text' id='surname' value='" + user.getSurname() + "' placeholder='Nazwisko'/></p>";
+        html += "<p>Email: <input type='text' id='email' value='" + user.getEmail() + "' placeholder='Email'/></p>";
+        html += "<p>Zmienić hasło? <input type='checkbox' id='isPassword'/></p>";
+        html += "<p id='newPassword'><input type='password' id='password' placeholder='Nowe hasło'/></p>";
+        if (loggedUser.getRole().equals(LoginType.ADMIN)) {
+            html += "<p>Typ: <select id='type'>";
+            for (LoginType type : LoginType.values()) {
+                String selected = "";
+                if (user.getRole().equals(type)) {
+                    selected = "selected=selected";
+                }
+                html += "<option value='" + type.toString().toLowerCase() + "'" + selected + ">" + type.getDisplayName() + "</option>";
+            }
+            html += "</select></p>";
+            String checked = "";
+            if (user.isActive()) checked = "checked=checked";
+            html += "<p>Aktywny: <input type='checkbox' id='active' " + checked + "/></p>";
+        }
+        String js = "$('#isPassword').change(function(){ if($(this).is(':checked')) {" +
+                " $('#newPassword').show(); } else {$('#newPassword').hide();} });";
+        html += makeJS(js);
         return html;
     }
 }

@@ -110,7 +110,7 @@ public class Idea implements ObjectDTO {
         this.actionDate = actionDate;
     }
 
-    @OneToMany(mappedBy = "idea")
+    @OneToMany(mappedBy = "idea", cascade = CascadeType.ALL)
     @Fetch(value = FetchMode.SUBSELECT)
     @PrimaryKeyJoinColumn
     public List<Opinion> getOpinions() {

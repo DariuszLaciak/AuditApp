@@ -37,7 +37,6 @@ public class Manage extends HttpServlet {
         User loggedUser = (User) s.getAttribute("userData");
         List<User> allUsers = UserMethods.getUsers();
         Session session;
-        if (loggedUser.getRole().equals(LoginType.ADMIN)) {
             switch (action) {
                 case "getUsers":
 
@@ -98,11 +97,84 @@ public class Manage extends HttpServlet {
 
                     responseMessage = "Hasło użytkownika zostało zmienione.";
                     break;
+                case "editUser":
+                    userId = Long.parseLong(request.getParameter("userId"));
+
+                    session = HibernateUtil.getSessionFactory().getCurrentSession();
+                    if (!session.getTransaction().isActive())
+                        session.beginTransaction();
+
+                    editedUser = session.load(User.class, userId);
+                    if (!loggedUser.getRole().equals(LoginType.ADMIN) && loggedUser.getId() != editedUser.getId()) {
+                        responseMessage = "Brak uprawnień do edycji profilu";
+                        success = false;
+                        break;
+                    } else {
+                        data = HtmlContent.makeEditUserHtml(editedUser, loggedUser);
+                    }
+                    session.getTransaction().commit();
+                    session.close();
+                    break;
+                case "confirmEditUser":
+                    userId = Long.parseLong(request.getParameter("userId"));
+                    name = request.getParameter("name");
+                    surname = request.getParameter("surname");
+                    mail = request.getParameter("email");
+                    role = request.getParameter("type");
+                    active = request.getParameter("active");
+                    password = request.getParameter("password");
+                    boolean changePass = Boolean.valueOf(request.getParameter("changePass"));
+                    session = HibernateUtil.getSessionFactory().getCurrentSession();
+                    if (!session.getTransaction().isActive())
+                        session.beginTransaction();
+
+                    editedUser = session.load(User.class, userId);
+                    editedUser.setName(name);
+                    editedUser.setSurname(surname);
+                    editedUser.setEmail(mail);
+                    if (loggedUser.getRole().equals(LoginType.ADMIN)) {
+                        activeB = Boolean.valueOf(active);
+                        userType = LoginType.valueOf(role.toUpperCase());
+                        editedUser.setRole(userType);
+                        editedUser.setActive(activeB);
+                    }
+                    if (changePass) {
+                        editedUser.setPassword(password);
+                    }
+
+                    session.update(editedUser);
+
+                    session.getTransaction().commit();
+                    session.close();
+
+                    if (loggedUser.getRole().equals(LoginType.ADMIN)) {
+                        data = HtmlContent.makeUsersForm(UserMethods.getUsers());
+                    }
+
+                    responseMessage = "Pomyślnie zmieniono profil";
+                    break;
+                case "deleteUser":
+                    userId = Long.parseLong(request.getParameter("userId"));
+                    if (loggedUser.getRole().equals(LoginType.ADMIN)) {
+                        session = HibernateUtil.getSessionFactory().getCurrentSession();
+                        if (!session.getTransaction().isActive())
+                            session.beginTransaction();
+
+                        editedUser = session.load(User.class, userId);
+                        editedUser.getEmployees().clear();
+                        editedUser.getAudits().clear();
+                        session.delete(editedUser);
+
+                        session.getTransaction().commit();
+                        session.close();
+                        data = HtmlContent.makeUsersForm(UserMethods.getUsers());
+                        responseMessage = "Pomyślnie usunięto użytkownika z bazy";
+                    } else {
+                        responseMessage = "Brak uprawnień";
+                        success = false;
+                    }
+                    break;
             }
-        } else {
-            success = false;
-            responseMessage = "Nie masz uprawnień";
-        }
 
         json.put("success", success);
         json.put("message", responseMessage);

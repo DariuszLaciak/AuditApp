@@ -59,7 +59,7 @@ public class Question implements ObjectDTO {
         this.type = type;
     }
 
-    @OneToMany(mappedBy = "question", orphanRemoval = true)
+    @OneToMany(mappedBy = "question", orphanRemoval = true, cascade = CascadeType.ALL)
     @PrimaryKeyJoinColumn
     public List<Answer> getAnswers() {
         return answers;

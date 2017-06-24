@@ -40,9 +40,6 @@ $(function () {
             }
         });
     });
-    $("#registerUser").click(function () {
-
-    });
 });
 
 function newAudit() {
@@ -338,12 +335,41 @@ function confirmAddUser() {
     });
 }
 
-function editUser(userId) {
-
+function deleteUser(userId) {
+    var username = $("#username_" + userId).text();
+    var html = "Czy na pewno chcesz usunąć uzytkownika: <b>" + username + "</b>?</br></br>UWAGA: Zostaną usunięte również pomysły i opinie przypisane do tego użytkownika!";
+    var button2 = {};
+    button2.value = "Tak";
+    button2.onclick = "confirmDeleteUser(" + userId + ")";
+    var button = {};
+    button.value = "Anuluj";
+    button.onclick = "closeOverlay(" + userId + ")";
+    var buttons = [button, button2];
+    makeOverlayWindow(userId, "center", 228, 270, "Usuń użytkownika: " + username, html, buttons);
 }
 
-function deleteUser(userId) {
-
+function confirmDeleteUser(userId) {
+    $.ajax({
+        url: "/Manage",
+        method: "POST",
+        dataType: "json",
+        data: {
+            action: "deleteUser",
+            userId: userId
+        },
+        success: function (data) {
+            if (data.success) {
+                showInfo(true, data.message);
+                closeOverlay(userId);
+                if ($("#manageUsersTab").is(":visible")) {
+                    $("#manageUsersTab").html(data.data);
+                }
+            }
+            else {
+                showInfo(false, data.message);
+            }
+        }
+    });
 }
 
 function changePass(userId) {
@@ -513,9 +539,9 @@ function makeConfirmWindowChangeIdeaStatus(id, open) {
         elem = $("#accept_" + id);
     }
     else {
-        elem = $("#reject" + id);
+        elem = $("#reject_" + id);
     }
-    makeOverlayWindow(id, elem, 225, 200, "Odrzuć: wystaw opinię", html, buttons);
+    makeOverlayWindow(id, elem, 225, 200, "Zmień status pomysłu", html, buttons);
 }
 
 function changeIdeaStatus(id, open) {
@@ -709,6 +735,76 @@ function makeAuditOverview() {
         success: function (data) {
             if (data.success) {
                 $("#overviewContent").html(data.data);
+            }
+            else {
+                showInfo(false, data.message);
+            }
+        }
+    });
+}
+
+function editUser(userId) {
+
+    $.ajax({
+        url: "/Manage",
+        method: "POST",
+        dataType: "json",
+        data: {
+            action: "editUser",
+            userId: userId
+        },
+        success: function (data) {
+            if (data.success) {
+                var button = {};
+                button.value = "Zapisz";
+                button.onclick = "confirmEditUser(" + userId + ")";
+
+                var button2 = {};
+                button2.value = "Anuluj";
+                button2.onclick = "closeOverlay(" + userId + ")";
+                var buttons = [button, button2];
+                makeOverlayWindow(userId, "center", 220, 450, "Edytuj profil", data.data, buttons);
+            }
+            else {
+                showInfo(false, data.message);
+            }
+        }
+    });
+
+
+}
+
+function confirmEditUser(userId) {
+    var name = $("#name").val();
+    var surname = $("#surname").val();
+    var email = $("#email").val();
+    var changePass = $("#isPassword").is(":checked");
+    var password = $("#password").val();
+    var type = $("#type").find(":selected").val();
+    var active = $("#active").is(":checked");
+
+    $.ajax({
+        url: "/Manage",
+        method: "POST",
+        dataType: "json",
+        data: {
+            action: "confirmEditUser",
+            userId: userId,
+            name: name,
+            surname: surname,
+            email: email,
+            changePass: changePass,
+            password: password,
+            type: type,
+            active: active
+        },
+        success: function (data) {
+            if (data.success) {
+                showInfo(true, data.message);
+                closeOverlay(userId);
+                if ($("#manageUsersTab").is(":visible")) {
+                    $("#manageUsersTab").html(data.data);
+                }
             }
             else {
                 showInfo(false, data.message);

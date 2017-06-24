@@ -35,7 +35,7 @@ public class AuditResult implements ObjectDTO {
         this.resultValue = resultValue;
     }
 
-    @OneToOne(optional = false)
+    @OneToOne(optional = false, cascade = CascadeType.ALL)
     @JoinColumn(name = "auditId")
     public Audit getAudit() {
         return audit;

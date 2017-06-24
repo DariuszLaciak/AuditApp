@@ -48,7 +48,8 @@ input[type='submit'] {
 }
 
 .registerNew, .logoutUser {
-    margin-top: 5px;
+    margin-top: 10px;
+    float: right;
 }
 
 .link {
@@ -64,7 +65,19 @@ input[type='submit'] {
     float: right;
     margin: 20px 10px 10px 10px;
     display: block;
-    width: 110px;
+    width: 180px;
+}
+
+.loggedIn {
+    float: right;
+}
+
+#editProfile {
+    float: left;
+}
+
+p#newPassword {
+    display: none;
 }
 
 #infoBox {

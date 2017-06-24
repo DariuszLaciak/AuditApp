@@ -61,7 +61,7 @@ public class Audit implements ObjectDTO {
         this.auditor = auditor;
     }
 
-    @OneToMany(fetch = FetchType.EAGER, mappedBy = "audit")
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "audit", cascade = CascadeType.ALL)
     @PrimaryKeyJoinColumn
     public List<Answer> getAnswers() {
         return answers;
@@ -94,7 +94,7 @@ public class Audit implements ObjectDTO {
         this.swot = swot;
     }
 
-    @OneToMany(fetch = FetchType.EAGER, mappedBy = "audit")
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "audit", cascade = CascadeType.ALL)
     @Fetch(value = FetchMode.SUBSELECT)
     @PrimaryKeyJoinColumn
     public List<SwotRelations> getRelations() {
