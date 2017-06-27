@@ -782,6 +782,7 @@ function confirmEditUser(userId) {
     var password = $("#password").val();
     var type = $("#type").find(":selected").val();
     var active = $("#active").is(":checked");
+    var manager = $("#manager").find(":selected").val();
 
     $.ajax({
         url: "/Manage",
@@ -796,7 +797,8 @@ function confirmEditUser(userId) {
             changePass: changePass,
             password: password,
             type: type,
-            active: active
+            active: active,
+            manager: manager
         },
         success: function (data) {
             if (data.success) {

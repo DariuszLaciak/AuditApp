@@ -1,6 +1,7 @@
 body {
     margin: 0;
     overflow: auto;
+    font-family: Arial;
 }
 #main {
     margin: 0 auto;
@@ -246,16 +247,16 @@ input[type=radio] {
 }
 
 label {
-    color: #9a929e;
+    color: lightyellow;
     display: inline-block;
     cursor: pointer;
     font-weight: bold;
     padding: 5px 10px;
-    font-size: smaller;
+    font-size: 15px;
 }
 
 input[type=radio]:checked + label {
-    color: #ccc8ce;
+    color: yellow;
     background: #1d2731;
 }
 

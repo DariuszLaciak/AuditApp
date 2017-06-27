@@ -99,7 +99,7 @@ public class Manage extends HttpServlet {
                     break;
                 case "editUser":
                     userId = Long.parseLong(request.getParameter("userId"));
-
+                    List<User> managers = UserMethods.getManagers();
                     session = HibernateUtil.getSessionFactory().getCurrentSession();
                     if (!session.getTransaction().isActive())
                         session.beginTransaction();
@@ -110,7 +110,7 @@ public class Manage extends HttpServlet {
                         success = false;
                         break;
                     } else {
-                        data = HtmlContent.makeEditUserHtml(editedUser, loggedUser);
+                        data = HtmlContent.makeEditUserHtml(editedUser, loggedUser, managers);
                     }
                     session.getTransaction().commit();
                     session.close();
@@ -123,10 +123,12 @@ public class Manage extends HttpServlet {
                     role = request.getParameter("type");
                     active = request.getParameter("active");
                     password = request.getParameter("password");
+                    managerId = Long.parseLong(request.getParameter("manager"));
                     boolean changePass = Boolean.valueOf(request.getParameter("changePass"));
                     session = HibernateUtil.getSessionFactory().getCurrentSession();
                     if (!session.getTransaction().isActive())
                         session.beginTransaction();
+
 
                     editedUser = session.load(User.class, userId);
                     editedUser.setName(name);
@@ -142,6 +144,11 @@ public class Manage extends HttpServlet {
                         editedUser.setPassword(password);
                     }
 
+                    if (managerId == -1) {
+                        editedUser.setManager(null);
+                    } else {
+                        editedUser.setManager(session.load(User.class, managerId));
+                    }
                     session.update(editedUser);
 
                     session.getTransaction().commit();

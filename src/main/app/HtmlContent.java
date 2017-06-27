@@ -114,31 +114,37 @@ public class HtmlContent {
     }
 
     public static String makeQuestions(List<Question> questions, HttpSession session) {
-
+        if (session.getAttribute("startNumber") == null) {
+            session.setAttribute("startNumber", 1);
+        }
+        int shownQuestions = 0;
         StringBuilder html = new StringBuilder("");
         String buttonValue = "Następne pytania";
         if (questions.size() <= Constraints.NUMBER_OF_QUESTIONS_PER_PAGE) {
             buttonValue = "Analiza SWOT";
         }
-        html.append("<ol>");
+        html.append("<h2>Pozostało pytań: ").append(questions.size()).append("</h2>");
+        html.append("<ol start='" + session.getAttribute("startNumber") + "'>");
         for (Question q : Common.getRandomQuestionsAndRemoveAskedFromSession(questions, session)) {
             html.append("<li><span class='questionLabel'>").append(q.getContent()).append("</span>");
             html.append(makeLickertScale(q.getId()));
             html.append("</li>");
+            shownQuestions++;
         }
         html.append(makeButton(buttonValue, "nextQuestions"));
         html.append("</ol>");
+        session.setAttribute("startNumber", (int) session.getAttribute("startNumber") + shownQuestions);
         return html.toString();
     }
 
     //<input type="radio" id="option-one" name="selector"><label for="option-one">Tak</label><input type="radio" id="option-two" name="selector"><label for="option-two">Raczej tak</label><input type="radio" id="option-three" name="selector"><label for="option-three">Zdecydowanie tak</label>
     private static String makeLickertScale(long id) {
         String html = "<div class='radio-group'><input class='lickertRadio' type='radio' id='" + id + "_lickert_1' name='" + id + "_lickert' value='" + Constraints.LICKERT_1 + "'><label for='" + id + "_lickert_1'>Zdecydowanie nie</label>";
-        html += "<input class='lickertRadio' type='radio' id='" + id + "_lickert_2' name='" + id + "_lickert' value='" + Constraints.LICKERT_2 + "'><label for='" + id + "_lickert_2'>Raczej nie</label>";
-        html += "<input class='lickertRadio' type='radio' id='" + id + "_lickert_3' name='" + id + "_lickert' value='" + Constraints.LICKERT_3 + "'><label for='" + id + "_lickert_3'>Nie</label>";
-        html += "<input class='lickertRadio' type='radio' id='" + id + "_lickert_4' name='" + id + "_lickert' value='" + Constraints.LICKERT_4 + "'><label for='" + id + "_lickert_4'>Obojętne</label>";
-        html += "<input class='lickertRadio' type='radio' id='" + id + "_lickert_5' name='" + id + "_lickert' value='" + Constraints.LICKERT_5 + "'><label for='" + id + "_lickert_5'>Tak</label>";
-        html += "<input class='lickertRadio' type='radio' id='" + id + "_lickert_6' name='" + id + "_lickert' value='" + Constraints.LICKERT_6 + "'><label for='" + id + "_lickert_6'>Raczej tak</label>";
+        html += "<input class='lickertRadio' type='radio' id='" + id + "_lickert_2' name='" + id + "_lickert' value='" + Constraints.LICKERT_2 + "'><label for='" + id + "_lickert_2'>Nie</label>";
+        html += "<input class='lickertRadio' type='radio' id='" + id + "_lickert_3' name='" + id + "_lickert' value='" + Constraints.LICKERT_3 + "'><label for='" + id + "_lickert_3'>Raczej nie</label>";
+        html += "<input class='lickertRadio' type='radio' id='" + id + "_lickert_4' name='" + id + "_lickert' value='" + Constraints.LICKERT_4 + "'><label for='" + id + "_lickert_4'>Nie wiem</label>";
+        html += "<input class='lickertRadio' type='radio' id='" + id + "_lickert_5' name='" + id + "_lickert' value='" + Constraints.LICKERT_5 + "'><label for='" + id + "_lickert_5'>Raczej tak</label>";
+        html += "<input class='lickertRadio' type='radio' id='" + id + "_lickert_6' name='" + id + "_lickert' value='" + Constraints.LICKERT_6 + "'><label for='" + id + "_lickert_6'>Tak</label>";
         html += "<input class='lickertRadio' type='radio' id='" + id + "_lickert_7' name='" + id + "_lickert' value='" + Constraints.LICKERT_7 + "'><label for='" + id + "_lickert_7'>Zdecydowanie tak</label></div>";
         return html;
     }
@@ -630,7 +636,7 @@ public class HtmlContent {
         return html;
     }
 
-    public static String makeEditUserHtml(User user, User loggedUser) {
+    public static String makeEditUserHtml(User user, User loggedUser, List<User> managers) {
         String html = "";
         if (!loggedUser.getRole().equals(LoginType.ADMIN)) {
             html += "</br>";
@@ -653,6 +659,15 @@ public class HtmlContent {
             String checked = "";
             if (user.isActive()) checked = "checked=checked";
             html += "<p>Aktywny: <input type='checkbox' id='active' " + checked + "/></p>";
+            html += "<p>Przełożony: <select id='manager'><option value='-1'>BRAK</option>";
+            for (User manager : managers) {
+                String selected = "";
+                if (user.getManager() != null && manager.getId() == user.getManager().getId()) {
+                    selected = "selected=selected";
+                }
+                html += "<option value='" + manager.getId() + "'" + selected + ">" + manager.getName() + " " + manager.getSurname() + "</option>";
+            }
+            html += "</select></p>";
         }
         String js = "$('#isPassword').change(function(){ if($(this).is(':checked')) {" +
                 " $('#newPassword').show(); } else {$('#newPassword').hide();} });";

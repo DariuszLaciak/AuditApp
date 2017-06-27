@@ -14,8 +14,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
@@ -44,6 +42,7 @@ public class BeginAudit extends HttpServlet {
             long id = (long) session.save(newAudit);
             s.setAttribute("auditId", id);
             s.setAttribute("notAskedQuestions", null);
+            s.setAttribute("startNumber", null);
 
             responseMessage = "";
             success = true;
