@@ -83,7 +83,7 @@ p#newPassword {
 
 #infoBox {
     position: fixed;
-    top: 50px;
+    top: 40%;
     left: 50%;
     margin-left: -201.5px;
     max-width: 400px;
@@ -94,14 +94,15 @@ p#newPassword {
     padding: 6px;
     display: none;
     border-radius: 10px;
+    font-weight: bold;
 }
 
 .success {
-    background-color: darkgreen;
+    background-color: #339911;
 }
 
 .failed {
-    background-color: darkred;
+    background-color: #aa1100;
 }
 
 #userMenu {
@@ -395,15 +396,25 @@ textarea {
     font-size: 17pt;
 }
 
-#overlayBG {
+#overlayBG, #loadingBG {
     position: fixed;
     width: 100%;
     height: 100%;
     background-color: black;
-    opacity: 0.5;
+    opacity: 0.8;
     z-index: 10;
+    text-align: center;
     top: 0;
     left: 0;
+}
+
+#loadingText {
+    display: block;
+    position: relative;
+    top: 50%;
+    font-size: 40px;
+    font-weight: bold;
+    color: white;
 }
 
 .style-select {

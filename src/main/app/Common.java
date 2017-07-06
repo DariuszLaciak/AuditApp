@@ -1,9 +1,6 @@
 package main.app;
 
-import main.app.enums.QuestionCategory;
-import main.app.enums.QuestionType;
-import main.app.enums.SwotCategory;
-import main.app.enums.SwotResult;
+import main.app.enums.*;
 import main.app.orm.*;
 
 import javax.servlet.http.HttpSession;
@@ -13,8 +10,7 @@ import java.util.*;
  * Created by Darek on 2017-03-05.
  */
 public class Common {
-    private static final float MAX_POINTS = (Constraints.NUMBER_OF_LICKERT_QUESTIONS * Constraints.LICKERT_7) +
-            (Constraints.NUMBER_OF_YES_NO_QUESTIONS * Constraints.YES_VAL);
+    private static final float MAX_POINTS = (Constraints.NUMBER_OF_LICKERT_QUESTIONS * Constraints.LICKERT_7);
     private static final float MAX_POINTS_PER_LICKERT_GROUP = (Constraints.NUMBER_OF_LICKERT_QUESTIONS * Constraints.LICKERT_7) /
             Constraints.NUMBER_OF_LICKERT_GROUPS;
     private static final float MAX_POINTS_OF_YES_NO_QUESTIONS = (Constraints.NUMBER_OF_YES_NO_QUESTIONS * Constraints.YES_VAL);
@@ -45,6 +41,18 @@ public class Common {
             }
         }
         return getResultOfAnswersType(newList, MAX_POINTS_OF_YES_NO_QUESTIONS, true);
+    }
+
+    public static List<Audit> getAuditOfType(List<Audit> allAudits, AuditType type) {
+        List<Audit> newList = new ArrayList<>();
+
+        for (Audit a : allAudits) {
+            if (a.getType().equals(type)) {
+                newList.add(a);
+            }
+        }
+
+        return newList;
     }
 
     private static float getResultOfAnswersType(List<Answer> answers, float max_to_calculate, boolean percent) {
@@ -134,7 +142,7 @@ public class Common {
         return category;
     }
 
-    public static SwotResult getSwotResultDescription(Audit audit) {
+    public static SwotResult getSwotResultDescription(Swot swot) {
         Map<SwotResult, Integer> resultMap = new HashMap<>();
         resultMap.put(SwotResult.MAXI_MAXI, 0);
         resultMap.put(SwotResult.MINI_MAXI, 0);
@@ -142,7 +150,7 @@ public class Common {
         resultMap.put(SwotResult.MINI_MINI, 0);
 
 
-        for (SwotRelations relation : audit.getRelations()) {
+        for (SwotRelations relation : swot.getRelations()) {
             resultMap.put(Common.getCategoryResultOfRelation(relation),
                     resultMap.get(Common.getCategoryResultOfRelation(relation)) + relation.getRelation());
         }
@@ -194,6 +202,18 @@ public class Common {
         }
         audits.sort(Comparator.comparing(Audit::getAuditDate));
         return audits;
+    }
+
+    public static List<Swot> getSwotsBetweendDates(List<Swot> allAudits, Date start, Date end) {
+        List<Swot> swots = new ArrayList<>();
+
+        for (Swot swot : allAudits) {
+            if (swot.getSwotDate().compareTo(start) >= 0 && swot.getSwotDate().compareTo(end) <= 0) {
+                swots.add(swot);
+            }
+        }
+        swots.sort(Comparator.comparing(Swot::getSwotDate));
+        return swots;
     }
 
     public static String stripPolishCharacters(String string) {

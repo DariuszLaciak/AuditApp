@@ -11,7 +11,7 @@ public class DatabaseFill {
         Session s = HibernateUtil.getSessionFactory().getCurrentSession();
         s.beginTransaction();
 
-        swot(s);
+        users(s);
 
         s.getTransaction().commit();
         s.close();

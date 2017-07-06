@@ -29,6 +29,7 @@ public class User implements ObjectDTO {
     private List<Audit> audits;
     private List<Idea> ideas;
     private List<Opinion> opinions;
+    private List<Swot> swots;
 
     public User() {
     }
@@ -183,5 +184,16 @@ public class User implements ObjectDTO {
 
     public void setEmployees(List<User> employees) {
         this.employees = employees;
+    }
+
+    @OneToMany(mappedBy = "auditorId", cascade = CascadeType.ALL)
+    @Fetch(value = FetchMode.SUBSELECT)
+    @PrimaryKeyJoinColumn
+    public List<Swot> getSwots() {
+        return swots;
+    }
+
+    public void setSwots(List<Swot> swots) {
+        this.swots = swots;
     }
 }

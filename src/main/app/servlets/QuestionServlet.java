@@ -23,6 +23,7 @@ import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -40,6 +41,8 @@ public class QuestionServlet extends HttpServlet {
         String responseMessage = "";
         Object data = null;
         boolean success = true;
+
+        User auditor = (User) s.getAttribute("userData");
         switch (action) {
             case "new": {
                 responseMessage = "Pomyślnie dodano pytanie";
@@ -140,34 +143,48 @@ public class QuestionServlet extends HttpServlet {
                     session.close();
                     s.removeAttribute("notAskedQuestions");
 
-                    data = HtmlContent.makeSwotTables(QuestionMethods.getSwot(), audit.getId());
+                    data = HtmlContent.prepareResults(audit);
+                    //data = HtmlContent.makeSwotTables(QuestionMethods.getAlternatives(), audit.getId()); przenieść do nowego
                 } else {
                     data = HtmlContent.makeQuestions(allQuestions, s);
                 }
 
             }
             break;
+            case "newSwot": {
+                Session session = HibernateUtil.getSessionFactory().getCurrentSession();
+                if (!session.getTransaction().isActive())
+                    session.beginTransaction();
+                Swot swot = new Swot(new Date());
+                swot.setAuditorId(auditor);
+                session.save(swot);
+                session.getTransaction().commit();
+                session.close();
+
+                data = HtmlContent.makeSwotTables(QuestionMethods.getSwot(), swot.getId());
+            }
+            break;
             case "saveSwot": {
                 String[] alternatives = request.getParameterValues("selected[]");
-                long auditId = Long.parseLong(request.getParameter("auditId"));
+                long swotId = Long.parseLong(request.getParameter("swotId"));
 
                 Session session = HibernateUtil.getSessionFactory().getCurrentSession();
                 if (!session.getTransaction().isActive())
                     session.beginTransaction();
 
-                Audit audit = session.load(Audit.class, auditId);
+                Swot swot = session.load(Swot.class, swotId);
                 List<SwotAlternatives> alternativesObjects = new ArrayList<>();
                 for (String alt : alternatives) {
                     alternativesObjects.add(session.load(SwotAlternatives.class, Long.parseLong(alt)));
                 }
-                audit.getSwot().addAll(alternativesObjects);
+                swot.getAlternatives().addAll(alternativesObjects);
 
-                session.update(audit);
+                session.update(swot);
 
                 session.getTransaction().commit();
                 session.close();
 
-                data = HtmlContent.makeSwotRelations(audit);
+                data = HtmlContent.makeSwotRelations(swot);
             }
             break;
             case "newSwotPosition": {
@@ -191,7 +208,7 @@ public class QuestionServlet extends HttpServlet {
             }
             break;
             case "swotRelations": {
-                long auditId = Long.parseLong(request.getParameter("auditId"));
+                long swotId = Long.parseLong(request.getParameter("swotId"));
                 String toSave = request.getParameter("relations");
 
 
@@ -207,7 +224,7 @@ public class QuestionServlet extends HttpServlet {
                 if (!session.getTransaction().isActive())
                     session.beginTransaction();
 
-                Audit auditToAnalyse = session.load(Audit.class, auditId);
+                Swot swotToAnalyse = session.load(Swot.class, swotId);
 
                 for (Object jo : toSaveJson) {
                     JSONObject ob = (JSONObject) jo;
@@ -216,12 +233,12 @@ public class QuestionServlet extends HttpServlet {
                     SwotAlternatives alt2 = session.load(SwotAlternatives.class, Long.parseLong(ob.get("id2").toString()));
                     int value = Integer.parseInt(ob.get("value").toString());
 
-                    SwotRelations relation = new SwotRelations(value, auditToAnalyse, alt1, alt2);
+                    SwotRelations relation = new SwotRelations(value, swotToAnalyse, alt1, alt2);
 
                     session.save(relation);
                 }
 
-                data = HtmlContent.prepareResults(auditToAnalyse);
+                data = HtmlContent.makeSwotResult(swotToAnalyse); // zmienic na wyniki swota
 
                 session.getTransaction().commit();
                 session.close();

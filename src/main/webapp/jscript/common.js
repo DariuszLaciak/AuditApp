@@ -1,7 +1,7 @@
 function showInfo(success, message) {
     $("#infoBox").removeClass();
     var FADE_SPEED = 1000;
-    var MESSAGE_TIME = 2000;
+    var MESSAGE_TIME = 4000;
     var cl = "failed";
     if (success) {
         cl = "success";
@@ -13,6 +13,12 @@ function showInfo(success, message) {
     });
 }
 
+function makeLoading(message) {
+    if (!message) message = "";
+    var background = "<div id='loadingBG'><div id='loadingText'>" + message + "</div></div>";
+    $("body").append(background);
+}
+
 function scrollUp() {
     $("html, body").animate({scrollTop: 0}, "slow");
 }
@@ -21,7 +27,7 @@ function makeOverlayWindow(id, element, width, height, title, content, buttons, 
     var top = 0;
     var left = 0;
     if (element === "center") {
-        top = $(window).height() / 2 - height / 2;
+        top = $(document).height() / 2 - height / 2;
         left = $(window).width() / 2 - width / 2;
     }
     else {
@@ -61,9 +67,14 @@ function makeOverlayWindow(id, element, width, height, title, content, buttons, 
     var background = "<div id='overlayBG'></div>";
     $("body").append(background);
     $("body").append(html);
+    $("#overlayWindow_" + id).draggable();
 }
 
 function closeOverlay(id) {
     $("#overlayWindow_" + id).remove();
     $("#overlayBG").remove();
+}
+
+function finishLoading() {
+    $("#loadingBG").remove();
 }

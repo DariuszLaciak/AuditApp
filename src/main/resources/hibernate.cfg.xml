@@ -23,6 +23,7 @@
             root
         </property>
         <property name="hibernate.connection.password">
+            root
         </property>
         <property name="hibernate.dialect.storage_engine">innodb</property>
         <property name="show_sql">false</property>

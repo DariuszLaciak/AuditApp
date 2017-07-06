@@ -1,8 +1,22 @@
 var actualIndex = 0;
 var $ideaType = [["COMPANY_CLIENT", "Relacja firma-klient"], ["PROMOTION", "Wizerunek firmy i promocja"], ["INTERNAL", "Organizacja pracy i zarządzenie, relacje wewnętrzne"],
     ["SECURITY", "Bezpieczeństwo"], ["MACHINES", "Maszyny"], ["PRODUCTION", "Organizacja produkcji"], ["PRODUCT", "Produkty"], ["OTHER", "Inne"]];
-
+var timer = 1000;
+$.ajaxSetup({
+    beforeSend: function () {
+        clearTimeout(timer);
+        timer = setTimeout(function () {
+            makeLoading("Proszę czekać...");
+        }, 500);
+    },
+    complete: function () {
+        clearTimeout(timer);
+        finishLoading();
+    }
+});
 $(function () {
+
+
     $("#loginPanel").submit(function (event) {
         event.preventDefault();
         var login = $("#user_id").val();
@@ -75,6 +89,60 @@ function generateQuestions() {
     handleQuestionRequest(null, actualIndex);
 }
 
+function newDetailedAudit() {
+    switchTab("newDetailedAuditTab");
+    if ($("#newDetailedAuditTab").length === 0) {
+        $("#content").append("<div id='newDetailedAuditTab' class = 'innerContent'></div>");
+
+    }
+}
+
+function innovationSources() {
+    switchTab("innovationSourcesTab");
+    if ($("#innovationSourcesTab").length === 0) {
+        $("#content").append("<div id='innovationSourcesTab' class = 'innerContent'></div>");
+
+    }
+}
+
+function innovationImpediments() {
+    switchTab("innovationImpedimentsTab");
+    if ($("#innovationImpedimentsTab").length === 0) {
+        $("#content").append("<div id='innovationImpedimentsTab' class = 'innerContent'></div>");
+
+    }
+}
+
+function newSwot() {
+    switchTab("newSwotTab");
+    if ($("#newSwotTab").length === 0) {
+        $("#content").append("<div id='newSwotTab' class = 'innerContent'></div>");
+        generateSwot();
+    }
+}
+
+function newSwotAnalysis() {
+    generateSwot();
+}
+
+function generateSwot() {
+    $.ajax({
+        url: "/Question",
+        method: "POST",
+        dataType: "json",
+        data: {
+            action: "newSwot"
+        },
+        success: function (data) {
+            if (data.success) {
+                $("#newSwotTab").html(data.data);
+            }
+            else {
+                showInfo(false, data.message);
+            }
+        }
+    });
+}
 
 function auditHistory() {
     switchTab("auditHistoryTab");
@@ -630,7 +698,7 @@ function newIdeaComment(id) {
     $(".overlayContent").prepend(form);
 }
 
-function swotRelations(auditId) {
+function swotRelations(swotId) {
     // swot_id_id
     $(".numberInput");
     var dataToSave = [];
@@ -651,12 +719,12 @@ function swotRelations(auditId) {
         dataType: "json",
         data: {
             action: "swotRelations",
-            auditId: auditId,
+            swotId: swotId,
             relations: JSON.stringify(dataToSave)
         },
         success: function (data) {
             if (data.success) {
-                $("#newAuditTab").html(data.data);
+                $("#newSwotTab").html(data.data);
             }
             else {
                 showInfo(false, data.message);
@@ -665,7 +733,7 @@ function swotRelations(auditId) {
     });
 }
 
-function saveSwot(auditId) {
+function saveSwot(swotId) {
     var chosenOptions = $(".form-control").find("option");
     var toSend = [];
     var areTablesFilled = true;
@@ -689,12 +757,12 @@ function saveSwot(auditId) {
             dataType: "json",
             data: {
                 action: "saveSwot",
-                auditId: auditId,
+                swotId: swotId,
                 selected: toSend
             },
             success: function (data) {
                 if (data.success) {
-                    $("#newAuditTab").html(data.data);
+                    $("#newSwotTab").html(data.data);
                 }
                 else {
                     showInfo(false, data.message);
@@ -763,7 +831,7 @@ function editUser(userId) {
                 button2.value = "Anuluj";
                 button2.onclick = "closeOverlay(" + userId + ")";
                 var buttons = [button, button2];
-                makeOverlayWindow(userId, "center", 220, 450, "Edytuj profil", data.data, buttons);
+                makeOverlayWindow(userId, "center", 220, 460, "Edytuj profil", data.data, buttons);
             }
             else {
                 showInfo(false, data.message);

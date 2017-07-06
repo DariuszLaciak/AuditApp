@@ -8,16 +8,16 @@ public class SwotRelations {
     private long id;
     private int relation;
 
-    private Audit audit;
+    private Swot swot;
     private SwotAlternatives relationPartner1;
     private SwotAlternatives relationPartner2;
 
     public SwotRelations() {
     }
 
-    public SwotRelations(int relation, Audit audit, SwotAlternatives relationPartner1, SwotAlternatives relationPartner2) {
+    public SwotRelations(int relation, Swot swot, SwotAlternatives relationPartner1, SwotAlternatives relationPartner2) {
         this.relation = relation;
-        this.audit = audit;
+        this.swot = swot;
         this.relationPartner1 = relationPartner1;
         this.relationPartner2 = relationPartner2;
     }
@@ -43,13 +43,13 @@ public class SwotRelations {
     }
 
     @ManyToOne
-    @JoinColumn(name = "auditId")
-    public Audit getAudit() {
-        return audit;
+    @JoinColumn(name = "swotId")
+    public Swot getSwot() {
+        return swot;
     }
 
-    public void setAudit(Audit audit) {
-        this.audit = audit;
+    public void setSwot(Swot swot) {
+        this.swot = swot;
     }
 
     @ManyToOne

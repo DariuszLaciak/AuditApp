@@ -1,9 +1,6 @@
 package main.app.orm;
 
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
-import org.hibernate.annotations.LazyCollection;
-import org.hibernate.annotations.LazyCollectionOption;
+import main.app.enums.AuditType;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -16,17 +13,12 @@ public class Audit implements ObjectDTO {
     private long id;
 
     private Date auditDate;
+    private AuditType type = AuditType.GENERAL;
 
     private User auditor;
 
     private List<Answer> answers;
     private AuditResult result;
-
-    @LazyCollection(LazyCollectionOption.FALSE)
-    private List<SwotAlternatives> swot;
-
-    @LazyCollection(LazyCollectionOption.FALSE)
-    private List<SwotRelations> relations;
 
     public Audit() {
     }
@@ -80,28 +72,12 @@ public class Audit implements ObjectDTO {
         this.result = result;
     }
 
-    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    @Fetch(value = FetchMode.SUBSELECT)
-    @JoinTable(name = "auditSwot", joinColumns = {
-            @JoinColumn(name = "auditId", nullable = false, updatable = false)},
-            inverseJoinColumns = {@JoinColumn(name = "swotAlternativeId",
-                    nullable = false, updatable = false)})
-    public List<SwotAlternatives> getSwot() {
-        return swot;
+    @Column(nullable = false)
+    public AuditType getType() {
+        return type;
     }
 
-    public void setSwot(List<SwotAlternatives> swot) {
-        this.swot = swot;
-    }
-
-    @OneToMany(fetch = FetchType.EAGER, mappedBy = "audit", cascade = CascadeType.ALL)
-    @Fetch(value = FetchMode.SUBSELECT)
-    @PrimaryKeyJoinColumn
-    public List<SwotRelations> getRelations() {
-        return relations;
-    }
-
-    public void setRelations(List<SwotRelations> relations) {
-        this.relations = relations;
+    public void setType(AuditType type) {
+        this.type = type;
     }
 }

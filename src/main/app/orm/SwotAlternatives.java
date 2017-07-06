@@ -14,7 +14,7 @@ public class SwotAlternatives {
     private SwotCategory category;
     private String text;
 
-    private List<Audit> audits;
+    private List<Swot> swots;
 
     private List<SwotRelations> relations1;
     private List<SwotRelations> relations2;
@@ -56,13 +56,13 @@ public class SwotAlternatives {
         this.text = text;
     }
 
-    @ManyToMany(mappedBy = "swot", cascade = CascadeType.ALL)
-    public List<Audit> getAudits() {
-        return audits;
+    @ManyToMany(mappedBy = "alternatives", cascade = CascadeType.ALL)
+    public List<Swot> getSwots() {
+        return swots;
     }
 
-    public void setAudits(List<Audit> audits) {
-        this.audits = audits;
+    public void setSwots(List<Swot> swots) {
+        this.swots = swots;
     }
 
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "relationPartner1", cascade = CascadeType.ALL)

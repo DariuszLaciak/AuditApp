@@ -9,7 +9,7 @@
     <script src="lib/jquery.selectlistactions.js" type='application/javascript'></script>
     <script src="lib/jquery-ui.min.js" type="application/javascript"></script>
     <script src="lib/UI-pl.js" type="application/javascript"></script>
-    <title>Audyt innowacojności przedsiębiorstwa</title>
+    <title>SZIP – System Zarządzania Innowacjami w Przedsiębiorstwie</title>
 </head>
 <body>
 <div id="main">

@@ -2,8 +2,10 @@ package main.app.servlets;
 
 import main.app.Common;
 import main.app.HtmlContent;
+import main.app.enums.AuditType;
 import main.app.enums.LoginType;
 import main.app.orm.Audit;
+import main.app.orm.Swot;
 import main.app.orm.User;
 import main.app.orm.methods.AuditMethods;
 import org.json.simple.JSONObject;
@@ -39,11 +41,16 @@ public class AuditHistory extends HttpServlet {
         boolean success = true;
         User loggedUser = (User) s.getAttribute("userData");
         List<Audit> allAudits = AuditMethods.getAudits();
+        List<Swot> allSwots = AuditMethods.getSwots();
+        List<Audit> generalAudits = Common.getAuditOfType(allAudits, AuditType.GENERAL);
+        List<Audit> detailedAudits = Common.getAuditOfType(allAudits, AuditType.DETAILED);
         SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
         if (!loggedUser.getRole().equals(LoginType.EMPLOYEE)) {
             switch (action) {
                 case "table":
-                    data = HtmlContent.getAuditHitory(allAudits);
+                    data = HtmlContent.getAuditHitory(generalAudits, true);
+                    data += HtmlContent.getAuditHitory(detailedAudits, false);
+                    data += HtmlContent.getSwotHistory(allSwots);
                     break;
                 case "report":
                     String auditId = request.getParameter("auditId");
@@ -57,7 +64,7 @@ public class AuditHistory extends HttpServlet {
                 case "overview":
                     String startDate = request.getParameter("startDate");
                     String endDate = request.getParameter("endDate");
-                    Date start = null, end = null;
+                    Date start, end;
                     try {
                         start = sdf.parse(startDate);
                         end = sdf.parse(endDate);
@@ -71,8 +78,9 @@ public class AuditHistory extends HttpServlet {
                     c.add(Calendar.DATE, 1);
 
                     end = c.getTime();
-                    List<Audit> auditsToMakeOverview = Common.getAuditsBetweendDates(allAudits, start, end);
-                    data = HtmlContent.makeOverviewContent(auditsToMakeOverview);
+                    List<Audit> auditsToMakeOverview = Common.getAuditsBetweendDates(generalAudits, start, end);
+                    List<Swot> swotsToMakeOverview = Common.getSwotsBetweendDates(allSwots, start, end);
+                    data = HtmlContent.makeOverviewContent(auditsToMakeOverview, swotsToMakeOverview);
                     break;
             }
         } else {

@@ -6,7 +6,7 @@ import main.app.orm.*;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
-import org.jfree.chart.labels.StandardCategoryItemLabelGenerator;
+import org.jfree.chart.labels.IntervalCategoryItemLabelGenerator;
 import org.jfree.chart.plot.SpiderWebPlot;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.category.DefaultCategoryDataset;
@@ -19,6 +19,7 @@ import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
@@ -77,8 +78,12 @@ public class HtmlContent {
         String html = "";
         html += "<div id='userMenu'>";
         if (!userType.equals(LoginType.EMPLOYEE)) {
-            html += makeButton("Nowy audyt", "newAudit");
-            html += makeButton("Historia audytów", "auditHistory");
+            html += makeButton("Ocena ogólna", "newAudit");
+            html += makeButton("Ocena szczegółowa", "newDetailedAudit");
+            html += makeButton("Analiza SWOT", "newSwot");
+            html += makeButton("Źródła innowacyjności", "innovationSources");
+            html += makeButton("Bariery innowacyjności", "innovationImpediments");
+            html += makeButton("Historia", "auditHistory");
             html += makeButton("Zestawienie", "auditOverview");
         }
         html += makeButton("Zgłoś pomysł", "newIdea");
@@ -121,7 +126,7 @@ public class HtmlContent {
         StringBuilder html = new StringBuilder("");
         String buttonValue = "Następne pytania";
         if (questions.size() <= Constraints.NUMBER_OF_QUESTIONS_PER_PAGE) {
-            buttonValue = "Analiza SWOT";
+            buttonValue = "Zakończ ocenę";
         }
         html.append("<h2>Pozostało pytań: ").append(questions.size()).append("</h2>");
         html.append("<ol start='" + session.getAttribute("startNumber") + "'>");
@@ -169,7 +174,7 @@ public class HtmlContent {
                         "<div class='resultSeparator'></div></div>");
         }
 
-        html.append(makeSwotResult(audit));
+        //html.append(makeSwotResult(audit)); przenieść do nowego
         html.append("</div>");
         html.append(HtmlContent.makeButton("Rozpocznij nowy audyt", "nextAudit"));
         return html.toString();
@@ -202,7 +207,7 @@ public class HtmlContent {
 
         SpiderWebPlot spiderWebPlot = new SpiderWebPlot(dataset);
         spiderWebPlot.setWebFilled(true);
-        spiderWebPlot.setLabelGenerator(new StandardCategoryItemLabelGenerator());
+        spiderWebPlot.setLabelGenerator(new IntervalCategoryItemLabelGenerator());
         spiderWebPlot.setInteriorGap(0.4);
         spiderWebPlot.setMaxValue(10);
         spiderWebPlot.setBackgroundPaint(null);
@@ -231,18 +236,24 @@ public class HtmlContent {
         return html;
     }
 
-    private static String makeSwotResult(Audit audit) {
+    public static String makeSwotResult(Swot swot) {
         String html = "<h2>Wynik analizy SWOT</h2>";
-        SwotResult result = Common.getSwotResultDescription(audit);
+        SwotResult result = Common.getSwotResultDescription(swot);
         html += "<div class='otherResult bold'>Zalecana strategia: " + result.getStrategy() + "</div>";
         html += "<div class='otherResultDesc'>" + result.getDescription() + "</div>";
+
+        html += makeButton("Rozpocznij nową analizę", "newSwotAnalysis");
         return html;
     }
 
-    public static String getAuditHitory(List<Audit> audits) {
+    public static String getAuditHitory(List<Audit> audits, boolean general) {
         SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-YYYY");
-        StringBuilder html = new StringBuilder("<div id='tableWrapper'><table class='myTable'>");
-        html.append("<thead><tr><th>Data audytu</th><th>Wynik</th><th></th></tr></thead><tbody>");
+        String note = "ogólna";
+        if (!general) {
+            note = "szczegółowa";
+        }
+        StringBuilder html = new StringBuilder("<div id='tableWrapper'><h2>Ocena " + note + "</h2><table class='myTable'>");
+        html.append("<thead><tr><th>Data oceny</th><th>Wynik</th><th></th></tr></thead><tbody>");
         Collections.sort(audits, (o1, o2) -> o2.getAuditDate().compareTo(o1.getAuditDate()));
         for (Audit audit : audits) {
             if (audit.getResult() != null) {
@@ -252,6 +263,22 @@ public class HtmlContent {
                 html.append("<td>").append(makeButton("Raport", "makeReport", String.valueOf(audit.getId()))).append("</td>");
                 html.append("</tr>");
             }
+        }
+        html.append("</tbody></table></div>");
+        return html.toString();
+    }
+
+    public static String getSwotHistory(List<Swot> swots) {
+        SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-YYYY");
+        StringBuilder html = new StringBuilder("<div id='tableWrapper'><h2>Analiza SWOT</h2><table class='myTable'>");
+        html.append("<thead><tr><th>Data analizy</th><th>Strategia</th><th></th></tr></thead><tbody>");
+        Collections.sort(swots, (o1, o2) -> o2.getSwotDate().compareTo(o1.getSwotDate()));
+        for (Swot swot : swots) {
+            html.append("<tr>");
+            html.append("<td>").append(sdf.format(swot.getSwotDate())).append("</td>");
+            html.append("<td>").append(Common.getSwotResultDescription(swot).getStrategy()).append("</td>");
+            html.append("<td>").append(makeButton("Raport", "makeSwotReport", String.valueOf(swot.getId()))).append("</td>");
+            html.append("</tr>");
         }
         html.append("</tbody></table></div>");
         return html.toString();
@@ -433,16 +460,16 @@ public class HtmlContent {
         return html;
     }
 
-    public static String makeSwotRelations(Audit audit) {
-        String html = "<h2>Czy mocne strony pozwalają na pełne wykorzystanie szans?\n" +
-                "Czy słabe strony mogą uniemożliwić wykorzystanie szans?\n" +
-                "Czy mocne strony pomogą w likwidacji zagrożeń?\n" +
-                "Czy słabe strony wpływają negatywnie na zagrożenia?</h2>";
+    public static String makeSwotRelations(Swot swot) {
+        String html = "<h2>Czy mocne strony pozwalają na pełne wykorzystanie szans?<br/>" +
+                "Czy słabe strony mogą uniemożliwić wykorzystanie szans?<br/>" +
+                "Czy mocne strony pomogą w likwidacji zagrożeń?<br/>" +
+                "Czy słabe strony wpływają negatywnie na zagrożenia?<br/></h2>";
         html += "<div id='tableWrapper'>";
         html += "<table class='myTable'><tbody>";
         html += "<tr class='firstRowRelations'><td></td>";
         String swotClass = "negative";
-        for (SwotAlternatives col : Common.separateCategoriesOfSwot(audit.getSwot()).get("cols")) {
+        for (SwotAlternatives col : Common.separateCategoriesOfSwot(swot.getAlternatives()).get("cols")) {
             if (col.getCategory().equals(SwotCategory.OPPORTUNITES) || col.getCategory().equals(SwotCategory.STRENGHTS)) {
                 swotClass = "positive";
             } else {
@@ -451,22 +478,22 @@ public class HtmlContent {
             html += "<td class='" + swotClass + "'>" + col.getText() + "</td>";
         }
         html += "</tr>";
-        for (SwotAlternatives row : Common.separateCategoriesOfSwot(audit.getSwot()).get("rows")) {
+        for (SwotAlternatives row : Common.separateCategoriesOfSwot(swot.getAlternatives()).get("rows")) {
             if (row.getCategory().equals(SwotCategory.OPPORTUNITES) || row.getCategory().equals(SwotCategory.STRENGHTS)) {
                 swotClass = "positive";
             } else {
                 swotClass = "negative";
             }
             html += "<tr><td class='firstColRelations " + swotClass + "'>" + row.getText() + "</td>";
-            for (SwotAlternatives col : Common.separateCategoriesOfSwot(audit.getSwot()).get("cols")) {
+            for (SwotAlternatives col : Common.separateCategoriesOfSwot(swot.getAlternatives()).get("cols")) {
                 html += "<td class='fixedWidth'>" + makeNumber(0, 2, 1,
-                        Common.getValueOfRelation(row, col, audit.getRelations()), "swot_" + row.getId() + "_" + col.getId()) + "</td>";
+                        Common.getValueOfRelation(row, col, swot.getRelations()), "swot_" + row.getId() + "_" + col.getId()) + "</td>";
             }
             html += "</tr>";
         }
         html += "<tbody></table></div>";
 
-        html += makeButton("Zapisz i pokaż raport", "swotRelations", String.valueOf(audit.getId()));
+        html += makeButton("Zapisz i pokaż raport", "swotRelations", String.valueOf(swot.getId()));
 
         return html;
     }
@@ -489,11 +516,11 @@ public class HtmlContent {
         return html;
     }
 
-    public static String makeOverviewContent(List<Audit> audits) {
+    public static String makeOverviewContent(List<Audit> audits, List<Swot> swots) {
         String html = "";
         if (audits.size() >= 2) {
             html += makeOverviewChart(audits);
-            html += makeSwotOverview(audits);
+            html += makeSwotOverview(swots);
         } else {
             html += "<h1>Do zestawienia są potrzebne co najmniej dwa audyty</h1>";
         }
@@ -529,6 +556,56 @@ public class HtmlContent {
         return html;
     }
 
+    private static String makeSwotOverview(List<Swot> swots) {
+        String html = "<h1>Zestawienie wyników analizy SWOT</h1>";
+        boolean areSwotChanges = false;
+        List<Long> shownAlternatives = new ArrayList<>();
+
+        if (swots.size() < 2) {
+            html += "<h2>Brak danych SWOT dla podanego okresu</h2>";
+        } else {
+            Swot firstSwot = swots.get(0);
+            Swot lastSwot = swots.get(swots.size() - 1);
+            for (SwotCategory cat : SwotCategory.values()) {
+                html += "<h2>" + cat.getValue() + "</h2><ul>";
+
+                for (SwotAlternatives sw : firstSwot.getAlternatives()) {
+                    if (sw.getCategory().equals(cat) && !shownAlternatives.contains(sw.getId())) {
+                        areSwotChanges = true;
+                        if (lastSwot.getAlternatives().contains(sw)) {
+                            html += "<li>" + sw.getText() + "</li>";
+                        } else {
+                            if (cat.equals(SwotCategory.OPPORTUNITES) || cat.equals(SwotCategory.STRENGHTS)) {
+                                html += "<li>" + printIconOverview(false, false) + sw.getText() + "</li>";
+                            } else {
+                                html += "<li>" + printIconOverview(false, true) + sw.getText() + "</li>";
+                            }
+                            shownAlternatives.add(sw.getId());
+                        }
+                    }
+                }
+                for (SwotAlternatives sw : lastSwot.getAlternatives()) {
+                    if (sw.getCategory().equals(cat)) {
+                        areSwotChanges = true;
+                        if (!firstSwot.getAlternatives().contains(sw) && !shownAlternatives.contains(sw.getId())) {
+                            if (cat.equals(SwotCategory.OPPORTUNITES) || cat.equals(SwotCategory.STRENGHTS)) {
+                                html += "<li>" + printIconOverview(true, true) + sw.getText() + "</li>";
+                            } else {
+                                html += "<li>" + printIconOverview(true, false) + sw.getText() + "</li>";
+                            }
+                            shownAlternatives.add(sw.getId());
+                        }
+                    }
+                }
+                if (!areSwotChanges) {
+                    html += "<li>BRAK ZMIAN</li>";
+                }
+                html += "</ul>";
+            }
+        }
+        return html;
+    }
+
     private static String makeTimeChart(TimeSeriesCollection collection, Stroke lineStroke, String title, boolean showLegend) {
         String html = "";
         JFreeChart chart = ChartFactory.createTimeSeriesChart(title, "Data", "Wynik [%]", collection, showLegend, false, false);
@@ -536,6 +613,7 @@ public class HtmlContent {
         if (showLegend) {
             chart.getLegend().setBackgroundPaint(Color.lightGray);
         }
+        Paint[] paints = {Color.BLUE, Color.GREEN, Color.YELLOW, Color.CYAN, Color.BLACK};
         chart.getTitle().setPaint(Color.WHITE);
         chart.getXYPlot().getDomainAxis().setTickLabelPaint(Color.WHITE);
         chart.getXYPlot().getDomainAxis().setLabelPaint(Color.WHITE);
@@ -543,6 +621,8 @@ public class HtmlContent {
         for (int i = 0; i < chart.getXYPlot().getSeriesCount(); ++i) {
             renderer.setSeriesStroke(i, lineStroke);
             renderer.setSeriesShapesFilled(i, true);
+            if (showLegend)
+                renderer.setSeriesPaint(i, paints[i]);
         }
         chart.getXYPlot().setRenderer(renderer);
         chart.getXYPlot().getRangeAxis().setTickLabelPaint(Color.WHITE);
@@ -555,53 +635,6 @@ public class HtmlContent {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-        return html;
-    }
-
-    private static String makeSwotOverview(List<Audit> audits) {
-        String html = "<h1>Zestawienie wyników analizy SWOT</h1>";
-        boolean areSwotChanges = false;
-        Audit firstAudit = audits.get(0);
-        Audit lastAudit = audits.get(audits.size() - 1);
-
-        if (firstAudit.getSwot().isEmpty() && lastAudit.getSwot().isEmpty()) {
-            html += "<h2>Brak danych SWOT dla podanego okresu</h2>";
-        } else
-            for (SwotCategory cat : SwotCategory.values()) {
-                html += "<h2>" + cat.getValue() + "</h2><ul>";
-
-                for (SwotAlternatives sw : firstAudit.getSwot()) {
-                    if (sw.getCategory().equals(cat)) {
-                        areSwotChanges = true;
-                        if (lastAudit.getSwot().contains(sw)) {
-                            html += "<li>" + sw.getText() + "</li>";
-                        } else {
-                            if (cat.equals(SwotCategory.OPPORTUNITES) || cat.equals(SwotCategory.STRENGHTS)) {
-                                html += "<li>" + printIconOverview(false, false) + sw.getText() + "</li>";
-                            } else {
-                                html += "<li>" + printIconOverview(false, true) + sw.getText() + "</li>";
-                            }
-                        }
-                    }
-                }
-                for (SwotAlternatives sw : lastAudit.getSwot()) {
-                    if (sw.getCategory().equals(cat)) {
-                        areSwotChanges = true;
-                        if (!firstAudit.getSwot().contains(sw)) {
-                            if (cat.equals(SwotCategory.OPPORTUNITES) || cat.equals(SwotCategory.STRENGHTS)) {
-                                html += "<li>" + printIconOverview(true, true) + sw.getText() + "</li>";
-                            } else {
-                                html += "<li>" + printIconOverview(true, false) + sw.getText() + "</li>";
-                            }
-                        }
-                    }
-                }
-                if (!areSwotChanges) {
-                    html += "<li>BRAK ZMIAN</li>";
-                }
-                html += "</ul>";
-            }
 
         return html;
     }
