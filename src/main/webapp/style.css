@@ -107,7 +107,11 @@ p#newPassword {
 
 #userMenu {
     width: 100%;
-    height: 35px;
+    max-height: 80px;
+}
+
+.allWidthInput {
+    width: 100%;
 }
 
 .userMenuButton {

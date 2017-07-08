@@ -1,6 +1,8 @@
 package main.app.orm;
 
 import main.app.enums.AuditType;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -18,6 +20,9 @@ public class Audit implements ObjectDTO {
     private User auditor;
 
     private List<Answer> answers;
+    private List<Source> sources;
+    private List<Impediment> impediments;
+
     private AuditResult result;
 
     public Audit() {
@@ -79,5 +84,33 @@ public class Audit implements ObjectDTO {
 
     public void setType(AuditType type) {
         this.type = type;
+    }
+
+    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @Fetch(value = FetchMode.SUBSELECT)
+    @JoinTable(name = "auditSources", joinColumns = {
+            @JoinColumn(name = "auditId", nullable = false, updatable = false)},
+            inverseJoinColumns = {@JoinColumn(name = "sourceId",
+                    nullable = false, updatable = false)})
+    public List<Source> getSources() {
+        return sources;
+    }
+
+    public void setSources(List<Source> sources) {
+        this.sources = sources;
+    }
+
+    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @Fetch(value = FetchMode.SUBSELECT)
+    @JoinTable(name = "auditImpediments", joinColumns = {
+            @JoinColumn(name = "auditId", nullable = false, updatable = false)},
+            inverseJoinColumns = {@JoinColumn(name = "impedimentId",
+                    nullable = false, updatable = false)})
+    public List<Impediment> getImpediments() {
+        return impediments;
+    }
+
+    public void setImpediments(List<Impediment> impediments) {
+        this.impediments = impediments;
     }
 }

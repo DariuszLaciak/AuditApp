@@ -52,7 +52,6 @@ public class HtmlContent {
         html += "<input type='text' id='user_id' name='user_id' placeholder='Login' />";
         html += "<input type='password' id='user_password' name='user_password' placeholder='Hasło'/>";
         html += "<input type='submit' value='Zaloguj się'/>";
-        //html += "<div id='registerUser' class='registerNew link'>Zapomniałem hasła</div>";
         html += "</form>";
 
         return html;
@@ -91,11 +90,53 @@ public class HtmlContent {
         if (userType == LoginType.ADMIN) {
             html += makeButton("Wszystkie pytania", "manageQuestions");
             html += makeButton("Zarządzaj użytkownikami", "manageUsers");
+            html += makeButton("Zarządzaj źródłami", "manageSources");
+            html += makeButton("Zarządzaj barierami", "manageImpediments");
         }
         html += "</div>";
 
 
         return html;
+    }
+
+    public static String makeSourcesTable(List<Source> sources) {
+        StringBuilder html = new StringBuilder(makeButton("Dodaj nowe źródło", "newSource"));
+        if (sources.isEmpty()) {
+            html.append("<h2>Brak źródeł do wyświetlenia</h2>");
+        } else {
+            html.append("<div class='tableHeader'>Źródła innowacyjności</div>");
+            html.append("<div id='tableWrapper'><table class='myTable'>");
+            html.append("<thead><tr><th>Id</th><th>Treść</th><th class='widestCol'>Wskazówka (w przypadku nie wybrania)</th><th>Akcja</th></tr></thead><tbody>");
+            for (Source q : sources) {
+                html.append("<tr><td>").append(q.getId()).append("</td><td class='widestCol'>").append(q.getText()).append("</td><td>").append(q.getLongDescription());
+                if (q.getAudits().isEmpty()) {
+                    html.append("<td><img id='delete_" + q.getId() + "' src='images/reject.png' title='Usuń źródło' class='ideaOption' onclick='deleteSource(" + q.getId() + ")' /></td>");
+                }
+                html.append("</td></tr>");
+            }
+            html.append("</tbody></table></div>");
+        }
+        return html.toString();
+    }
+
+    public static String makeImpedimentsTable(List<Impediment> impediments) {
+        StringBuilder html = new StringBuilder(makeButton("Dodaj nową barierę", "newImpediment"));
+        if (impediments.isEmpty()) {
+            html.append("<h2>Brak barier do wyświetlenia</h2>");
+        } else {
+            html.append("<div class='tableHeader'>Bariery innowacyjności</div>");
+            html.append("<div id='tableWrapper'><table class='myTable'>");
+            html.append("<thead><tr><th>Id</th><th class='widestCol'>Treść</th><th>Zalecenia</th><th>Akcja</th></tr></thead><tbody>");
+            for (Impediment q : impediments) {
+                html.append("<tr><td>").append(q.getId()).append("</td><td class='widestCol'>").append(q.getText()).append("</td><td>").append(makeButton("Pokaż", "showAdvices", q.getId() + ""));
+                if (q.getAudits().isEmpty()) {
+                    html.append("<td><img id='delete_" + q.getId() + "' src='images/reject.png' title='Usuń barierę' class='ideaOption' onclick='deleteImpediment(" + q.getId() + ")' /></td>");
+                }
+                html.append("</td></tr>");
+            }
+            html.append("</tbody></table></div>");
+        }
+        return html.toString();
     }
 
     public static String makeNonLoggedMessage() {
@@ -456,6 +497,89 @@ public class HtmlContent {
 
         html += makeButton("Dalej", "saveSwot", String.valueOf(auditId));
 
+
+        return html;
+    }
+
+    public static String makeSourceOrImpedimentTable(Object listOfItems, boolean isSource, long auditId) {
+        String html = "";
+        String source = "Source";
+        boolean isEmpty = true;
+        if (isSource) {
+            html += "<h2>Źródła innowacyjności</h2>";
+        } else {
+            html += "<h2>Bariery innowacyjności</h2>";
+            source = "Impediment";
+        }
+        html += "<div class='row style-select'>";
+        html += "<div class='col-md-12'>";
+        html += "<div id='div_" + source + "' class='subject-info-box-1'>";
+        html += "<label>Dostępne</label>";
+        html += "<select multiple id='source_" + source + "'>";
+        if (isSource) {
+            List<Source> sources = (List<Source>) listOfItems;
+            for (Object src : sources) {
+                Source s = (Source) src;
+                html += "<option value='source_" + s.getId() + "'>" + s.getText() + "</option>";
+                isEmpty = false;
+            }
+        } else {
+            List<Impediment> impediments = (List<Impediment>) listOfItems;
+            for (Object src : impediments) {
+                Impediment s = (Impediment) src;
+                html += "<option value='impediment_" + s.getId() + "'>" + s.getText() + "</option>";
+                isEmpty = false;
+            }
+        }
+
+        html += "</select>";
+        html += "</div>";
+        html += "<div class='subject-info-arrows text-center'>";
+        html += "</br></br>";
+        html += "<input type='button' class='userMenuButton' id='btnAllRight_" + source + "' value='>>'/>";
+        html += "</br>";
+        html += "<input type='button' class='userMenuButton' id='btnRight_" + source + "' value='>'/>";
+        html += "</br>";
+        html += "<input type='button' class='userMenuButton' id='btnLeft_" + source + "' value='<'/>";
+        html += "</br>";
+        html += "<input type='button' class='userMenuButton' id='btnAllLeft_" + source + "' value='<<'/>";
+        html += "</div>";
+
+        html += "<div class='subject-info-box-2'>";
+        html += "<label>Wybrane</label>";
+        html += "<select multiple class='form-control' id='destination_" + source + "'></select>";
+        html += "</div>";
+        html += "<div class='clearfix'></div>";
+
+        html += "</div></div>";
+
+        String script = "$('#btnRight_" + source + "').click(function(e) {\n" +
+                "    $('select').moveToListAndDelete('#source_" + source + "', '#destination_" + source + "');\n" +
+                "    e.preventDefault();\n" +
+                "  });\n" +
+                "\n" +
+                "  $('#btnAllRight_" + source + "').click(function(e) {\n" +
+                "    $('select').moveAllToListAndDelete('#source_" + source + "', '#destination_" + source + "');\n" +
+                "    e.preventDefault();\n" +
+                "  });\n" +
+                "\n" +
+                "  $('#btnLeft_" + source + "').click(function(e) {\n" +
+                "    $('select').moveToListAndDelete('#destination_" + source + "', '#source_" + source + "');\n" +
+                "    e.preventDefault();\n" +
+                "  });\n" +
+                "\n" +
+                "  $('#btnAllLeft_" + source + "').click(function(e) {\n" +
+                "    $('select').moveAllToListAndDelete('#destination_" + source + "', '#source_" + source + "');\n" +
+                "    e.preventDefault();\n" +
+                "  });";
+
+        html += makeJS(script);
+
+        html += makeButton("Zatwierdź", "save" + source, String.valueOf(auditId));
+
+        if (isEmpty) {
+            html = "<h2>Brak danych do wyświetlenia</h2>";
+        }
 
         return html;
     }

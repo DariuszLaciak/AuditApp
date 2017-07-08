@@ -3,8 +3,8 @@ package main.app.servlets;
 import main.app.Common;
 import main.app.HtmlContent;
 import main.app.enums.LoginType;
-import main.app.orm.HibernateUtil;
-import main.app.orm.User;
+import main.app.orm.*;
+import main.app.orm.methods.AuditMethods;
 import main.app.orm.methods.UserMethods;
 import org.hibernate.Session;
 import org.json.simple.JSONObject;
@@ -180,6 +180,54 @@ public class Manage extends HttpServlet {
                         responseMessage = "Brak uprawnień";
                         success = false;
                     }
+                    break;
+                case "getSources":
+                    List<Source> sources = AuditMethods.getSources();
+                    data = HtmlContent.makeSourcesTable(sources);
+                    break;
+                case "getImpediments":
+                    List<Impediment> impediments = AuditMethods.getImpediments();
+                    data = HtmlContent.makeImpedimentsTable(impediments);
+                    break;
+                case "saveSource":
+                    String text = request.getParameter("text");
+                    String description = request.getParameter("description");
+                    session = HibernateUtil.getSessionFactory().getCurrentSession();
+                    if (!session.getTransaction().isActive())
+                        session.beginTransaction();
+
+                    Source source = new Source(text, description);
+                    session.save(source);
+
+                    session.getTransaction().commit();
+                    session.close();
+
+                    sources = AuditMethods.getSources();
+                    data = HtmlContent.makeSourcesTable(sources);
+                    responseMessage = "Pomyślnie dodano źródło";
+                    break;
+                case "saveImpediment":
+                    String impedimentText = request.getParameter("text");
+                    String[] advices = request.getParameterValues("advices[]");
+
+                    session = HibernateUtil.getSessionFactory().getCurrentSession();
+                    if (!session.getTransaction().isActive())
+                        session.beginTransaction();
+
+                    Impediment impediment = new Impediment(impedimentText);
+                    session.save(impediment);
+                    for (String advice : advices) {
+                        ImpedimentAdvice adviceObj = new ImpedimentAdvice(advice);
+                        adviceObj.setImpediment(impediment);
+                        session.save(adviceObj);
+                    }
+
+                    session.getTransaction().commit();
+                    session.close();
+
+                    impediments = AuditMethods.getImpediments();
+                    data = HtmlContent.makeImpedimentsTable(impediments);
+                    responseMessage = "Pomyślnie dodano barierę";
                     break;
             }
 

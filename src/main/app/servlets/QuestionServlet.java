@@ -2,10 +2,12 @@ package main.app.servlets;
 
 import main.app.Common;
 import main.app.HtmlContent;
+import main.app.enums.AuditType;
 import main.app.enums.QuestionCategory;
 import main.app.enums.QuestionType;
 import main.app.enums.SwotCategory;
 import main.app.orm.*;
+import main.app.orm.methods.AuditMethods;
 import main.app.orm.methods.QuestionMethods;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
@@ -243,6 +245,42 @@ public class QuestionServlet extends HttpServlet {
                 session.getTransaction().commit();
                 session.close();
 
+            }
+            break;
+            case "newSources": {
+                Session session = HibernateUtil.getSessionFactory().getCurrentSession();
+                if (!session.getTransaction().isActive())
+                    session.beginTransaction();
+
+                Audit audit = new Audit();
+                audit.setType(AuditType.SOURCES);
+                audit.setAuditor(auditor);
+                audit.setAuditDate(new Date());
+
+                long auditId = (long) session.save(audit);
+
+                session.getTransaction().commit();
+                session.close();
+
+                data = HtmlContent.makeSourceOrImpedimentTable(AuditMethods.getSources(), true, auditId);
+            }
+            break;
+            case "newImpediments": {
+                Session session = HibernateUtil.getSessionFactory().getCurrentSession();
+                if (!session.getTransaction().isActive())
+                    session.beginTransaction();
+
+                Audit audit = new Audit();
+                audit.setType(AuditType.IMPEDIMENTS);
+                audit.setAuditor(auditor);
+                audit.setAuditDate(new Date());
+
+                long auditId = (long) session.save(audit);
+
+                session.getTransaction().commit();
+                session.close();
+
+                data = HtmlContent.makeSourceOrImpedimentTable(AuditMethods.getImpediments(), false, auditId);
             }
             break;
         }

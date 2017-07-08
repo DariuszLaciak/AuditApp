@@ -23,7 +23,7 @@ function scrollUp() {
     $("html, body").animate({scrollTop: 0}, "slow");
 }
 
-function makeOverlayWindow(id, element, width, height, title, content, buttons, heightFixed) {
+function makeOverlayWindow(id, element, width, height, title, content, buttons, heightFixed, maxHeightInner) {
     var top = 0;
     var left = 0;
     if (element === "center") {
@@ -54,7 +54,11 @@ function makeOverlayWindow(id, element, width, height, title, content, buttons, 
     html += "<div class='overlayTitle'>";
     html += title;
     html += "</div>";
-    html += "<div class='overlayContent'>";
+    var styleInner = "";
+    if (maxHeightInner) {
+        styleInner = "style='height: " + maxHeightInner + "; overflow: auto;'"
+    }
+    html += "<div class='overlayContent' " + styleInner + ">";
     html += content;
     html += "</div>";
     html += "<div class='overlayButtons'>";

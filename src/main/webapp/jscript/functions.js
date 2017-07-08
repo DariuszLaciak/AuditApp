@@ -101,7 +101,7 @@ function innovationSources() {
     switchTab("innovationSourcesTab");
     if ($("#innovationSourcesTab").length === 0) {
         $("#content").append("<div id='innovationSourcesTab' class = 'innerContent'></div>");
-
+        generateSources();
     }
 }
 
@@ -109,7 +109,7 @@ function innovationImpediments() {
     switchTab("innovationImpedimentsTab");
     if ($("#innovationImpedimentsTab").length === 0) {
         $("#content").append("<div id='innovationImpedimentsTab' class = 'innerContent'></div>");
-
+        generateImpediments();
     }
 }
 
@@ -121,8 +121,207 @@ function newSwot() {
     }
 }
 
+function manageSources() {
+    switchTab("manageSourcesTab");
+    if ($("#manageSourcesTab").length === 0) {
+        $("#content").append("<div id='manageSourcesTab' class = 'innerContent'></div>");
+        getSourcesTable();
+    }
+}
+
+function manageImpediments() {
+    switchTab("manageImpedimentsTab");
+    if ($("#manageImpedimentsTab").length === 0) {
+        $("#content").append("<div id='manageImpedimentsTab' class = 'innerContent'></div>");
+        getImpedimentsTable();
+    }
+}
+
+function getSourcesTable() {
+    $.ajax({
+        url: "/Manage",
+        method: "POST",
+        dataType: "json",
+        data: {
+            action: "getSources"
+        },
+        success: function (data) {
+            if (data.success) {
+                $("#manageSourcesTab").html(data.data);
+            }
+            else {
+                showInfo(false, data.message);
+            }
+        }
+    });
+}
+
+function getImpedimentsTable() {
+    $.ajax({
+        url: "/Manage",
+        method: "POST",
+        dataType: "json",
+        data: {
+            action: "getImpediments"
+        },
+        success: function (data) {
+            if (data.success) {
+                $("#manageImpedimentsTab").html(data.data);
+            }
+            else {
+                showInfo(false, data.message);
+            }
+        }
+    });
+}
+
 function newSwotAnalysis() {
     generateSwot();
+}
+
+function generateSources() {
+    $.ajax({
+        url: "/Question",
+        method: "POST",
+        dataType: "json",
+        data: {
+            action: "newSources"
+        },
+        success: function (data) {
+            if (data.success) {
+                $("#innovationSourcesTab").html(data.data);
+            }
+            else {
+                showInfo(false, data.message);
+            }
+        }
+    });
+}
+
+function newSource() {
+    var button = {};
+    button.value = "Zapisz";
+    button.onclick = "confirmAddSource()";
+
+    var button2 = {};
+    button2.value = "Anuluj";
+    button2.onclick = "closeOverlay(\"newSource\")";
+    var buttons = [button, button2];
+    var html = "<input class='allWidthInput' type='text' placeholder='Treść źródła' id='newSourceText' />";
+    html += "<textarea class='allWidthInput' placeholder='Opis do wskazówki (w przypadku niewybrania)' id='newSourceDescription' rows='6'></textarea>";
+    makeOverlayWindow("newSource", "center", 400, 280, "Nowe źrodło", html, buttons);
+}
+
+function confirmAddSource() {
+    var text = $("#newSourceText").val();
+    var longText = $("#newSourceDescription").val();
+
+    if (text == "" || longText == "") {
+        showInfo(false, "Wypełnij wszystkie pola!");
+    }
+    else {
+        $.ajax({
+            url: "/Manage",
+            method: "POST",
+            dataType: "json",
+            data: {
+                action: "saveSource",
+                text: text,
+                description: longText
+            },
+            success: function (data) {
+                if (data.success) {
+                    showInfo(true, data.message);
+                    $("#manageSourcesTab").html(data.data);
+                    closeOverlay("newSource");
+                }
+                else {
+                    showInfo(false, data.message);
+                }
+            }
+        });
+    }
+}
+
+function newImpediment() {
+    var button = {};
+    button.value = "Zapisz";
+    button.onclick = "confirmAddImpediment()";
+
+    var button2 = {};
+    button2.value = "Anuluj";
+    button2.onclick = "closeOverlay(\"newImpediment\")";
+    var buttons = [button, button2];
+    var html = "<input class='allWidthInput' type='text' placeholder='Treść źródła' id='newImpedimentText' />";
+    html += "<h3>Wskazówki do barier</h3>";
+    html += "<input type='text' class='allWidthInput adviceInput' placeholder='Rada do bariery' id='newImpedimentAdvice_1' />";
+    html += "<img id='adviceButton_1' title='Kolejna rada' src='images/plusG.png' class='ideaOption' onclick='nextAdvice(2)'/>";
+    makeOverlayWindow("newImpediment", "center", 400, 350, "Nowa bariera", html, buttons, false, 200);
+}
+
+function nextAdvice(num) {
+    $("#overlayWindow_newImpediment").find(".overlayContent").append("<input class='allWidthInput adviceInput' type='text' placeholder='Rada do bariery' id='newImpedimentAdvice_" + num + "' />" +
+        "<img id='adviceButton_" + num + "' title='Kolejna rada' src='images/plusG.png' class='ideaOption' onclick='nextAdvice(" + (num + 1) + ")'/>");
+    $("#overlayWindow_newImpediment").find(".overlayContent").find("#adviceButton_" + (num - 1)).remove();
+}
+
+function confirmAddImpediment() {
+    var text = $("#newImpedimentText").val();
+    var advices = [];
+    $.each($(".adviceInput"), function () {
+        if ($(this).val != "" && $(this).val() && typeof($(this).val) != 'undefined') {
+            advices.push($(this).val());
+        }
+    });
+
+    if (text == "" || advices.length == 0) {
+        showInfo(false, "Podaj treść bariery i przynajmniej jedną wskazówkę!");
+    }
+    else {
+        $.ajax({
+            url: "/Manage",
+            method: "POST",
+            dataType: "json",
+            data: {
+                action: "saveImpediment",
+                text: text,
+                advices: advices
+            },
+            success: function (data) {
+                if (data.success) {
+                    showInfo(true, data.message);
+                    $("#manageImpedimentsTab").html(data.data);
+                    closeOverlay("newImpediment");
+                }
+                else {
+                    showInfo(false, data.message);
+                }
+            }
+        });
+    }
+}
+
+function showAdvices(impedimentId) {
+    alert("podpowiedzi do " + impedimentId);
+}
+
+function generateImpediments() {
+    $.ajax({
+        url: "/Question",
+        method: "POST",
+        dataType: "json",
+        data: {
+            action: "newImpediments"
+        },
+        success: function (data) {
+            if (data.success) {
+                $("#innovationImpedimentsTab").html(data.data);
+            }
+            else {
+                showInfo(false, data.message);
+            }
+        }
+    });
 }
 
 function generateSwot() {
