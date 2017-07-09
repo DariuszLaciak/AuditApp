@@ -15,6 +15,8 @@ public interface Constraints {
     float YES_VAL = 1.0f;
     float NO_VAL = 0.0f;
 
+    String colors[] = {"#CCE6F4", "#F6D8AE", "#6BFFB8", "#FF6B35", "#F6F930", "#FF0000"};
+
     int NUMBER_OF_LICKERT_QUESTIONS = 50;
     int NUMBER_OF_YES_NO_QUESTIONS = 8;
 

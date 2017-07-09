@@ -84,4 +84,10 @@ public class Swot {
     public void setAlternatives(List<SwotAlternatives> alternatives) {
         this.alternatives = alternatives;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        Swot a = (Swot) o;
+        return this.getId() == a.getId();
+    }
 }

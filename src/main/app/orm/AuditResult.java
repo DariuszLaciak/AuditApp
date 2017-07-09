@@ -53,4 +53,10 @@ public class AuditResult implements ObjectDTO {
     public void setSwotResult(SwotResult swotResult) {
         this.swotResult = swotResult;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        AuditResult a = (AuditResult) o;
+        return this.getId() == a.getId();
+    }
 }

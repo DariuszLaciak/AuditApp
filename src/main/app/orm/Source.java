@@ -57,4 +57,10 @@ public class Source {
     public void setAudits(List<Audit> audits) {
         this.audits = audits;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        Source a = (Source) o;
+        return this.getId() == a.getId();
+    }
 }

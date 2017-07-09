@@ -9,6 +9,16 @@
     <script src="lib/jquery.selectlistactions.js" type='application/javascript'></script>
     <script src="lib/jquery-ui.min.js" type="application/javascript"></script>
     <script src="lib/UI-pl.js" type="application/javascript"></script>
+
+    <!-- Charts -->
+    <script src="lib/amcharts/amcharts.js"></script>
+    <script src="lib/amcharts/radar.js"></script>
+    <script src="lib/amcharts/serial.js"></script>
+    <script src="lib/amcharts/lang/pl.js"></script>
+    <script src="lib/amcharts/export.min.js"></script>
+    <%--<link rel="stylesheet" href="https://www.amcharts.com/lib/3/plugins/export/export.css" type="text/css" media="all" />--%>
+    <script src="lib/amcharts/themes/light.js"></script>
+
     <title>SZIP – System Zarządzania Innowacjami w Przedsiębiorstwie</title>
 </head>
 <body>

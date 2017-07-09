@@ -97,6 +97,12 @@ p#newPassword {
     font-weight: bold;
 }
 
+#chartdiv, #chartDiv_1, #chartDiv_2 {
+    width: 100%;
+    height: 500px;
+    font-size: 11px;
+}
+
 .success {
     background-color: #339911;
 }

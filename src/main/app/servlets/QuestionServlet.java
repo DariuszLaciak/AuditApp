@@ -154,16 +154,7 @@ public class QuestionServlet extends HttpServlet {
             }
             break;
             case "newSwot": {
-                Session session = HibernateUtil.getSessionFactory().getCurrentSession();
-                if (!session.getTransaction().isActive())
-                    session.beginTransaction();
-                Swot swot = new Swot(new Date());
-                swot.setAuditorId(auditor);
-                session.save(swot);
-                session.getTransaction().commit();
-                session.close();
-
-                data = HtmlContent.makeSwotTables(QuestionMethods.getSwot(), swot.getId());
+                data = HtmlContent.makeSwotTables(QuestionMethods.getSwot());
             }
             break;
             case "saveSwot": {
@@ -174,7 +165,18 @@ public class QuestionServlet extends HttpServlet {
                 if (!session.getTransaction().isActive())
                     session.beginTransaction();
 
-                Swot swot = session.load(Swot.class, swotId);
+                Swot swot = new Swot(new Date());
+                swot.setAuditorId(auditor);
+                session.save(swot);
+
+                session.getTransaction().commit();
+                session.close();
+
+                session = HibernateUtil.getSessionFactory().getCurrentSession();
+                if (!session.getTransaction().isActive())
+                    session.beginTransaction();
+
+                swot = session.load(Swot.class, swotId);
                 List<SwotAlternatives> alternativesObjects = new ArrayList<>();
                 for (String alt : alternatives) {
                     alternativesObjects.add(session.load(SwotAlternatives.class, Long.parseLong(alt)));
@@ -240,7 +242,7 @@ public class QuestionServlet extends HttpServlet {
                     session.save(relation);
                 }
 
-                data = HtmlContent.makeSwotResult(swotToAnalyse); // zmienic na wyniki swota
+                data = HtmlContent.makeSwotResult(swotToAnalyse);
 
                 session.getTransaction().commit();
                 session.close();
@@ -248,6 +250,14 @@ public class QuestionServlet extends HttpServlet {
             }
             break;
             case "newSources": {
+                data = HtmlContent.makeSourceOrImpedimentTable(AuditMethods.getSources(), true);
+            }
+            break;
+            case "newImpediments": {
+                data = HtmlContent.makeSourceOrImpedimentTable(AuditMethods.getImpediments(), false);
+            }
+            break;
+            case "sourceAudit": {
                 Session session = HibernateUtil.getSessionFactory().getCurrentSession();
                 if (!session.getTransaction().isActive())
                     session.beginTransaction();
@@ -256,16 +266,32 @@ public class QuestionServlet extends HttpServlet {
                 audit.setType(AuditType.SOURCES);
                 audit.setAuditor(auditor);
                 audit.setAuditDate(new Date());
-
                 long auditId = (long) session.save(audit);
 
                 session.getTransaction().commit();
                 session.close();
 
-                data = HtmlContent.makeSourceOrImpedimentTable(AuditMethods.getSources(), true, auditId);
+                session = HibernateUtil.getSessionFactory().getCurrentSession();
+                if (!session.getTransaction().isActive())
+                    session.beginTransaction();
+
+                audit = session.load(Audit.class, auditId);
+
+                String[] sources = request.getParameterValues("sources[]");
+                boolean noData = Boolean.parseBoolean(request.getParameter("noData"));
+                if (!noData) {
+                    for (String src : sources) {
+                        Source source = session.load(Source.class, Long.parseLong(src));
+                        audit.getSources().add(source);
+                    }
+                }
+                session.getTransaction().commit();
+                session.close();
+
+                data = HtmlContent.makeSourcesReport(audit);
             }
             break;
-            case "newImpediments": {
+            case "impedimentAudit": {
                 Session session = HibernateUtil.getSessionFactory().getCurrentSession();
                 if (!session.getTransaction().isActive())
                     session.beginTransaction();
@@ -275,12 +301,58 @@ public class QuestionServlet extends HttpServlet {
                 audit.setAuditor(auditor);
                 audit.setAuditDate(new Date());
 
+                session.save(audit);
+
                 long auditId = (long) session.save(audit);
 
                 session.getTransaction().commit();
                 session.close();
 
-                data = HtmlContent.makeSourceOrImpedimentTable(AuditMethods.getImpediments(), false, auditId);
+                session = HibernateUtil.getSessionFactory().getCurrentSession();
+                if (!session.getTransaction().isActive())
+                    session.beginTransaction();
+
+                audit = session.load(Audit.class, auditId);
+                String[] impediments = request.getParameterValues("impediments[]");
+                boolean noData = Boolean.parseBoolean(request.getParameter("noData"));
+                if (!noData) {
+                    for (String src : impediments) {
+                        Impediment impediment = session.load(Impediment.class, Long.parseLong(src));
+                        audit.getImpediments().add(impediment);
+                    }
+                }
+                session.getTransaction().commit();
+                session.close();
+
+                data = HtmlContent.makeImpedimentsReport(audit);
+            }
+            break;
+            case "showSources": {
+                long auditId = Long.parseLong(request.getParameter("auditId"));
+                Session session = HibernateUtil.getSessionFactory().getCurrentSession();
+                if (!session.getTransaction().isActive())
+                    session.beginTransaction();
+
+                Audit audit = session.load(Audit.class, auditId);
+
+                session.getTransaction().commit();
+                session.close();
+
+                data = HtmlContent.makeSourcesReport(audit);
+            }
+            break;
+            case "showImpediments": {
+                long auditId = Long.parseLong(request.getParameter("auditId"));
+                Session session = HibernateUtil.getSessionFactory().getCurrentSession();
+                if (!session.getTransaction().isActive())
+                    session.beginTransaction();
+
+                Audit audit = session.load(Audit.class, auditId);
+
+                session.getTransaction().commit();
+                session.close();
+
+                data = HtmlContent.makeImpedimentsReport(audit);
             }
             break;
         }

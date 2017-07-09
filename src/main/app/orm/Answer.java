@@ -71,4 +71,10 @@ public class Answer implements ObjectDTO {
                 ", question=" + question +
                 '}';
     }
+
+    @Override
+    public boolean equals(Object o) {
+        Answer a = (Answer) o;
+        return this.getId() == a.getId();
+    }
 }

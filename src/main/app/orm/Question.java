@@ -77,4 +77,10 @@ public class Question implements ObjectDTO {
     public void setCategory(QuestionCategory category) {
         this.category = category;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        Question a = (Question) o;
+        return this.getId() == a.getId();
+    }
 }

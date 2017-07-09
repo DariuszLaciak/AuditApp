@@ -5,9 +5,11 @@ import main.app.HtmlContent;
 import main.app.enums.AuditType;
 import main.app.enums.LoginType;
 import main.app.orm.Audit;
+import main.app.orm.HibernateUtil;
 import main.app.orm.Swot;
 import main.app.orm.User;
 import main.app.orm.methods.AuditMethods;
+import org.hibernate.Session;
 import org.json.simple.JSONObject;
 
 import javax.servlet.ServletException;
@@ -81,6 +83,19 @@ public class AuditHistory extends HttpServlet {
                     List<Audit> auditsToMakeOverview = Common.getAuditsBetweendDates(generalAudits, start, end);
                     List<Swot> swotsToMakeOverview = Common.getSwotsBetweendDates(allSwots, start, end);
                     data = HtmlContent.makeOverviewContent(auditsToMakeOverview, swotsToMakeOverview);
+                    break;
+                case "swotReport":
+                    long swotId = Long.parseLong(request.getParameter("swotId"));
+                    Session session = HibernateUtil.getSessionFactory().getCurrentSession();
+                    if (!session.getTransaction().isActive())
+                        session.beginTransaction();
+
+                    Swot swot = session.load(Swot.class, swotId);
+
+                    session.getTransaction().commit();
+                    session.close();
+                    data = HtmlContent.makeSwotResult(swot);
+                    data += HtmlContent.makeButton("Wróć do historii", "getAuditHistory");
                     break;
             }
         } else {

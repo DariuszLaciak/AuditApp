@@ -196,4 +196,10 @@ public class User implements ObjectDTO {
     public void setSwots(List<Swot> swots) {
         this.swots = swots;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        User a = (User) o;
+        return this.getId() == a.getId();
+    }
 }

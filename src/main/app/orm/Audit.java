@@ -113,4 +113,10 @@ public class Audit implements ObjectDTO {
     public void setImpediments(List<Impediment> impediments) {
         this.impediments = impediments;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        Audit a = (Audit) o;
+        return this.getId() == a.getId();
+    }
 }

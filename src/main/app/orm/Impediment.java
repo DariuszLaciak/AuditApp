@@ -62,4 +62,10 @@ public class Impediment {
     public void setAudits(List<Audit> audits) {
         this.audits = audits;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        Impediment a = (Impediment) o;
+        return this.getId() == a.getId();
+    }
 }

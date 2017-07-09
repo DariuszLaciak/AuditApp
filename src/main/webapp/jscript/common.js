@@ -82,3 +82,14 @@ function closeOverlay(id) {
 function finishLoading() {
     $("#loadingBG").remove();
 }
+
+function updateLabels(event) {
+    var labels = event.chart.chartDiv.getElementsByClassName("amcharts-axis-title");
+    for (var i = 0; i < labels.length; i++) {
+        var color = event.chart.dataProvider[i].color;
+        if (color !== undefined) {
+            labels[i].setAttribute("fill", color);
+        }
+    }
+    $(".amcharts-chart-div").find("a").remove();
+}

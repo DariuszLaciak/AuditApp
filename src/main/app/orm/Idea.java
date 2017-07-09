@@ -120,4 +120,10 @@ public class Idea implements ObjectDTO {
     public void setOpinions(List<Opinion> opinion) {
         this.opinion = opinion;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        Idea a = (Idea) o;
+        return this.getId() == a.getId();
+    }
 }

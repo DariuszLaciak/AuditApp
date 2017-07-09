@@ -86,4 +86,10 @@ public class SwotAlternatives {
     public void setRelations2(List<SwotRelations> relations2) {
         this.relations2 = relations2;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        SwotAlternatives a = (SwotAlternatives) o;
+        return this.getId() == a.getId();
+    }
 }

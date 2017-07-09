@@ -229,6 +229,49 @@ public class Manage extends HttpServlet {
                     data = HtmlContent.makeImpedimentsTable(impediments);
                     responseMessage = "Pomyślnie dodano barierę";
                     break;
+                case "getAdvices":
+                    long impedimentId = Long.parseLong(request.getParameter("impedimentId"));
+                    session = HibernateUtil.getSessionFactory().getCurrentSession();
+                    if (!session.getTransaction().isActive())
+                        session.beginTransaction();
+
+                    Impediment imp = session.load(Impediment.class, impedimentId);
+
+                    session.getTransaction().commit();
+                    session.close();
+
+                    data = HtmlContent.makeAdviceHtml(imp);
+                    break;
+                case "deleteImpediment":
+                    impedimentId = Long.parseLong(request.getParameter("impedimentId"));
+                    session = HibernateUtil.getSessionFactory().getCurrentSession();
+                    if (!session.getTransaction().isActive())
+                        session.beginTransaction();
+
+                    Impediment impedimentToDelete = session.load(Impediment.class, impedimentId);
+                    session.delete(impedimentToDelete);
+
+                    session.getTransaction().commit();
+                    session.close();
+
+                    responseMessage = "Pomyślnie usunięto barierę";
+                    data = HtmlContent.makeImpedimentsTable(AuditMethods.getImpediments());
+                    break;
+                case "deleteSource":
+                    long sourceId = Long.parseLong(request.getParameter("sourceId"));
+                    session = HibernateUtil.getSessionFactory().getCurrentSession();
+                    if (!session.getTransaction().isActive())
+                        session.beginTransaction();
+
+                    Source sourceToDelete = session.load(Source.class, sourceId);
+                    session.delete(sourceToDelete);
+
+                    session.getTransaction().commit();
+                    session.close();
+
+                    responseMessage = "Pomyślnie usunięto barierę";
+                    data = HtmlContent.makeSourcesTable(AuditMethods.getSources());
+                    break;
             }
 
         json.put("success", success);

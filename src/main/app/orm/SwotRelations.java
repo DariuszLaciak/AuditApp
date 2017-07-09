@@ -71,4 +71,10 @@ public class SwotRelations {
     public void setRelationPartner2(SwotAlternatives relationPartner2) {
         this.relationPartner2 = relationPartner2;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        SwotRelations a = (SwotRelations) o;
+        return this.getId() == a.getId();
+    }
 }

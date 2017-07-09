@@ -1,33 +1,17 @@
 package main.app;
 
-import com.mchange.io.FileUtils;
 import main.app.enums.*;
 import main.app.orm.*;
-import org.jfree.chart.ChartFactory;
-import org.jfree.chart.ChartUtilities;
-import org.jfree.chart.JFreeChart;
-import org.jfree.chart.labels.IntervalCategoryItemLabelGenerator;
-import org.jfree.chart.plot.SpiderWebPlot;
-import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
-import org.jfree.data.category.DefaultCategoryDataset;
-import org.jfree.data.time.Day;
-import org.jfree.data.time.TimeSeries;
-import org.jfree.data.time.TimeSeriesCollection;
+import main.app.orm.methods.AuditMethods;
 
 import javax.servlet.http.HttpSession;
-import java.awt.*;
-import java.io.File;
-import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 public class HtmlContent {
     private static SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
 
-    private static String makeButton(String nameToDisplay, String onclick) {
+    public static String makeButton(String nameToDisplay, String onclick) {
         String html = "";
         html += "<input class='userMenuButton' type='button' value='" + nameToDisplay + "' onclick='" + onclick + "()'/>";
         return html;
@@ -202,8 +186,9 @@ public class HtmlContent {
         html.append(prepareAuditResultHeader(audit));
         html.append("<div class='mainResult'>Całkowity wynik: ").append(resultTotal).append(" % </div>");
         html.append(prepareSpiderChart(answers));
+        int iter = 0;
         for (QuestionCategory category : QuestionCategory.values()) {
-                html.append("<div class='otherResult'>" + "<div class='otherResultHeader'>").
+            html.append("<div class='otherResult'>" + "<div class='otherResultHeader bold' style='color:" + Constraints.colors[iter++] + "'>").
                         append(category.getVisible().toUpperCase()).
                         append("</div>").
                         append("<div class='otherResultDesc'>").
@@ -225,17 +210,89 @@ public class HtmlContent {
         SimpleDateFormat sdf = new SimpleDateFormat("YYYY-MM-dd");
         String html = "<div class='auditResultHeader'>";
         html += "<div class='auditedCompany'>" +
-                "<span>Data przeprowadzenia audytu: " + sdf.format(audit.getAuditDate()) + "</span></div>";
-        html += "<div class='auditorData'>Audytor: " + audit.getAuditor().getName() + " " + audit.getAuditor().getSurname() + "</div>";
+                "<span>Data raportu: " + sdf.format(audit.getAuditDate()) + "</span></div>";
+        html += "<div class='auditorData'>Przeprowadził: " + audit.getAuditor().getName() + " " + audit.getAuditor().getSurname() + "</div>";
         html += "</div>";
 
         return html;
     }
 
     private static String prepareSpiderChart(List<Answer> answers) {
-        String html = "";
+        String html = "<div id='chartdiv'></div>";
 
-        DefaultCategoryDataset dataset = new DefaultCategoryDataset();
+        int iter = 0;
+
+        String js = "var chart = AmCharts.makeChart( \"chartdiv\", {\n" +
+                "  \"type\": \"radar\",\n" +
+                "  \"theme\": \"light\",\n" +
+                "  \"fontSize\": 16," +
+                "  \"fontFamily\": \"Arial\"," +
+                "  \"addClassNames\": true," +
+                "  \"dataProvider\": [ \n";
+        for (QuestionCategory qc : QuestionCategory.values()) {
+            float result = Math.round(Common.getResultFromAnswersForLickert(answers, qc, true) * 100);
+            js += "    {\n" +
+                    "\"category\": \"" + qc.getVisible() + "\",\n" +
+                    "    \"result\": " + result + ",\n" +
+                    "\"color\": \"" + Constraints.colors[iter] + "\"" +
+                    "  } ";
+            if (iter++ != QuestionCategory.values().length - 1) {
+                js += ", ";
+            }
+        }
+        js +=
+                "   ],\n" +
+                        "  \"valueAxes\": [ {\n" +
+                        "    \"axisTitleOffset\": 20,\n" +
+                        "    \"minimum\": 0,\n" +
+                        "    \"maximum\": 100,\n" +
+                        "    \"axisAlpha\": 0.80,\n" +
+                        "      \"guides\": [{\n" +
+                        "      \"value\": 0,\n" +
+                        "      \"toValue\": 20,\n" +
+                        "      \"fillColor\": \"#fff\",\n" +
+                        "      \"fillAlpha\": 0.3\n" +
+                        "    }, {\n" +
+                        "      \"value\": 20,\n" +
+                        "      \"toValue\": 40,\n" +
+                        "      \"fillColor\": \"#fff\",\n" +
+                        "      \"fillAlpha\": 0.25\n" +
+                        "    }, {\n" +
+                        "      \"value\": 40,\n" +
+                        "      \"toValue\": 60,\n" +
+                        "      \"fillColor\": \"#fff\",\n" +
+                        "      \"fillAlpha\": 0.2\n" +
+                        "    }, {\n" +
+                        "      \"value\": 60,\n" +
+                        "      \"toValue\": 80,\n" +
+                        "      \"fillColor\": \"#fff\",\n" +
+                        "      \"fillAlpha\": 0.15\n" +
+                        "    }, {\n" +
+                        "      \"value\": 80,\n" +
+                        "      \"toValue\": 100,\n" +
+                        "      \"fillColor\": \"#fff\",\n" +
+                        "      \"fillAlpha\": 0.1\n" +
+                        "    }]" +
+                        "  } ],\n" +
+                        "  \"startDuration\": 0,\n" +
+                        "  \"graphs\": [ {\n" +
+                        "    \"balloonText\": \"[[category]]: [[value]] %\",\n" +
+                        "    \"bullet\": \"round\",\n" +
+                        "    \"lineThickness\": 3,\n" +
+                        "    \"valueField\": \"result\"\n" +
+                        "  } ],\n" +
+                        "  \"categoryField\": \"category\",\n" +
+                        "   \"listeners\": [{\n" +
+                        "    \"event\": \"rendered\",\n" +
+                        "    \"method\": updateLabels\n" +
+                        "  }, {\n" +
+                        "    \"event\": \"resized\",\n" +
+                        "    \"method\": updateLabels\n" +
+                        "  }]" +
+                        "} );";
+        html += makeJS(js);
+
+        /*DefaultCategoryDataset dataset = new DefaultCategoryDataset();
         for (QuestionCategory qc : QuestionCategory.values()) {
                 float result = Common.getResultFromAnswersForLickert(answers, qc, false) / 3;
                 dataset.addValue(result, "wynik", qc.getVisible());
@@ -273,7 +330,8 @@ public class HtmlContent {
             html += "<img class='resultSpider' src=\"data:image/png;base64, " + Base64.getEncoder().encodeToString(FileUtils.getBytes(tempFile)) + "\"/>";
         } catch (IOException e) {
             e.printStackTrace();
-        }
+        }*/
+
         return html;
     }
 
@@ -434,7 +492,7 @@ public class HtmlContent {
         return html;
     }
 
-    public static String makeSwotTables(List<SwotAlternatives> list, long auditId) {
+    public static String makeSwotTables(List<SwotAlternatives> list) {
         String html = "<h2>Analiza SWOT</h2>";
         for (SwotCategory category : SwotCategory.values()) {
             html += "<div class='row style-select'>";
@@ -495,23 +553,30 @@ public class HtmlContent {
             html += makeJS(script);
         }
 
-        html += makeButton("Dalej", "saveSwot", String.valueOf(auditId));
+        html += makeButton("Dalej", "saveSwot");
 
 
         return html;
     }
 
-    public static String makeSourceOrImpedimentTable(Object listOfItems, boolean isSource, long auditId) {
+    public static String makeSourceOrImpedimentTable(Object listOfItems, boolean isSource) {
+        AuditType type = AuditType.SOURCES;
         String html = "";
         String source = "Source";
+        String sources_dek = "źródeł";
         boolean isEmpty = true;
         if (isSource) {
             html += "<h2>Źródła innowacyjności</h2>";
         } else {
             html += "<h2>Bariery innowacyjności</h2>";
             source = "Impediment";
+            sources_dek = "barier";
+            type = AuditType.IMPEDIMENTS;
         }
-        html += "<div class='row style-select'>";
+        Audit previousAudit = Common.getLastAuditOfType(AuditMethods.getAudits(), type);
+
+        html += "<p>Brak " + sources_dek + ": <input id='noDataCheckbox_" + source + "' type='checkbox' value='no_data'/></p>";
+        html += "<div id='table_" + source + "' class='row style-select'>";
         html += "<div class='col-md-12'>";
         html += "<div id='div_" + source + "' class='subject-info-box-1'>";
         html += "<label>Dostępne</label>";
@@ -520,14 +585,18 @@ public class HtmlContent {
             List<Source> sources = (List<Source>) listOfItems;
             for (Object src : sources) {
                 Source s = (Source) src;
-                html += "<option value='source_" + s.getId() + "'>" + s.getText() + "</option>";
+                if (!previousAudit.getSources().contains(s)) {
+                    html += "<option value='source_" + s.getId() + "'>" + s.getText() + "</option>";
+                }
                 isEmpty = false;
             }
         } else {
             List<Impediment> impediments = (List<Impediment>) listOfItems;
             for (Object src : impediments) {
                 Impediment s = (Impediment) src;
-                html += "<option value='impediment_" + s.getId() + "'>" + s.getText() + "</option>";
+                if (!previousAudit.getImpediments().contains(s)) {
+                    html += "<option value='impediment_" + s.getId() + "'>" + s.getText() + "</option>";
+                }
                 isEmpty = false;
             }
         }
@@ -547,7 +616,27 @@ public class HtmlContent {
 
         html += "<div class='subject-info-box-2'>";
         html += "<label>Wybrane</label>";
-        html += "<select multiple class='form-control' id='destination_" + source + "'></select>";
+        html += "<select multiple class='form-control' id='destination_" + source + "'>";
+        if (isSource) {
+            List<Source> sources = (List<Source>) listOfItems;
+            for (Object src : sources) {
+                Source s = (Source) src;
+                if (previousAudit.getSources().contains(s)) {
+                    html += "<option value='source_" + s.getId() + "'>" + s.getText() + "</option>";
+                }
+                isEmpty = false;
+            }
+        } else {
+            List<Impediment> impediments = (List<Impediment>) listOfItems;
+            for (Object src : impediments) {
+                Impediment s = (Impediment) src;
+                if (previousAudit.getImpediments().contains(s)) {
+                    html += "<option value='impediment_" + s.getId() + "'>" + s.getText() + "</option>";
+                }
+                isEmpty = false;
+            }
+        }
+        html += "</select>";
         html += "</div>";
         html += "<div class='clearfix'></div>";
 
@@ -571,11 +660,19 @@ public class HtmlContent {
                 "  $('#btnAllLeft_" + source + "').click(function(e) {\n" +
                 "    $('select').moveAllToListAndDelete('#destination_" + source + "', '#source_" + source + "');\n" +
                 "    e.preventDefault();\n" +
-                "  });";
+                "  });\n" +
+                " $('#noDataCheckbox_" + source + "').change(function(){\n" +
+                "   if($(this).is(':checked')) {\n" +
+                "       $('#table_" + source + "').hide(); \n" +
+                "   } else{\n" +
+                "       $('#table_" + source + "').show();\n" +
+                "   }\n" +
+                " });";
 
         html += makeJS(script);
 
-        html += makeButton("Zatwierdź", "save" + source, String.valueOf(auditId));
+        html += makeButton("Pokaż obecne wskazówki", "showReport" + source, previousAudit.getId() + "");
+        html += makeButton("Zatwierdź", "save" + source);
 
         if (isEmpty) {
             html = "<h2>Brak danych do wyświetlenia</h2>";
@@ -640,6 +737,50 @@ public class HtmlContent {
         return html;
     }
 
+    public static String makeSourcesReport(Audit audit) {
+        String html = "";
+        html += prepareAuditResultHeader(audit);
+        if (audit.getSources().size() == AuditMethods.getSources().size()) {
+            html += "<h2>Przedsiębiorstwo posiada wszystkie źródła innowacji. Gratulacje!</h2>";
+        } else {
+            html += "<h2>W celu lepszego rozwoju firmy, zaleca się: </h2>";
+            for (Source s : Common.getNotSelectedSource(audit.getSources())) {
+                html += "<h3>" + s.getLongDescription() + "</h3>";
+            }
+        }
+        html += makeButton("Powrót do źródeł", "generateSources");
+
+        return html;
+    }
+
+    public static String makeImpedimentsReport(Audit audit) {
+        String html = "";
+        html += prepareAuditResultHeader(audit);
+        if (audit.getImpediments().isEmpty()) {
+            html += "<h2>Brak barier innowacyjności. Gratulacje!</h2>";
+        } else {
+            html += "<h2>W celu lepszego rozwoju firmy, zaleca się: </h2>";
+            for (Impediment s : audit.getImpediments()) {
+                for (ImpedimentAdvice advice : s.getAdvices()) {
+                    html += "<h3>" + advice.getText() + "</h3>";
+                }
+            }
+        }
+        html += makeButton("Powrót do barier", "generateImpediments");
+
+        return html;
+    }
+
+    public static String makeAdviceHtml(Impediment impediment) {
+        String html = "<h3>" + impediment.getText() + ": </h3>";
+        html += "<ul>";
+        for (ImpedimentAdvice advice : impediment.getAdvices()) {
+            html += "<li>" + advice.getText() + "</li>";
+        }
+        html += "</ul>";
+        return html;
+    }
+
     public static String makeOverviewContent(List<Audit> audits, List<Swot> swots) {
         String html = "";
         if (audits.size() >= 2) {
@@ -653,8 +794,33 @@ public class HtmlContent {
 
     private static String makeOverviewChart(List<Audit> audits) {
         String html = "";
+        SimpleDateFormat sdfForChart = new SimpleDateFormat("yyyy-MM-dd");
 
-        TimeSeriesCollection collection = new TimeSeriesCollection();
+        TreeMap<String, Map<String, Integer>> data = new TreeMap<>();
+        String title = "Końcowy wynik";
+        for (Audit audit : audits) {
+            Map<String, Integer> dataMap = new HashMap<>();
+            dataMap.put("Końcowy wynik", Math.round(Common.getResultFromAnswers(audit.getAnswers()) * 100));
+            data.put(sdf.format(audit.getAuditDate()), dataMap);
+
+        }
+
+        html += makeTimeChart(data, title);
+
+        data = new TreeMap<>();
+        title = "Wyniki poszczególnych kategorii";
+        for (Audit audit : audits) {
+            Map<String, Integer> dataMap = new HashMap<>();
+            for (QuestionCategory cat : QuestionCategory.values()) {
+                dataMap.put(cat.toString(), Math.round(Common.getResultFromAnswersForLickert(audit.getAnswers(), cat, true) * 100));
+            }
+            data.put(sdf.format(audit.getAuditDate()), dataMap);
+
+        }
+
+        html += makeTimeChart(data, title);
+
+        /*TimeSeriesCollection collection = new TimeSeriesCollection();
         TimeSeries series = new TimeSeries("Końcowy wynik");
         for (Audit audit : audits) {
             series.addOrUpdate(new Day(audit.getAuditDate()), Common.getResultFromAnswers(audit.getAnswers()) * 100);
@@ -674,7 +840,7 @@ public class HtmlContent {
         }
 
 
-        html += makeTimeChart(collection, new BasicStroke(3.0f), "Wyniki poszczególnych kategorii", true);
+        html += makeTimeChart(collection, new BasicStroke(3.0f), "Wyniki poszczególnych kategorii", true);*/
 
 
         return html;
@@ -730,9 +896,117 @@ public class HtmlContent {
         return html;
     }
 
-    private static String makeTimeChart(TimeSeriesCollection collection, Stroke lineStroke, String title, boolean showLegend) {
-        String html = "";
-        JFreeChart chart = ChartFactory.createTimeSeriesChart(title, "Data", "Wynik [%]", collection, showLegend, false, false);
+    private static String makeTimeChart(TreeMap<String, Map<String, Integer>> data, String title/*TimeSeriesCollection collection, Stroke lineStroke, String title, boolean showLegend*/) {
+        String html = "<h2>" + title + "</h2>";
+        String divId = "chartDiv_1";
+        if (data.get(data.firstKey()).size() != 1) {
+            divId = "chartDiv_2";
+        }
+        html += "<div id='" + divId + "'></div>";
+
+        String js = "var chartData = generateChartData();\n" +
+                "\n" +
+                "var chart = AmCharts.makeChart(\"" + divId + "\", {\n" +
+                "    \"type\": \"serial\",\n" +
+                "    \"theme\": \"light\",\n" +
+                "    \"fontSize\": 16," +
+                "    \"fontFamily\": \"Arial\"," +
+                "    \"color\": \"#FFFFFF\"," +
+                "    \"balloonDateFormat\": \"DD-MM-YYYY\",\n" +
+                "    \"dataDateFormat\": \"DD-MM-YYYY\"," +
+                "    \"language\": \"pl\"," +
+                "    \"legend\": {\n" +
+                "        \"useGraphSettings\": true,\n" +
+                "        \"color\": \"#FFFFFF\"";
+        int lineThickness = 3;
+        if (data.get(data.firstKey()).size() == 1) {
+            js += "        ,\"enabled\": false\n";
+            lineThickness = 5;
+        }
+        js += "    },\n" +
+                "    \"dataProvider\": chartData,\n" +
+                "    \"synchronizeGrid\":true,\n" +
+                "    \"valueAxes\": [{\n" +
+                "        \"id\":\"v1\",\n" +
+                "        \"axisColor\": \"#DADADA\",\n" +
+                "        \"axisThickness\": 1,\n" +
+                "        \"axisAlpha\": 1,\n" +
+                "        \"maximum\": 100,\n" +
+                "        \"strictMinMax\": true,\n" +
+                "        \"position\": \"left\"\n" +
+                "    }],\n" +
+                "    \"graphs\": [\n";
+        int iter = 0;
+        for (Map.Entry<String, Integer> entry : data.get(data.firstKey()).entrySet()) {
+            String color;
+            String titleAndValue;
+            if (data.get(data.firstKey()).size() == 1) {
+                color = Constraints.colors[Constraints.colors.length - 1];
+                titleAndValue = entry.getKey();
+            } else {
+                color = Constraints.colors[iter];
+                titleAndValue = QuestionCategory.valueOf(entry.getKey()).getVisible();
+            }
+            js += "       {\"valueAxis\": \"v1\",\n" +
+                    "        \"lineColor\": \"" + color + "\",\n" +
+                    "        \"lineThickness\": " + lineThickness + ",\n" +
+                    "        \"bullet\": \"round\",\n" +
+                    "        \"bulletBorderThickness\": 1,\n" +
+                    "        \"hideBulletsCount\": 30,\n" +
+                    "        \"balloonText\": \"" + titleAndValue + ": [[value]] %\",\n" +
+                    "        \"title\": \"" + titleAndValue + "\",\n" +
+                    "        \"valueField\": \"" + titleAndValue + "\",\n" +
+                    "\t\t\"fillAlphas\": 0\n" +
+                    "    }";
+            if (iter++ != data.get(data.firstKey()).size() - 1) {
+                js += ", ";
+            }
+        }
+        js += "],\n" +
+                "    \"chartScrollbar\": {},\n" +
+                "    \"chartCursor\": {\n" +
+                "        \"categoryBalloonDateFormat\": \"DD-MM-YYYY\"," +
+                "        \"cursorPosition\": \"mouse\"\n" +
+                "    },\n" +
+                "    \"categoryField\": \"date\",\n" +
+                "    \"categoryAxis\": {\n" +
+                "        \"parseDates\": true,\n" +
+                "        \"axisColor\": \"#DADADA\",\n" +
+                "        \"minorGridEnabled\": true}\n" +
+                "    });\n" +
+                "\n" +
+                "chart.addListener(\"dataUpdated\", zoomChart);\n" +
+                "zoomChart();\n" +
+                "\n" +
+                "\n" +
+                "function generateChartData() {\n" +
+                "    var chartData = [];\n";
+        for (Map.Entry<String, Map<String, Integer>> entry : data.entrySet()) {
+            js += "        chartData.push({\n" +
+                    "            date: \"" + entry.getKey() + "\",\n";
+            iter = 0;
+            for (Map.Entry<String, Integer> entryData : entry.getValue().entrySet()) {
+                String titleAndValue = entryData.getKey();
+                if (entry.getValue().size() != 1) {
+                    titleAndValue = QuestionCategory.valueOf(entryData.getKey()).getVisible();
+                }
+                js += "            \"" + titleAndValue + "\": " + entryData.getValue() + "\n";
+                if (entry.getValue().size() - 1 != iter++) {
+                    js += ",";
+                }
+            }
+            js += "        });\n";
+        }
+        js += "    return chartData;\n" +
+                "}\n" +
+                "\n" +
+                "function zoomChart(){\n" +
+                "    chart.zoomToIndexes(chart.dataProvider.length - 20, chart.dataProvider.length - 1);\n" +
+                "    $(\".amcharts-chart-div\").find(\"a\").remove();\n" +
+                "}\n";
+        html += makeJS(js);
+
+        /*JFreeChart chart = ChartFactory.createTimeSeriesChart(title, "Data", "Wynik [%]", collection, showLegend, false, false);
         chart.setBackgroundPaint(null);
         if (showLegend) {
             chart.getLegend().setBackgroundPaint(Color.lightGray);
@@ -758,7 +1032,7 @@ public class HtmlContent {
             html += "<img class='resultTimeChart' src=\"data:image/png;base64, " + Base64.getEncoder().encodeToString(FileUtils.getBytes(tempFile)) + "\"/>";
         } catch (IOException e) {
             e.printStackTrace();
-        }
+        }*/
 
         return html;
     }

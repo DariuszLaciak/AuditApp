@@ -2,6 +2,7 @@ package main.app;
 
 import main.app.enums.*;
 import main.app.orm.*;
+import main.app.orm.methods.AuditMethods;
 
 import javax.servlet.http.HttpSession;
 import java.util.*;
@@ -214,6 +215,27 @@ public class Common {
         }
         swots.sort(Comparator.comparing(Swot::getSwotDate));
         return swots;
+    }
+
+    public static List<Source> getNotSelectedSource(List<Source> selectedSources) {
+        List<Source> notSelectedSources = new ArrayList<>();
+        List<Source> allSources = AuditMethods.getSources();
+        for (Source src : allSources) {
+            if (!selectedSources.contains(src)) {
+                notSelectedSources.add(src);
+            }
+        }
+
+        return notSelectedSources;
+    }
+
+    public static Audit getLastAuditOfType(List<Audit> audits, AuditType type) {
+        Audit audit = null;
+        List<Audit> auditOfType = getAuditOfType(audits, type);
+        if (!auditOfType.isEmpty()) {
+            audit = auditOfType.get(auditOfType.size() - 1);
+        }
+        return audit;
     }
 
     public static String stripPolishCharacters(String string) {

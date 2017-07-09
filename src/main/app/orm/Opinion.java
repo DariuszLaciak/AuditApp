@@ -72,4 +72,10 @@ public class Opinion implements ObjectDTO {
     public void setOpinionDate(Date opinionDate) {
         this.opinionDate = opinionDate;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        Opinion a = (Opinion) o;
+        return this.getId() == a.getId();
+    }
 }

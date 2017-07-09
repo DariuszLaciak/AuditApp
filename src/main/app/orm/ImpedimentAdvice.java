@@ -46,4 +46,10 @@ public class ImpedimentAdvice {
     public void setImpediment(Impediment impediment) {
         this.impediment = impediment;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        ImpedimentAdvice a = (ImpedimentAdvice) o;
+        return this.getId() == a.getId();
+    }
 }

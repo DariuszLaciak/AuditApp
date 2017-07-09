@@ -176,6 +176,7 @@ function getImpedimentsTable() {
 }
 
 function newSwotAnalysis() {
+    newSwot();
     generateSwot();
 }
 
@@ -243,6 +244,72 @@ function confirmAddSource() {
     }
 }
 
+function saveImpediment() {
+    var chosenOptions = $("#destination_Impediment").find("option");
+    var noData = $("#noDataCheckbox_Impediment").is(":checked");
+    if (chosenOptions.length == 0 && !noData) {
+        showInfo(false, "Wybierz conajmniej jedną barierę!");
+    }
+    else {
+        var toSend = [];
+        $.each(chosenOptions, function () {
+            var opt = $(this).val().substr($(this).val().indexOf("_") + 1, $(this).val().length);
+            toSend.push(opt);
+        });
+        $.ajax({
+            url: "/Question",
+            method: "POST",
+            dataType: "json",
+            data: {
+                action: "impedimentAudit",
+                impediments: toSend,
+                noData: noData
+            },
+            success: function (data) {
+                if (data.success) {
+                    $("#innovationImpedimentsTab").html(data.data);
+                }
+                else {
+                    showInfo(false, data.message);
+                }
+            }
+        });
+    }
+}
+
+function saveSource() {
+    var chosenOptions = $("#destination_Source").find("option");
+    var noData = $("#noDataCheckbox_Source").is(":checked");
+    if (chosenOptions.length == 0 && !noData) {
+        showInfo(false, "Wybierz conajmniej jedno źródło!");
+    }
+    else {
+        var toSend = [];
+        $.each(chosenOptions, function () {
+            var opt = $(this).val().substr($(this).val().indexOf("_") + 1, $(this).val().length);
+            toSend.push(opt);
+        });
+        $.ajax({
+            url: "/Question",
+            method: "POST",
+            dataType: "json",
+            data: {
+                action: "sourceAudit",
+                sources: toSend,
+                noData: noData
+            },
+            success: function (data) {
+                if (data.success) {
+                    $("#innovationSourcesTab").html(data.data);
+                }
+                else {
+                    showInfo(false, data.message);
+                }
+            }
+        });
+    }
+}
+
 function newImpediment() {
     var button = {};
     button.value = "Zapisz";
@@ -257,6 +324,71 @@ function newImpediment() {
     html += "<input type='text' class='allWidthInput adviceInput' placeholder='Rada do bariery' id='newImpedimentAdvice_1' />";
     html += "<img id='adviceButton_1' title='Kolejna rada' src='images/plusG.png' class='ideaOption' onclick='nextAdvice(2)'/>";
     makeOverlayWindow("newImpediment", "center", 400, 350, "Nowa bariera", html, buttons, false, 200);
+}
+
+function showReportSource(auditId) {
+    $.ajax({
+        url: "/Question",
+        method: "POST",
+        dataType: "json",
+        data: {
+            action: "showSources",
+            auditId: auditId,
+        },
+        success: function (data) {
+            if (data.success) {
+                $("#innovationSourcesTab").html(data.data);
+            }
+            else {
+                showInfo(false, data.message);
+            }
+        }
+    });
+}
+
+function showAdvices(impedimentId) {
+    $.ajax({
+        url: "/Manage",
+        method: "POST",
+        dataType: "json",
+        data: {
+            action: "getAdvices",
+            impedimentId: impedimentId,
+        },
+        success: function (data) {
+            if (data.success) {
+                var button2 = {};
+                button2.value = "Zamknij";
+                button2.onclick = "closeOverlay(\"impedimentAdvices\")";
+                var buttons = [button2];
+                makeOverlayWindow("impedimentAdvices", "center", 400, 350, "Wskazówki do barier", data.data, buttons, false, 200);
+            }
+            else {
+                showInfo(false, data.message);
+            }
+        }
+    });
+
+}
+
+function showReportImpediment(auditId) {
+    $.ajax({
+        url: "/Question",
+        method: "POST",
+        dataType: "json",
+        data: {
+            action: "showImpediments",
+            auditId: auditId,
+        },
+        success: function (data) {
+            if (data.success) {
+                $("#innovationImpedimentsTab").html(data.data);
+            }
+            else {
+                showInfo(false, data.message);
+            }
+        }
+    });
 }
 
 function nextAdvice(num) {
@@ -301,10 +433,6 @@ function confirmAddImpediment() {
     }
 }
 
-function showAdvices(impedimentId) {
-    alert("podpowiedzi do " + impedimentId);
-}
-
 function generateImpediments() {
     $.ajax({
         url: "/Question",
@@ -316,6 +444,48 @@ function generateImpediments() {
         success: function (data) {
             if (data.success) {
                 $("#innovationImpedimentsTab").html(data.data);
+            }
+            else {
+                showInfo(false, data.message);
+            }
+        }
+    });
+}
+
+function deleteImpediment(impedimentId) {
+    $.ajax({
+        url: "/Manage",
+        method: "POST",
+        dataType: "json",
+        data: {
+            action: "deleteImpediment",
+            impedimentId: impedimentId
+        },
+        success: function (data) {
+            if (data.success) {
+                showInfo(true, data.message);
+                $("#manageImpedimentsTab").html(data.data);
+            }
+            else {
+                showInfo(false, data.message);
+            }
+        }
+    });
+}
+
+function deleteSource(sourceId) {
+    $.ajax({
+        url: "/Manage",
+        method: "POST",
+        dataType: "json",
+        data: {
+            action: "deleteImpediment",
+            sourceId: sourceId
+        },
+        success: function (data) {
+            if (data.success) {
+                showInfo(true, data.message);
+                $("#manageSourcesTab").html(data.data);
             }
             else {
                 showInfo(false, data.message);
@@ -388,6 +558,27 @@ function makeReport(auditId) {
         data: {
             action: "report",
             auditId: auditId
+        },
+        success: function (data) {
+            if (data.success) {
+                $("#auditHistoryTab").html(data.data);
+                scrollUp();
+            }
+            else {
+                showInfo(false, data.message);
+            }
+        }
+    });
+}
+
+function makeSwotReport(swotId) {
+    $.ajax({
+        url: "/AuditHistory",
+        method: "POST",
+        dataType: "json",
+        data: {
+            action: "swotReport",
+            swotId: swotId
         },
         success: function (data) {
             if (data.success) {
@@ -932,7 +1123,7 @@ function swotRelations(swotId) {
     });
 }
 
-function saveSwot(swotId) {
+function saveSwot() {
     var chosenOptions = $(".form-control").find("option");
     var toSend = [];
     var areTablesFilled = true;
@@ -956,7 +1147,6 @@ function saveSwot(swotId) {
             dataType: "json",
             data: {
                 action: "saveSwot",
-                swotId: swotId,
                 selected: toSend
             },
             success: function (data) {
