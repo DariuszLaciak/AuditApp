@@ -74,9 +74,12 @@ function newAuditProcess() {
         url: "/BeginAudit",
         method: "POST",
         dataType: "json",
+        data: {
+            type: "general"
+        },
         success: function (data) {
             if (data.success) {
-                generateQuestions();
+                generateQuestions(true);
             }
             else {
                 showInfo(false, data.message);
@@ -85,15 +88,34 @@ function newAuditProcess() {
     });
 }
 
-function generateQuestions() {
-    handleQuestionRequest(null, actualIndex);
+function newDetailedAuditProcess() {
+    $.ajax({
+        url: "/BeginAudit",
+        method: "POST",
+        dataType: "json",
+        data: {
+            type: "detailed"
+        },
+        success: function (data) {
+            if (data.success) {
+                generateQuestions(false);
+            }
+            else {
+                showInfo(false, data.message);
+            }
+        }
+    });
+}
+
+function generateQuestions(isGeneral) {
+    handleQuestionRequest(null, isGeneral);
 }
 
 function newDetailedAudit() {
     switchTab("newDetailedAuditTab");
     if ($("#newDetailedAuditTab").length === 0) {
         $("#content").append("<div id='newDetailedAuditTab' class = 'innerContent'></div>");
-
+        newDetailedAuditProcess();
     }
 }
 
@@ -611,18 +633,24 @@ function getQuestions() {
     });
 }
 
-function handleQuestionRequest(dataToSave) {
+function handleQuestionRequest(dataToSave, isGeneral) {
     $.ajax({
         url: "/Question",
         method: "POST",
         dataType: "json",
         data: {
             action: "getQuestions",
-            toSave: JSON.stringify(dataToSave)
+            toSave: JSON.stringify(dataToSave),
+            isGeneral: isGeneral
         },
         success: function (data) {
             if (data.success) {
-                $("#newAuditTab").html(data.data);
+                if (isGeneral) {
+                    $("#newAuditTab").html(data.data);
+                }
+                else {
+                    $("#newDetailedAuditTab").html(data.data);
+                }
                 //activateSwitchYes();
                 scrollUp();
             }
@@ -633,9 +661,12 @@ function handleQuestionRequest(dataToSave) {
     });
 }
 
-function nextQuestions() {
+function nextQuestions(isGeneral) {
     var dataToSave = [];
     var numberOfQuestions = $(".lickertRadio").length / 7;
+    if (!isGeneral) {
+        numberOfQuestions = $(".lickertRadio").length / 5;
+    }
     $.each($(".lickertRadio").filter(":checked"), function () {
         var singleData = {};
         var thisRadio = $(this);
@@ -646,7 +677,7 @@ function nextQuestions() {
         dataToSave.push(singleData);
     });
     if (dataToSave.length == numberOfQuestions) {
-        handleQuestionRequest(dataToSave);
+        handleQuestionRequest(dataToSave, isGeneral);
     }
     else {
         showInfo(false, "Wszystkie odpowiedzi są wymagane");
@@ -682,14 +713,97 @@ function newIdea() {
             "Kategoria:<select id='ideaType' name='type'>";
         $($ideaType).each(function (ind, val) {
             if (val[0] == "OTHER") {
-                html += "<option selected='selected' value='" + val[0] + "' >" + val[1] + "</option>";
+                html += "<option selected='selected' value='" + val[0] + "'>" + val[1] + "</option>";
             }
             else {
                 html += "<option value='" + val[0] + "' >" + val[1] + "</option>";
             }
         });
+
         html += "</select><input type='button' class='userMenuButton' value='Wyślij' onclick='sendIdea()'/></form>";
+        html += "<div id='helpInfo'>";
+        html += "<ul>";
+        $($ideaType).each(function (ind, val) {
+            html += "<li>" + val[1] + "</li>";
+        });
+        html += "</ul></div>";
         $("#newIdeaTab").html(html);
+        $(function () {
+            $("#ideaType").hover(function (e) {
+                    $("#helpInfo").show();
+                },
+                function () {
+                    $("#helpInfo").hide();
+                });
+        });
+    }
+}
+
+function openHelpWindow() {
+    $.ajax({
+        url: "/Manage",
+        method: "POST",
+        dataType: "json",
+        data: {
+            action: "getHelp"
+        },
+        success: function (data) {
+            if (data.success) {
+                var button2 = {};
+                button2.value = "Zamknij";
+                button2.onclick = "closeOverlay(\"helpWindow\")";
+                var buttons = [button2];
+                makeOverlayWindow("helpWindow", "center", 800, 600, "Słownik pojęć", data.data, buttons, false, 450);
+            }
+            else {
+                showInfo(false, data.message);
+            }
+        }
+    });
+
+}
+
+function addHelpWord() {
+    var html = "<input type='text' id='helpWord' class='allWidthInput' placeholder='Podaj nazwę pojęcia'/>";
+    html += "<textarea id='helpContent' placeholder='Wyjaśnienie pojęcia' rows='7' class='allWidthInput'></textarea>";
+    var button = {};
+    button.value = "Dodaj";
+    button.onclick = "saveAddNewHelp()";
+    var button2 = {};
+    button2.value = "Anuluj";
+    button2.onclick = "closeOverlay(\"addNewHelp\")";
+    var buttons = [button, button2];
+    makeOverlayWindow("addNewHelp", "center", 400, 300, "Słownik pojęć", html, buttons, false, false, true);
+}
+
+function saveAddNewHelp() {
+    var word = $("#helpWord").val();
+    var content = $("#helpContent").val();
+    if (word == "" || content == "") {
+        showInfo(false, "Wypełnij wszyskie pola!");
+    }
+    else {
+        $.ajax({
+            url: "/Manage",
+            method: "POST",
+            dataType: "json",
+            data: {
+                action: "addHelp",
+                word: word,
+                content: content
+            },
+            success: function (data) {
+                if (data.success) {
+                    closeOverlay("addNewHelp");
+                    var div = $("#overlayWindow_helpWindow").find(".overlayContent").first();
+                    div.html(data.data);
+                    showInfo(true, data.message);
+                }
+                else {
+                    showInfo(false, data.message);
+                }
+            }
+        });
     }
 }
 

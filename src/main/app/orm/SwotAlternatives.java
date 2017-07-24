@@ -9,7 +9,7 @@ import java.util.List;
 
 @Table
 @Entity
-public class SwotAlternatives {
+public class SwotAlternatives implements ObjectDTO {
     private long id;
     private SwotCategory category;
     private String text;

@@ -23,6 +23,7 @@ public class HibernateUtil {
         configuration.addAnnotatedClass(Source.class);
         configuration.addAnnotatedClass(Impediment.class);
         configuration.addAnnotatedClass(ImpedimentAdvice.class);
+        configuration.addAnnotatedClass(HelpDictionary.class);
         configuration.configure();
         ServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder().applySettings(
                 configuration.getProperties()).build();

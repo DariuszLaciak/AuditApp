@@ -14,14 +14,21 @@ public class Common {
     private static final float MAX_POINTS = (Constraints.NUMBER_OF_LICKERT_QUESTIONS * Constraints.LICKERT_7);
     private static final float MAX_POINTS_PER_LICKERT_GROUP = (Constraints.NUMBER_OF_LICKERT_QUESTIONS * Constraints.LICKERT_7) /
             Constraints.NUMBER_OF_LICKERT_GROUPS;
-    private static final float MAX_POINTS_OF_YES_NO_QUESTIONS = (Constraints.NUMBER_OF_YES_NO_QUESTIONS * Constraints.YES_VAL);
+
+    private static final float MAX_POINTS_DETAILED = (Constraints.NUMBER_OF_DETAILED_QUESTIONS * Constraints.LICKERT_DETAILED_5);
+    private static final float MAX_POINTS_PER_LICKERT_DETAILED_GROUP = (Constraints.NUMBER_OF_DETAILED_QUESTIONS * Constraints.LICKERT_DETAILED_5) /
+            Constraints.NUMBER_OF_LICKERT_DETAILED_GROUPS;
 
     public static boolean isSessionActive(HttpSession session) {
         return session.getAttribute("userId") != null;
     }
 
     public static float getResultFromAnswers(List<Answer> answers) {
-        return getResultOfAnswersType(answers, MAX_POINTS, true);
+        float result = getResultOfAnswersType(answers, MAX_POINTS, true);
+        if (answers.get(0).getQuestion().getType().equals(QuestionType.DETAILED)) {
+            result = getResultOfAnswersType(answers, MAX_POINTS_DETAILED, true);
+        }
+        return result;
     }
 
     public static float getResultFromAnswersForLickert(List<Answer> answers, QuestionCategory category, boolean percent) {
@@ -34,14 +41,14 @@ public class Common {
         return getResultOfAnswersType(newList, MAX_POINTS_PER_LICKERT_GROUP, percent);
     }
 
-    public static float getResultFromAnswersForYesNo(List<Answer> answers) {
+    public static float getResultFromAnswersForDetailedLickert(List<Answer> answers, QuestionCategory category, boolean percent) {
         List<Answer> newList = new ArrayList<>();
         for (Answer a : answers) {
-            if (a.getQuestion().getType().equals(QuestionType.YES_NO)) {
+            if (a.getQuestion().getCategory().equals(category)) {
                 newList.add(a);
             }
         }
-        return getResultOfAnswersType(newList, MAX_POINTS_OF_YES_NO_QUESTIONS, true);
+        return getResultOfAnswersType(newList, MAX_POINTS_PER_LICKERT_DETAILED_GROUP, percent);
     }
 
     public static List<Audit> getAuditOfType(List<Audit> allAudits, AuditType type) {

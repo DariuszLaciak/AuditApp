@@ -44,8 +44,8 @@ public class AuditHistory extends HttpServlet {
         User loggedUser = (User) s.getAttribute("userData");
         List<Audit> allAudits = AuditMethods.getAudits();
         List<Swot> allSwots = AuditMethods.getSwots();
-        List<Audit> generalAudits = Common.getAuditOfType(allAudits, AuditType.GENERAL);
         List<Audit> detailedAudits = Common.getAuditOfType(allAudits, AuditType.DETAILED);
+        List<Audit> generalAudits = Common.getAuditOfType(allAudits, AuditType.GENERAL);
         SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
         if (!loggedUser.getRole().equals(LoginType.EMPLOYEE)) {
             switch (action) {

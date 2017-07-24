@@ -4,7 +4,7 @@ import javax.persistence.*;
 
 @Table
 @Entity
-public class SwotRelations {
+public class SwotRelations implements ObjectDTO {
     private long id;
     private int relation;
 

@@ -5,6 +5,7 @@ import main.app.HtmlContent;
 import main.app.enums.LoginType;
 import main.app.orm.*;
 import main.app.orm.methods.AuditMethods;
+import main.app.orm.methods.OtherMethods;
 import main.app.orm.methods.UserMethods;
 import org.hibernate.Session;
 import org.json.simple.JSONObject;
@@ -271,6 +272,26 @@ public class Manage extends HttpServlet {
 
                     responseMessage = "Pomyślnie usunięto barierę";
                     data = HtmlContent.makeSourcesTable(AuditMethods.getSources());
+                    break;
+                case "getHelp":
+                    data = HtmlContent.makeHelp(OtherMethods.getHelp(), loggedUser.getRole());
+                    break;
+                case "addHelp":
+                    String word = request.getParameter("word");
+                    String content = request.getParameter("content");
+
+                    session = HibernateUtil.getSessionFactory().getCurrentSession();
+                    if (!session.getTransaction().isActive())
+                        session.beginTransaction();
+
+                    HelpDictionary helpDictionary = new HelpDictionary(content, word);
+                    session.save(helpDictionary);
+
+                    session.getTransaction().commit();
+                    session.close();
+
+                    data = HtmlContent.makeHelp(OtherMethods.getHelp(), loggedUser.getRole());
+                    responseMessage = "Pomyślnie dodano pojęcie";
                     break;
             }
 

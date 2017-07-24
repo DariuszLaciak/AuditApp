@@ -11,7 +11,7 @@ import java.util.List;
 
 @Table
 @Entity
-public class Swot {
+public class Swot implements ObjectDTO {
     private long id;
     private Date swotDate;
 

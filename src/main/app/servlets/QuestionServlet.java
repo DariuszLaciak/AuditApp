@@ -3,13 +3,11 @@ package main.app.servlets;
 import main.app.Common;
 import main.app.HtmlContent;
 import main.app.enums.AuditType;
-import main.app.enums.QuestionCategory;
 import main.app.enums.QuestionType;
 import main.app.enums.SwotCategory;
 import main.app.orm.*;
 import main.app.orm.methods.AuditMethods;
 import main.app.orm.methods.QuestionMethods;
-import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -46,38 +44,19 @@ public class QuestionServlet extends HttpServlet {
 
         User auditor = (User) s.getAttribute("userData");
         switch (action) {
-            case "new": {
-                responseMessage = "Pomyślnie dodano pytanie";
-                String questionContent = request.getParameter("content");
-                String questionType = request.getParameter("type");
-                String category = request.getParameter("category");
-                QuestionType type = QuestionType.valueOf(questionType.toUpperCase());
-                QuestionCategory questionCategory = QuestionCategory.valueOf(category.toUpperCase());
-                Question question = new Question(questionContent, type, questionCategory);
-
-                try {
-                    Session session = HibernateUtil.getSessionFactory().getCurrentSession();
-                    if (!session.getTransaction().isActive())
-                        session.beginTransaction();
-                    session.persist(question);
-
-                    session.getTransaction().commit();
-                    session.close();
-
-                } catch (HibernateException e) {
-                    responseMessage = "Problem z serwerem. Stontaktuj się z administratorem";
-                    success = false;
-                }
-            }
-            break;
             case "list": {
                 List<Question> all = QuestionMethods.getQuestions();
                 data = HtmlContent.makeQuestionTable(all);
             }
             break;
             case "getQuestions": {
+                String questionType = request.getParameter("isGeneral");
+                QuestionType type = QuestionType.LICKERT;
+                if (!Boolean.parseBoolean(questionType)) {
+                    type = QuestionType.DETAILED;
+                }
                 if (s.getAttribute("notAskedQuestions") == null) {
-                    s.setAttribute("notAskedQuestions", QuestionMethods.getQuestions());
+                    s.setAttribute("notAskedQuestions", QuestionMethods.getQuestions(type));
                 }
                 List<Question> allQuestions = (List<Question>) s.getAttribute("notAskedQuestions");
 
@@ -103,9 +82,6 @@ public class QuestionServlet extends HttpServlet {
                         JSONObject ob = (JSONObject) jo;
                         Answer ans = new Answer();
                         ans.setAnswer(Float.parseFloat((String) ob.get("answer")));
-                        if (ob.containsKey("yesVal") && !ob.get("yesVal").equals("")) {
-                            ans.setYesValueAnswer(Long.parseLong((String) ob.get("yesVal")));
-                        }
                         Question q = session.load(Question.class, Long.parseLong((String) ob.get("id")));
                         ans.setQuestion(q);
 
@@ -146,7 +122,6 @@ public class QuestionServlet extends HttpServlet {
                     s.removeAttribute("notAskedQuestions");
 
                     data = HtmlContent.prepareResults(audit);
-                    //data = HtmlContent.makeSwotTables(QuestionMethods.getAlternatives(), audit.getId()); przenieść do nowego
                 } else {
                     data = HtmlContent.makeQuestions(allQuestions, s);
                 }

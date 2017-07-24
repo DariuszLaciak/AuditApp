@@ -47,6 +47,10 @@ public class HtmlContent {
         User loggedUser = (User) session.getAttribute("userData");
         String username = loggedUser.getUsername();
 
+
+        html += "<div id='helpContext'>";
+        html += "<img src='images/question-mark.png' id='openHelp' class='ideaOption'  onclick='openHelpWindow()' title='Pokaż pomoc'/>";
+        html += "</div>";
         html += "<div id='loggedPanel'>";
         html += "<div id='editProfile'>";
         html += makeButton("Profil", "editUser", loggedUser.getId() + "") + "</div>";
@@ -150,6 +154,7 @@ public class HtmlContent {
         int shownQuestions = 0;
         StringBuilder html = new StringBuilder("");
         String buttonValue = "Następne pytania";
+        QuestionType type = questions.get(0).getType();
         if (questions.size() <= Constraints.NUMBER_OF_QUESTIONS_PER_PAGE) {
             buttonValue = "Zakończ ocenę";
         }
@@ -157,11 +162,18 @@ public class HtmlContent {
         html.append("<ol start='" + session.getAttribute("startNumber") + "'>");
         for (Question q : Common.getRandomQuestionsAndRemoveAskedFromSession(questions, session)) {
             html.append("<li><span class='questionLabel'>").append(q.getContent()).append("</span>");
-            html.append(makeLickertScale(q.getId()));
+            if (type.equals(QuestionType.LICKERT))
+                html.append(makeLickertScale(q.getId()));
+            else
+                html.append(makeDetailedLickertScale(q.getId()));
             html.append("</li>");
             shownQuestions++;
         }
-        html.append(makeButton(buttonValue, "nextQuestions"));
+        String argument = true + "";
+        if (type.equals(QuestionType.DETAILED)) {
+            argument = false + "";
+        }
+        html.append(makeButton(buttonValue, "nextQuestions", argument));
         html.append("</ol>");
         session.setAttribute("startNumber", (int) session.getAttribute("startNumber") + shownQuestions);
         return html.toString();
@@ -179,6 +191,15 @@ public class HtmlContent {
         return html;
     }
 
+    private static String makeDetailedLickertScale(long id) {
+        String html = "<div class='radio-group'><input class='lickertRadio' type='radio' id='" + id + "_lickert_1' name='" + id + "_lickert' value='" + Constraints.LICKERT_DETAILED_1 + "'><label for='" + id + "_lickert_1'>Brak/niedostatecznie</label>";
+        html += "<input class='lickertRadio' type='radio' id='" + id + "_lickert_2' name='" + id + "_lickert' value='" + Constraints.LICKERT_DETAILED_2 + "'><label for='" + id + "_lickert_2'>Miernie</label>";
+        html += "<input class='lickertRadio' type='radio' id='" + id + "_lickert_3' name='" + id + "_lickert' value='" + Constraints.LICKERT_DETAILED_3 + "'><label for='" + id + "_lickert_3'>Dostatecznie</label>";
+        html += "<input class='lickertRadio' type='radio' id='" + id + "_lickert_4' name='" + id + "_lickert' value='" + Constraints.LICKERT_DETAILED_4 + "'><label for='" + id + "_lickert_4'>Dobrze</label>";
+        html += "<input class='lickertRadio' type='radio' id='" + id + "_lickert_5' name='" + id + "_lickert' value='" + Constraints.LICKERT_DETAILED_1 + "'><label for='" + id + "_lickert_5'>Bardzo dobrze</label>";
+        return html;
+    }
+
     public static String prepareResults(Audit audit) {
         List<Answer> answers = audit.getAnswers();
         StringBuilder html = new StringBuilder("<div class='auditResults'>");
@@ -187,17 +208,33 @@ public class HtmlContent {
         html.append("<div class='mainResult'>Całkowity wynik: ").append(resultTotal).append(" % </div>");
         html.append(prepareSpiderChart(answers));
         int iter = 0;
+        QuestionType type = audit.getAnswers().get(0).getQuestion().getType();
         for (QuestionCategory category : QuestionCategory.values()) {
-            html.append("<div class='otherResult'>" + "<div class='otherResultHeader bold' style='color:" + Constraints.colors[iter++] + "'>").
-                        append(category.getVisible().toUpperCase()).
-                        append("</div>").
-                        append("<div class='otherResultDesc'>").
-                        append(category.getDesription()).
-                        append("</div>").
-                        append("<div class='otherResultPercent'>Spełnione w ").
-                        append(Math.round(Common.getResultFromAnswersForLickert(answers, category, true) * 100)).
-                        append(" % </div>" +
-                        "<div class='resultSeparator'></div></div>");
+            if (category.getType().equals(type)) {
+                if (type.equals(QuestionType.LICKERT)) {
+                    html.append("<div class='otherResult'>" + "<div class='otherResultHeader bold' style='color:" + Constraints.colors[iter++] + "'>").
+                            append(category.getVisible().toUpperCase()).
+                            append("</div>").
+                            append("<div class='otherResultDesc'>").
+                            append(category.getDesription()).
+                            append("</div>").
+                            append("<div class='otherResultPercent'>Spełnione w ").
+                            append(Math.round(Common.getResultFromAnswersForLickert(answers, category, true) * 100)).
+                            append(" % </div>" +
+                                    "<div class='resultSeparator'></div></div>");
+                } else {
+                    html.append("<div class='otherResult'>" + "<div class='otherResultHeader bold' style='color:" + Constraints.colors[iter++] + "'>").
+                            append(category.getVisible().toUpperCase()).
+                            append("</div>").
+                            append("<div class='otherResultDesc'>").
+                            append(category.getDesription()).
+                            append("</div>").
+                            append("<div class='otherResultPercent'>Spełnione w ").
+                            append(Math.round(Common.getResultFromAnswersForDetailedLickert(answers, category, true) * 100)).
+                            append(" % </div>" +
+                                    "<div class='resultSeparator'></div></div>");
+                }
+            }
         }
 
         //html.append(makeSwotResult(audit)); przenieść do nowego
@@ -219,6 +256,8 @@ public class HtmlContent {
 
     private static String prepareSpiderChart(List<Answer> answers) {
         String html = "<div id='chartdiv'></div>";
+        QuestionType type = answers.get(0).getQuestion().getType();
+        AuditType auditType = answers.get(0).getAudit().getType();
 
         int iter = 0;
 
@@ -230,14 +269,20 @@ public class HtmlContent {
                 "  \"addClassNames\": true," +
                 "  \"dataProvider\": [ \n";
         for (QuestionCategory qc : QuestionCategory.values()) {
-            float result = Math.round(Common.getResultFromAnswersForLickert(answers, qc, true) * 100);
-            js += "    {\n" +
-                    "\"category\": \"" + qc.getVisible() + "\",\n" +
-                    "    \"result\": " + result + ",\n" +
-                    "\"color\": \"" + Constraints.colors[iter] + "\"" +
-                    "  } ";
-            if (iter++ != QuestionCategory.values().length - 1) {
-                js += ", ";
+            if (qc.getType().equals(type)) {
+                float result;
+                if (auditType.equals(AuditType.GENERAL))
+                    result = Math.round(Common.getResultFromAnswersForLickert(answers, qc, true) * 100);
+                else
+                    result = Math.round(Common.getResultFromAnswersForDetailedLickert(answers, qc, true) * 100);
+                js += "    {\n" +
+                        "\"category\": \"" + qc.getVisible() + "\",\n" +
+                        "    \"result\": " + result + ",\n" +
+                        "\"color\": \"" + Constraints.colors[iter] + "\"" +
+                        "  } ";
+                if (iter++ != QuestionCategory.values().length - 1) {
+                    js += ", ";
+                }
             }
         }
         js +=
@@ -795,6 +840,7 @@ public class HtmlContent {
     private static String makeOverviewChart(List<Audit> audits) {
         String html = "";
         SimpleDateFormat sdfForChart = new SimpleDateFormat("yyyy-MM-dd");
+        QuestionType type = audits.get(0).getAnswers().get(0).getQuestion().getType();
 
         TreeMap<String, Map<String, Integer>> data = new TreeMap<>();
         String title = "Końcowy wynik";
@@ -812,7 +858,12 @@ public class HtmlContent {
         for (Audit audit : audits) {
             Map<String, Integer> dataMap = new HashMap<>();
             for (QuestionCategory cat : QuestionCategory.values()) {
-                dataMap.put(cat.toString(), Math.round(Common.getResultFromAnswersForLickert(audit.getAnswers(), cat, true) * 100));
+                if (cat.getType().equals(type)) {
+                    if (cat.getType().equals(QuestionType.LICKERT))
+                        dataMap.put(cat.toString(), Math.round(Common.getResultFromAnswersForLickert(audit.getAnswers(), cat, true) * 100));
+                    else
+                        dataMap.put(cat.toString(), Math.round(Common.getResultFromAnswersForDetailedLickert(audit.getAnswers(), cat, true) * 100));
+                }
             }
             data.put(sdf.format(audit.getAuditDate()), dataMap);
 
@@ -1103,6 +1154,21 @@ public class HtmlContent {
         String js = "$('#isPassword').change(function(){ if($(this).is(':checked')) {" +
                 " $('#newPassword').show(); } else {$('#newPassword').hide();} });";
         html += makeJS(js);
+        return html;
+    }
+
+    public static String makeHelp(List<HelpDictionary> helpDictionary, LoginType type) {
+        String html = "";
+        if (type.equals(LoginType.ADMIN))
+            html += makeButton("Dodaj nowe pojęcie", "addHelpWord");
+        for (HelpDictionary help : helpDictionary) {
+            html += "<div class='helpParagraph'>";
+            html += "<div class='helpWord'>" + help.getWord() + "</div>";
+            html += " - ";
+            html += "<div class='helpContent'>" + help.getContent() + "</div>";
+            html += "</div>";
+
+        }
         return html;
     }
 }

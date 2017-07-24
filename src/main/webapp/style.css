@@ -81,6 +81,17 @@ p#newPassword {
     display: none;
 }
 
+#helpInfo {
+    display: none;
+    width: 280px;
+    margin-top: 106px;
+    margin-left: 590px;
+}
+
+#helpContext {
+    float: right;
+}
+
 #infoBox {
     position: fixed;
     top: 40%;
@@ -95,6 +106,7 @@ p#newPassword {
     display: none;
     border-radius: 10px;
     font-weight: bold;
+    z-index: 999;
 }
 
 #chartdiv, #chartDiv_1, #chartDiv_2 {
@@ -302,6 +314,7 @@ textarea {
 
 #newIdeaForm {
     margin: 10px;
+    float: left;
 }
 
 #ideaType {
@@ -587,4 +600,18 @@ textarea {
 
 .negative {
     color: #ff6666
+}
+
+.helpParagraph {
+    display: flex;
+    padding: 5px;
+}
+
+.helpWord {
+    font-style: italic;
+    margin-right: 10px;
+}
+
+.helpContent {
+    margin-left: 10px;
 }

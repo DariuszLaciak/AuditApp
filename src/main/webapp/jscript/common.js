@@ -23,7 +23,7 @@ function scrollUp() {
     $("html, body").animate({scrollTop: 0}, "slow");
 }
 
-function makeOverlayWindow(id, element, width, height, title, content, buttons, heightFixed, maxHeightInner) {
+function makeOverlayWindow(id, element, width, height, title, content, buttons, heightFixed, maxHeightInner, isStacked) {
     var top = 0;
     var left = 0;
     if (element === "center") {
@@ -71,6 +71,13 @@ function makeOverlayWindow(id, element, width, height, title, content, buttons, 
     var background = "<div id='overlayBG'></div>";
     $("body").append(background);
     $("body").append(html);
+
+    if (isStacked) {
+        var overlayIndex = $(".overlayWindow").css("z-index");
+        var bgIndex = $("#overlayBG").css("z-index");
+        $("#overlayBG").css("z-index", overlayIndex + 1);
+        $("#overlayWindow_" + id).css("z-index", overlayIndex + 2);
+    }
     $("#overlayWindow_" + id).draggable();
 }
 

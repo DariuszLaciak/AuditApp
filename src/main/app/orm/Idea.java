@@ -4,6 +4,7 @@ import main.app.enums.IdeaTypes;
 import main.app.enums.Status;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
+import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -47,6 +48,7 @@ public class Idea implements ObjectDTO {
     }
 
     @Column(nullable = false)
+    @Type(type = "text")
     public String getContent() {
         return content;
     }

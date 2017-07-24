@@ -1,6 +1,7 @@
 package main.app.orm.methods;
 
 import main.app.enums.QuestionCategory;
+import main.app.enums.QuestionType;
 import main.app.orm.HibernateUtil;
 import main.app.orm.Question;
 import main.app.orm.SwotAlternatives;
@@ -20,6 +21,18 @@ public class QuestionMethods {
         if (!s.getTransaction().isActive())
             s.beginTransaction();
         lista = s.createQuery("from Question").list();
+        s.getTransaction().commit();
+        if (s.isOpen())
+            s.close();
+        return lista;
+    }
+
+    public static List<Question> getQuestions(QuestionType type) {
+        List<Question> lista;
+        s = HibernateUtil.getSessionFactory().getCurrentSession();
+        if (!s.getTransaction().isActive())
+            s.beginTransaction();
+        lista = s.createQuery("from Question where type=:type").setParameter("type", type).list();
         s.getTransaction().commit();
         if (s.isOpen())
             s.close();

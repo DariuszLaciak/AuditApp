@@ -2,6 +2,7 @@ package main.app.orm;
 
 import main.app.enums.QuestionCategory;
 import main.app.enums.QuestionType;
+import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
 import java.util.List;
@@ -42,6 +43,7 @@ public class Question implements ObjectDTO {
     }
 
     @Column(nullable = false)
+    @Type(type = "text")
     public String getContent() {
         return content;
     }

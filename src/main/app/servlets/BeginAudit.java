@@ -1,5 +1,6 @@
 package main.app.servlets;
 
+import main.app.enums.AuditType;
 import main.app.orm.Audit;
 import main.app.orm.HibernateUtil;
 import main.app.orm.User;
@@ -29,6 +30,8 @@ public class BeginAudit extends HttpServlet {
         PrintWriter out = response.getWriter();
         User auditor = (User) s.getAttribute("userData");
 
+        String type = request.getParameter("type");
+        AuditType auditType = AuditType.valueOf(type.toUpperCase());
         String responseMessage = "";
         boolean success = false;
         Object data = null;
@@ -39,6 +42,7 @@ public class BeginAudit extends HttpServlet {
                 session.beginTransaction();
             newAudit.setAuditor(auditor);
             newAudit.setAuditDate(new Date());
+            newAudit.setType(auditType);
             long id = (long) session.save(newAudit);
             s.setAttribute("auditId", id);
             s.setAttribute("notAskedQuestions", null);

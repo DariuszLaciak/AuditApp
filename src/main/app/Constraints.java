@@ -13,14 +13,20 @@ public interface Constraints {
     float LICKERT_7 = 3.0f;
 
     float YES_VAL = 1.0f;
-    float NO_VAL = 0.0f;
 
-    String colors[] = {"#CCE6F4", "#F6D8AE", "#6BFFB8", "#FF6B35", "#F6F930", "#FF0000"};
+    float LICKERT_DETAILED_1 = 1.0f;
+    float LICKERT_DETAILED_2 = 2.0f;
+    float LICKERT_DETAILED_3 = 3.0f;
+    float LICKERT_DETAILED_4 = 4.0f;
+    float LICKERT_DETAILED_5 = 5.0f;
+
+    String colors[] = {"#CCE6F4", "#F6D8AE", "#6BFFB8", "#FF6B35", "#F6F930", "#00FF00", "#775577", "#FF0000"};
 
     int NUMBER_OF_LICKERT_QUESTIONS = 50;
-    int NUMBER_OF_YES_NO_QUESTIONS = 8;
+    int NUMBER_OF_DETAILED_QUESTIONS = 70;
 
     int NUMBER_OF_LICKERT_GROUPS = 5;
+    int NUMBER_OF_LICKERT_DETAILED_GROUPS = 7;
 
     int NUMBER_OF_QUESTIONS_PER_PAGE = 10;
 

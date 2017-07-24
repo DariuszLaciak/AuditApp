@@ -1,10 +1,12 @@
 package main.app.orm;
 
+import org.hibernate.annotations.Type;
+
 import javax.persistence.*;
 
 @Table
 @Entity
-public class ImpedimentAdvice {
+public class ImpedimentAdvice implements ObjectDTO {
     private long id;
     private String text;
 
@@ -28,7 +30,8 @@ public class ImpedimentAdvice {
         this.id = id;
     }
 
-    @Column(nullable = false, length = 70)
+    @Column(nullable = false)
+    @Type(type = "text")
     public String getText() {
         return text;
     }

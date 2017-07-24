@@ -2,13 +2,14 @@ package main.app.orm;
 
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
+import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
 import java.util.List;
 
 @Table
 @Entity
-public class Impediment {
+public class Impediment implements ObjectDTO {
     private long id;
     private String text;
 
@@ -34,7 +35,8 @@ public class Impediment {
         this.id = id;
     }
 
-    @Column(nullable = false, length = 70)
+    @Column(nullable = false)
+    @Type(type = "text")
     public String getText() {
         return text;
     }

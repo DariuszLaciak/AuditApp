@@ -1,5 +1,7 @@
 package main.app.orm;
 
+import org.hibernate.annotations.Type;
+
 import javax.persistence.*;
 import java.util.Date;
 
@@ -36,6 +38,7 @@ public class Opinion implements ObjectDTO {
     }
 
     @Column(nullable = false)
+    @Type(type = "text")
     public String getContent() {
         return content;
     }
