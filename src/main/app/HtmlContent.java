@@ -716,7 +716,8 @@ public class HtmlContent {
 
         html += makeJS(script);
 
-        html += makeButton("Pokaż obecne wskazówki", "showReport" + source, previousAudit.getId() + "");
+        if (previousAudit != null)
+            html += makeButton("Pokaż obecne wskazówki", "showReport" + source, previousAudit.getId() + "");
         html += makeButton("Zatwierdź", "save" + source);
 
         if (isEmpty) {
