@@ -134,7 +134,6 @@ public class QuestionServlet extends HttpServlet {
             break;
             case "saveSwot": {
                 String[] alternatives = request.getParameterValues("selected[]");
-                long swotId = Long.parseLong(request.getParameter("swotId"));
 
                 Session session = HibernateUtil.getSessionFactory().getCurrentSession();
                 if (!session.getTransaction().isActive())
@@ -142,7 +141,7 @@ public class QuestionServlet extends HttpServlet {
 
                 Swot swot = new Swot(new Date());
                 swot.setAuditorId(auditor);
-                session.save(swot);
+                long swotId = (long) session.save(swot);
 
                 session.getTransaction().commit();
                 session.close();
