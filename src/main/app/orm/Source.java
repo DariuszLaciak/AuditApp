@@ -11,6 +11,7 @@ public class Source implements ObjectDTO {
     private long id;
     private String text;
     private String longDescription;
+    private boolean internal = true;
 
     private List<Audit> audits;
 
@@ -20,6 +21,12 @@ public class Source implements ObjectDTO {
     public Source(String text, String longDescription) {
         this.text = text;
         this.longDescription = longDescription;
+    }
+
+    public Source(String text, String longDescription, boolean internal) {
+        this.text = text;
+        this.longDescription = longDescription;
+        this.internal = internal;
     }
 
     @Id
@@ -65,5 +72,14 @@ public class Source implements ObjectDTO {
     public boolean equals(Object o) {
         Source a = (Source) o;
         return this.getId() == a.getId();
+    }
+
+    @Column(nullable = false)
+    public boolean isInternal() {
+        return internal;
+    }
+
+    public void setInternal(boolean internal) {
+        this.internal = internal;
     }
 }

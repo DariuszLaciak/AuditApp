@@ -1,6 +1,14 @@
 var actualIndex = 0;
 var $ideaType = [["COMPANY_CLIENT", "Relacja firma-klient"], ["PROMOTION", "Wizerunek firmy i promocja"], ["INTERNAL", "Organizacja pracy i zarządzenie, relacje wewnętrzne"],
     ["SECURITY", "Bezpieczeństwo"], ["MACHINES", "Maszyny"], ["PRODUCTION", "Organizacja produkcji"], ["PRODUCT", "Produkty"], ["OTHER", "Inne"]];
+var $ideaDesc = [["PROMOTION", "Dotyczące promocji marki, wizerunku i osiągnięć firmy"],
+    ["INTERNAL", "Dotyczące poprawy komunikacji i obiegu informacji wewnątrz firmy, usprawnienia organizacji pracy działu oraz współpracy pomiędzy działami, dotyczące spraw socjalnych, dotyczące wprowadzenia nowoczesnych metod zarządzania."],
+    ["SECURITY", "Dotyczące podniesienia poziomu bezpieczeństwa (osób i danych), zwiększenia poziomu ochrony przeciwpożarowej."],
+    ["MACHINES", "Dotyczące technicznego ulepszenia maszyn, propozycje automatyzacji procesów produkcyjnych."],
+    ["PRODUCTION", "Dotyczące zmian organizacyjnych w obszarze produkcji."],
+    ["COMPANY_CLIENT", "Dotyczące ulepszenia obsługi klientów, komunikacji z dostawcami i klientami."],
+    ["PRODUCT", "Dotyczące produktów wykorzystywanych w firmie"],
+    ["OTHER", "Niezwiązane z żadną z powyższych kategorii"]];
 var timer = 1000;
 $.ajaxSetup({
     beforeSend: function () {
@@ -232,12 +240,14 @@ function newSource() {
     var buttons = [button, button2];
     var html = "<input class='allWidthInput' type='text' placeholder='Treść źródła' id='newSourceText' />";
     html += "<textarea class='allWidthInput' placeholder='Opis do wskazówki (w przypadku niewybrania)' id='newSourceDescription' rows='6'></textarea>";
+    html += "Typ: <select id='sourceType'><option value='1'>Wewnętrzne</option><option value='0'>Zewnętrzne</option></select>";
     makeOverlayWindow("newSource", "center", 400, 280, "Nowe źrodło", html, buttons);
 }
 
 function confirmAddSource() {
     var text = $("#newSourceText").val();
     var longText = $("#newSourceDescription").val();
+    var isInternal = $('#sourceType').find(":selected").val();
 
     if (text == "" || longText == "") {
         showInfo(false, "Wypełnij wszystkie pola!");
@@ -250,7 +260,8 @@ function confirmAddSource() {
             data: {
                 action: "saveSource",
                 text: text,
-                description: longText
+                description: longText,
+                isInternal: isInternal
             },
             success: function (data) {
                 if (data.success) {
@@ -341,7 +352,7 @@ function newImpediment() {
     button2.value = "Anuluj";
     button2.onclick = "closeOverlay(\"newImpediment\")";
     var buttons = [button, button2];
-    var html = "<input class='allWidthInput' type='text' placeholder='Treść źródła' id='newImpedimentText' />";
+    var html = "<input class='allWidthInput' type='text' placeholder='Bariera innowacyjności' id='newImpedimentText' />";
     html += "<h3>Wskazówki do barier</h3>";
     html += "<input type='text' class='allWidthInput adviceInput' placeholder='Rada do bariery' id='newImpedimentAdvice_1' />";
     html += "<img id='adviceButton_1' title='Kolejna rada' src='images/plusG.png' class='ideaOption' onclick='nextAdvice(2)'/>";
@@ -501,7 +512,7 @@ function deleteSource(sourceId) {
         method: "POST",
         dataType: "json",
         data: {
-            action: "deleteImpediment",
+            action: "deleteSource",
             sourceId: sourceId
         },
         success: function (data) {
@@ -724,7 +735,7 @@ function newIdea() {
         html += "<div id='helpInfo'>";
         html += "<ul>";
         $($ideaType).each(function (ind, val) {
-            html += "<li>" + val[1] + "</li>";
+            html += "<li><b>" + val[1] + "</b> - " + $ideaDesc[ind][1] + "</li>";
         });
         html += "</ul></div>";
         $("#newIdeaTab").html(html);

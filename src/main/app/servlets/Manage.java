@@ -193,11 +193,13 @@ public class Manage extends HttpServlet {
                 case "saveSource":
                     String text = request.getParameter("text");
                     String description = request.getParameter("description");
+                    String isInternal = request.getParameter("isInternal");
+                    boolean internal = !isInternal.equals("0");
                     session = HibernateUtil.getSessionFactory().getCurrentSession();
                     if (!session.getTransaction().isActive())
                         session.beginTransaction();
 
-                    Source source = new Source(text, description);
+                    Source source = new Source(text, description, internal);
                     session.save(source);
 
                     session.getTransaction().commit();
@@ -270,7 +272,7 @@ public class Manage extends HttpServlet {
                     session.getTransaction().commit();
                     session.close();
 
-                    responseMessage = "Pomyślnie usunięto barierę";
+                    responseMessage = "Pomyślnie usunięto źródło";
                     data = HtmlContent.makeSourcesTable(AuditMethods.getSources());
                     break;
                 case "getHelp":

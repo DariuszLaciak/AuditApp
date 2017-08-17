@@ -94,9 +94,9 @@ public class HtmlContent {
         } else {
             html.append("<div class='tableHeader'>Źródła innowacyjności</div>");
             html.append("<div id='tableWrapper'><table class='myTable'>");
-            html.append("<thead><tr><th>Id</th><th>Treść</th><th class='widestCol'>Wskazówka (w przypadku nie wybrania)</th><th>Akcja</th></tr></thead><tbody>");
+            html.append("<thead><tr><th>Id</th><th>Treść</th><th class='widestCol'>Wskazówka (w przypadku nie wybrania)</th><th>Typ</th><th>Akcja</th></tr></thead><tbody>");
             for (Source q : sources) {
-                html.append("<tr><td>").append(q.getId()).append("</td><td class='widestCol'>").append(q.getText()).append("</td><td>").append(q.getLongDescription());
+                html.append("<tr><td>").append(q.getId()).append("</td><td class='widestCol'>").append(q.getText()).append("</td><td class='pre'>").append(q.getLongDescription()).append("</td><td>").append(q.isInternal() ? "Wewnętrzne" : "Zewnętrzne");
                 if (q.getAudits().isEmpty()) {
                     html.append("<td><img id='delete_" + q.getId() + "' src='images/reject.png' title='Usuń źródło' class='ideaOption' onclick='deleteSource(" + q.getId() + ")' /></td>");
                 }
@@ -791,7 +791,7 @@ public class HtmlContent {
         } else {
             html += "<h2>W celu lepszego rozwoju firmy, zaleca się: </h2>";
             for (Source s : Common.getNotSelectedSource(audit.getSources())) {
-                html += "<h3>" + s.getLongDescription() + "</h3>";
+                html += "<h3 class='pre'>" + s.getLongDescription() + "</h3>";
             }
         }
         html += makeButton("Powrót do źródeł", "generateSources");

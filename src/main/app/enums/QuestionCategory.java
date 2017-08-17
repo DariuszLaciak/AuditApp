@@ -29,7 +29,7 @@ public enum QuestionCategory {
     }
 
     public String getDesription() {
-        String description = "W przygotowaniu";
+        String description = "";
         switch (this) {
             case LEARNING:
                 description = Constraints.LEARNING_DESCRIPTION;

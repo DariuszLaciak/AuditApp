@@ -48,6 +48,10 @@ input[type='submit'] {
     display: block;
 }
 
+.pre {
+    white-space: pre;
+}
+
 .registerNew, .logoutUser {
     margin-top: 10px;
     float: right;
@@ -83,9 +87,10 @@ p#newPassword {
 
 #helpInfo {
     display: none;
-    width: 280px;
-    margin-top: 106px;
+    margin-top: 10px;
     margin-left: 590px;
+    font-size: smaller;
+
 }
 
 #helpContext {
