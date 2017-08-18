@@ -630,7 +630,7 @@ public class HtmlContent {
             List<Source> sources = (List<Source>) listOfItems;
             for (Object src : sources) {
                 Source s = (Source) src;
-                if (previousAudit != null && !previousAudit.getSources().contains(s)) {
+                if (previousAudit == null || !previousAudit.getSources().contains(s)) {
                     html += "<option value='source_" + s.getId() + "'>" + s.getText() + "</option>";
                 }
                 isEmpty = false;
@@ -639,7 +639,7 @@ public class HtmlContent {
             List<Impediment> impediments = (List<Impediment>) listOfItems;
             for (Object src : impediments) {
                 Impediment s = (Impediment) src;
-                if (previousAudit != null && !previousAudit.getImpediments().contains(s)) {
+                if (previousAudit == null || !previousAudit.getImpediments().contains(s)) {
                     html += "<option value='impediment_" + s.getId() + "'>" + s.getText() + "</option>";
                 }
                 isEmpty = false;
@@ -666,7 +666,7 @@ public class HtmlContent {
             List<Source> sources = (List<Source>) listOfItems;
             for (Object src : sources) {
                 Source s = (Source) src;
-                if (previousAudit != null && previousAudit.getSources().contains(s)) {
+                if (previousAudit == null || previousAudit.getSources().contains(s)) {
                     html += "<option value='source_" + s.getId() + "'>" + s.getText() + "</option>";
                 }
                 isEmpty = false;
@@ -675,7 +675,7 @@ public class HtmlContent {
             List<Impediment> impediments = (List<Impediment>) listOfItems;
             for (Object src : impediments) {
                 Impediment s = (Impediment) src;
-                if (previousAudit != null && previousAudit.getImpediments().contains(s)) {
+                if (previousAudit == null || previousAudit.getImpediments().contains(s)) {
                     html += "<option value='impediment_" + s.getId() + "'>" + s.getText() + "</option>";
                 }
                 isEmpty = false;
