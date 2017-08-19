@@ -5,6 +5,7 @@ import main.app.orm.*;
 import main.app.orm.methods.AuditMethods;
 
 import javax.servlet.http.HttpSession;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -843,7 +844,20 @@ public class HtmlContent {
         SimpleDateFormat sdfForChart = new SimpleDateFormat("yyyy-MM-dd");
         QuestionType type = audits.get(0).getAnswers().get(0).getQuestion().getType();
 
-        TreeMap<String, Map<String, Integer>> data = new TreeMap<>();
+        Comparator<String> comparator = new Comparator<String>() {
+            @Override
+            public int compare(String s, String t1) {
+                try {
+                    Date d1 = sdf.parse(s);
+                    Date d2 = sdf.parse(t1);
+                    return d1.compareTo(d2);
+                } catch (ParseException e) {
+                    return 0;
+                }
+            }
+        };
+
+        TreeMap<String, Map<String, Integer>> data = new TreeMap<>(comparator);
         String title = "Końcowy wynik";
         for (Audit audit : audits) {
             Map<String, Integer> dataMap = new HashMap<>();
@@ -854,7 +868,7 @@ public class HtmlContent {
 
         html += makeTimeChart(data, title);
 
-        data = new TreeMap<>();
+        data = new TreeMap<>(comparator);
         title = "Wyniki poszczególnych kategorii";
         for (Audit audit : audits) {
             Map<String, Integer> dataMap = new HashMap<>();
@@ -954,6 +968,7 @@ public class HtmlContent {
         if (data.get(data.firstKey()).size() != 1) {
             divId = "chartDiv_2";
         }
+
         html += "<div id='" + divId + "'></div>";
 
         String js = "var chartData = generateChartData();\n" +

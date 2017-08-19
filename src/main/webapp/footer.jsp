@@ -15,6 +15,6 @@
     c.setTime(new Date());
 
 %>
-<div class="footer">Copyright @ Elżbieta Łaciak
+<div class="footer">Copyright &copy Elżbieta Łaciak
     (<%=c.getWeekYear() > 2017 ? sdf.format(date) + " - " + sdf.format(new Date()) : sdf.format(date) %>)
 </div>
