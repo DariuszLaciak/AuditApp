@@ -615,6 +615,9 @@ textarea {
 .helpWord {
     font-style: italic;
     margin-right: 10px;
+    min-width: 100px;
+    max-width: 100px;
+    word-wrap: break-word;
 }
 
 .helpContent {
