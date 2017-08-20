@@ -373,6 +373,21 @@ public class Manage extends HttpServlet {
                     responseMessage = "Pomyślnie usunięto innowację";
                     data = HtmlContent.makeInnovationTable(loggedUser);
                     break;
+                case "generatePdf":
+                    innovationId = request.getParameter("innovationId");
+                    id = Long.parseLong(innovationId);
+
+                    session = HibernateUtil.getSessionFactory().getCurrentSession();
+                    if (!session.getTransaction().isActive())
+                        session.beginTransaction();
+
+                    Innovation inno = session.load(Innovation.class, id);
+
+                    if (!session.getTransaction().isActive())
+                        session.beginTransaction();
+
+                    data = HtmlContent.generatePDFForInnovation(inno, loggedUser, request);
+                    break;
             }
 
         json.put("success", success);

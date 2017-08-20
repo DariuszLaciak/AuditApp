@@ -107,7 +107,7 @@ public class QuestionServlet extends HttpServlet {
                     Audit audit = session.load(Audit.class, (Long) s.getAttribute("auditId"));
 
                     List<Answer> answers = audit.getAnswers();
-                    float result = Common.getResultFromAnswers(answers);
+                    float result = Common.getResultFromAnswers(answers, true);
                     result *= 100;
                     int percent = Math.round(result);
 

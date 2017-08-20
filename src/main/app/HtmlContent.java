@@ -1,11 +1,22 @@
 package main.app;
 
+import com.itextpdf.text.Document;
+import com.itextpdf.text.DocumentException;
+import com.itextpdf.text.Font;
+import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.pdf.BaseFont;
+import com.itextpdf.text.pdf.PdfWriter;
 import main.app.enums.*;
 import main.app.orm.*;
 import main.app.orm.methods.AuditMethods;
 import main.app.orm.methods.QuestionMethods;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -199,19 +210,24 @@ public class HtmlContent {
         html += "<input class='lickertRadio' type='radio' id='" + id + "_lickert_2' name='" + id + "_lickert' value='" + Constraints.LICKERT_DETAILED_2 + "'><label for='" + id + "_lickert_2'>Miernie</label>";
         html += "<input class='lickertRadio' type='radio' id='" + id + "_lickert_3' name='" + id + "_lickert' value='" + Constraints.LICKERT_DETAILED_3 + "'><label for='" + id + "_lickert_3'>Dostatecznie</label>";
         html += "<input class='lickertRadio' type='radio' id='" + id + "_lickert_4' name='" + id + "_lickert' value='" + Constraints.LICKERT_DETAILED_4 + "'><label for='" + id + "_lickert_4'>Dobrze</label>";
-        html += "<input class='lickertRadio' type='radio' id='" + id + "_lickert_5' name='" + id + "_lickert' value='" + Constraints.LICKERT_DETAILED_1 + "'><label for='" + id + "_lickert_5'>Bardzo dobrze</label>";
+        html += "<input class='lickertRadio' type='radio' id='" + id + "_lickert_5' name='" + id + "_lickert' value='" + Constraints.LICKERT_DETAILED_5 + "'><label for='" + id + "_lickert_5'>Bardzo dobrze</label>";
         return html;
     }
 
     public static String prepareResults(Audit audit) {
         List<Answer> answers = audit.getAnswers();
+        QuestionType type = audit.getAnswers().get(0).getQuestion().getType();
         StringBuilder html = new StringBuilder("<div class='auditResults'>");
-        int resultTotal = Math.round(Common.getResultFromAnswers(answers) * 100);
+        int resultTotal = Math.round(Common.getResultFromAnswers(answers, true) * 100);
         html.append(prepareAuditResultHeader(audit));
-        html.append("<div class='mainResult'>Całkowity wynik: ").append(resultTotal).append(" % </div>");
+        html.append("<div class='mainResult'>Całkowity wynik: ").append(resultTotal).append(" % </br>");
+        if (type.equals(QuestionType.DETAILED)) {
+            int rawTotal = (int) Common.getResultFromAnswers(answers, false);
+            html.append(Common.calculateResult(rawTotal)).append("</div>");
+        }
         html.append(prepareSpiderChart(answers));
         int iter = 0;
-        QuestionType type = audit.getAnswers().get(0).getQuestion().getType();
+
         for (QuestionCategory category : QuestionCategory.values()) {
             if (category.getType().equals(type)) {
                 if (type.equals(QuestionType.LICKERT)) {
@@ -230,9 +246,9 @@ public class HtmlContent {
                             append(category.getVisible().toUpperCase()).
                             append("</div>").
                             append("<div class='otherResultDesc'>").
-                            append(category.getDesription()).
+                            append(Common.calculateResultForCategory((int) Common.getResultFromAnswersForDetailedLickert(answers, category, false))).
                             append("</div>").
-                            append("<div class='otherResultPercent'>Spełnione w ").
+                            append("<div class='otherResultPercent'>Wynik procentowy: ").
                             append(Math.round(Common.getResultFromAnswersForDetailedLickert(answers, category, true) * 100)).
                             append(" % </div>" +
                                     "<div class='resultSeparator'></div></div>");
@@ -863,7 +879,7 @@ public class HtmlContent {
         String title = "Końcowy wynik";
         for (Audit audit : audits) {
             Map<String, Integer> dataMap = new HashMap<>();
-            dataMap.put("Końcowy wynik", Math.round(Common.getResultFromAnswers(audit.getAnswers()) * 100));
+            dataMap.put("Końcowy wynik", Math.round(Common.getResultFromAnswers(audit.getAnswers(), true) * 100));
             data.put(sdf.format(audit.getAuditDate()), dataMap);
 
         }
@@ -1347,18 +1363,124 @@ public class HtmlContent {
         } else {
             innovations = QuestionMethods.getInnovations();
         }
-        html += "</br></br><div id='tableWrapper'>";
-        html += "<table class='myTable'><thead>";
-        html += "<tr><th>Nazwa Innowacji</th><th>Data innowacji</th><th>Akcje</th></tr></thead><tbody>";
-        for (Innovation innovation : innovations) {
-            html += "<tr><td>" + innovation.getInnovationName() + "</td><td>" + sdf.format(innovation.getDate()) + "</td><td>";
-            html += "<img src='images/pdf.png' id='pdf_" + innovation.getId() + "' class='ideaOption'  onclick='generatePdf(" + innovation.getId() + ")' title='Generuj PDF'/>";
-            if (loggedUser.getRole().equals(LoginType.ADMIN)) {
-                html += "<img src='images/reject.png' id='delete_" + innovation.getId() + "' class='ideaOption'  onclick='deleteInnovation(" + innovation.getId() + ")' title='Usuń innowację'/>";
+        if (innovations.isEmpty()) {
+            html += "<h2>Brak wprowadzonych innowacji</h2>";
+        } else {
+            html += "</br></br><div id='tableWrapper'>";
+            html += "<table class='myTable'><thead>";
+            html += "<tr><th>Nazwa Innowacji</th><th>Data innowacji</th><th>Akcje</th></tr></thead><tbody>";
+            for (Innovation innovation : innovations) {
+                html += "<tr><td>" + innovation.getInnovationName() + "</td><td>" + sdf.format(innovation.getDate()) + "</td><td>";
+                html += "<img src='images/pdf.png' id='pdf_" + innovation.getId() + "' class='ideaOption'  onclick='generatePdf(" + innovation.getId() + ")' title='Generuj PDF'/>";
+                if (loggedUser.getRole().equals(LoginType.ADMIN)) {
+                    html += "<img src='images/reject.png' id='delete_" + innovation.getId() + "' class='ideaOption'  onclick='deleteInnovation(" + innovation.getId() + ")' title='Usuń innowację'/>";
+                }
+                html += "</td></tr>";
             }
-            html += "</td></tr>";
+            html += "</tbody></table></div>";
         }
-        html += "</tbody></table></div>";
         return html;
+    }
+
+    public static String generatePDFForInnovation(Innovation innovation, User loggedUser, HttpServletRequest request) {
+        String filename = "Raport_" + innovation.getInnovationName() + ".pdf";
+        String path = request.getServletContext().getRealPath("/");
+        BaseFont bf = null;
+        try {
+            bf = BaseFont.createFont("ARIALUNI.TTF", BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
+        } catch (DocumentException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        Font catFont = new Font(bf, 18,
+                Font.BOLD);
+        Font subFont = new Font(bf, 16,
+                Font.BOLD);
+        Font normalFont = new Font(bf, 12);
+        Font smallBold = new Font(bf, 12,
+                Font.BOLD);
+        Font smallerBold = new Font(bf, 10,
+                Font.BOLD);
+        Font normalSmallFont = new Font(bf, 10);
+        Font biggerBold = new Font(bf, 14,
+                Font.BOLD);
+        Font normalItalic = new Font(Font.FontFamily.TIMES_ROMAN, 12,
+                Font.ITALIC);
+        try {
+            Document document = new Document();
+            File output = new File(path + filename);
+            PdfWriter.getInstance(document, new FileOutputStream(output));
+            document.open();
+            document.addTitle(innovation.getInnovationName());
+            document.addSubject("Identyfikacja innowacji");
+            document.addKeywords("Innowacja, raport");
+            document.addAuthor(Common.getAuthorOfInnovation(innovation));
+
+            Paragraph firstPage = new Paragraph();
+            firstPage.add(new Paragraph("Raport identyfikacji innowacji: " + innovation.getInnovationName(), catFont));
+            addEmptyLine(firstPage, 1);
+            firstPage.add(new Paragraph("Dla: " + innovation.getCompanyName(), subFont));
+            addEmptyLine(firstPage, 1);
+            firstPage.add(new Paragraph("Innowacja sporządzona przez:" + Common.getAuthorOfInnovation(innovation), biggerBold));
+            firstPage.add(new Paragraph("Data innowacji: " + sdf.format(innovation.getDate()), biggerBold));
+            addEmptyLine(firstPage, 2);
+            firstPage.add(new Paragraph("Raport wygenerowany przez: " + loggedUser.getName() + " " + loggedUser.getSurname(), biggerBold));
+            addEmptyLine(firstPage, 8);
+            firstPage.add(new Paragraph("Raport został wygenerowany z użyciem aplikacji", smallBold));
+            firstPage.add(new Paragraph("S Z I P  -  System Zarządzania Innowacjami w Przedsiębiorstwie", biggerBold));
+            document.add(firstPage);
+            document.newPage();
+
+            for (InnovationCategory category : InnovationCategory.values()) {
+                Paragraph page = new Paragraph();
+                page.add(new Paragraph(category.getDisplay().toUpperCase(), subFont));
+                addEmptyLine(page, 1);
+                for (InnovationAnswer answer : Common.getAnswersForCategory(innovation.getAnswers(), category)) {
+                    Paragraph ans = new Paragraph(answer.getQuestion().getLabel(), smallBold);
+                    String ansToPrint = answer.getContent();
+                    if (answer.getQuestion().getType().equals(InnovationType.RADIO)) {
+                        ansToPrint = answer.getQuestion().getRadioOptions().get(Integer.parseInt(ansToPrint));
+                    }
+                    ans.add(new Paragraph(ansToPrint, normalFont));
+                    if (answer.getQuestion().isAdditional()) {
+                        ans.add(new Paragraph(answer.getQuestion().getPlaceholder() + ": ", smallerBold));
+                        ans.add(new Paragraph(answer.getAdditionalAnswer(), normalSmallFont));
+                    }
+                    addEmptyLine(page, 1);
+                    page.add(ans);
+
+                }
+                document.add(page);
+                document.newPage();
+            }
+
+
+            Paragraph page = new Paragraph();
+            addEmptyLine(page, 2);
+            page.add(new Paragraph("Załączniki: ", smallBold));
+            page.add(new Paragraph(innovation.getAttachments(), normalFont));
+            addEmptyLine(page, 5);
+            page.add(new Paragraph("Każdy innowator oświadcza, że zapoznał się z treścią formularza oraz, że treść formularza jest zgodna ze stanem faktycznym.", biggerBold));
+            page.add(new Paragraph(innovation.getSigned(), normalItalic));
+            document.add(page);
+            document.newPage();
+            document.close();
+
+        } catch (DocumentException e) {
+            e.printStackTrace();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return filename;
+    }
+
+    private static void addEmptyLine(Paragraph paragraph, int number) {
+        for (int i = 0; i < number; i++) {
+            paragraph.add(new Paragraph(" "));
+        }
     }
 }

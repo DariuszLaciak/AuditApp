@@ -287,14 +287,31 @@ function saveInnovation() {
             }
         }
     });
+
+    var innovationName = $("#innovationName").val();
+    var innovationCompany = $("#innovationCompany").val();
+    var innovationAttachments = $("#innovationAttachments").val();
+    var innovationSigns = $("#innovationSigns").val();
+    if (innovationName == "") {
+        allAnswered = false;
+        $("#innovationName").parent().css("border", "2px solid red");
+    }
+    if (innovationSigns == "") {
+        allAnswered = false;
+        $("#innovationSigns").parent().css("border", "2px solid red");
+    }
+    if (innovationAttachments == "") {
+        allAnswered = false;
+        $("#innovationAttachments").parent().css("border", "2px solid red");
+    }
+    if (innovationCompany == "") {
+        allAnswered = false;
+        $("#innovationCompany").parent().css("border", "2px solid red");
+    }
     if (!allAnswered) {
         showInfo(false, "Wszystkie odpowiedzi są wymagane");
     }
     else {
-        var innovationName = $("#innovationName").val();
-        var innovationCompany = $("#innovationCompany").val();
-        var innovationAttachments = $("#innovationAttachments").val();
-        var innovationSigns = $("#innovationSigns").val();
         $.ajax({
             url: "/Manage",
             method: "POST",
@@ -334,6 +351,30 @@ function deleteInnovation(innovationId) {
             if (data.success) {
                 showInfo(true, data.message);
                 $("#innovationIdentificationTab").html(data.data);
+            }
+            else {
+                showInfo(false, data.message);
+            }
+        }
+    });
+}
+
+function generatePdf(innovationId) {
+    $.ajax({
+        url: "/Manage",
+        method: "POST",
+        dataType: "json",
+        data: {
+            action: "generatePdf",
+            innovationId: innovationId
+        },
+        success: function (data) {
+            if (data.success) {
+                var anchor = document.createElement('a');
+                anchor.href = data.data;
+                anchor.target = '_blank';
+                anchor.download = data.data;
+                anchor.click();
             }
             else {
                 showInfo(false, data.message);

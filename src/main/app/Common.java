@@ -25,10 +25,10 @@ public class Common {
         return session.getAttribute("userId") != null;
     }
 
-    public static float getResultFromAnswers(List<Answer> answers) {
-        float result = getResultOfAnswersType(answers, MAX_POINTS, true);
+    public static float getResultFromAnswers(List<Answer> answers, boolean percent) {
+        float result = getResultOfAnswersType(answers, MAX_POINTS, percent);
         if (answers.get(0).getQuestion().getType().equals(QuestionType.DETAILED)) {
-            result = getResultOfAnswersType(answers, MAX_POINTS_DETAILED, true);
+            result = getResultOfAnswersType(answers, MAX_POINTS_DETAILED, percent);
         }
         return result;
     }
@@ -327,4 +327,53 @@ public class Common {
         }
         return null;
     }
+
+    public static String getAuthorOfInnovation(Innovation innovation) {
+        String name = innovation.getAnswers().get(0).getContent();
+        return name;
+    }
+
+    public static List<InnovationAnswer> getAnswersForCategory(List<InnovationAnswer> answers, InnovationCategory category) {
+        List<InnovationAnswer> categoryAnswers = new ArrayList<>();
+
+        for (InnovationAnswer answer : answers) {
+            if (answer.getQuestion().getCategory().equals(category)) {
+                categoryAnswers.add(answer);
+            }
+        }
+        return categoryAnswers;
+    }
+
+    public static String calculateResult(int result) {
+        String desc;
+        if (result <= Constraints.DETAILED_1_LIMIT) {
+            desc = Constraints.DETAILED_RESULT_1;
+        } else if (result <= Constraints.DETAILED_2_LIMIT) {
+            desc = Constraints.DETAILED_RESULT_2;
+        } else if (result <= Constraints.DETAILED_3_LIMIT) {
+            desc = Constraints.DETAILED_RESULT_3;
+        } else if (result <= Constraints.DETAILED_4_LIMIT) {
+            desc = Constraints.DETAILED_RESULT_4;
+        } else {
+            desc = Constraints.DETAILED_RESULT_5;
+        }
+        return desc;
+    }
+
+    public static String calculateResultForCategory(int result) {
+        String desc;
+        if (result <= Constraints.DETAILED_CAT_1_LIMIT) {
+            desc = Constraints.DETAILED_CATEGORY_RESULT_1;
+        } else if (result <= Constraints.DETAILED_CAT_2_LIMIT) {
+            desc = Constraints.DETAILED_CATEGORY_RESULT_2;
+        } else if (result <= Constraints.DETAILED_CAT_3_LIMIT) {
+            desc = Constraints.DETAILED_CATEGORY_RESULT_3;
+        } else if (result <= Constraints.DETAILED_CAT_4_LIMIT) {
+            desc = Constraints.DETAILED_CATEGORY_RESULT_4;
+        } else {
+            desc = Constraints.DETAILED_CATEGORY_RESULT_5;
+        }
+        return desc;
+    }
+
 }
