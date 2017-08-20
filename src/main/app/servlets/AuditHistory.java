@@ -81,8 +81,9 @@ public class AuditHistory extends HttpServlet {
 
                     end = c.getTime();
                     List<Audit> auditsToMakeOverview = Common.getAuditsBetweendDates(generalAudits, start, end);
+                    List<Audit> detailedAuditsToMakeOverview = Common.getAuditsBetweendDates(detailedAudits, start, end);
                     List<Swot> swotsToMakeOverview = Common.getSwotsBetweendDates(allSwots, start, end);
-                    data = HtmlContent.makeOverviewContent(auditsToMakeOverview, swotsToMakeOverview);
+                    data = HtmlContent.makeOverviewContent(auditsToMakeOverview, swotsToMakeOverview, detailedAuditsToMakeOverview);
                     break;
                 case "swotReport":
                     long swotId = Long.parseLong(request.getParameter("swotId"));

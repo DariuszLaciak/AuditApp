@@ -114,9 +114,15 @@ p#newPassword {
     z-index: 999;
 }
 
-#chartdiv, #chartDiv_1, #chartDiv_2 {
+#chartdiv, #chartDivGeneral_1, #chartDivDetailed_1 {
     width: 100%;
-    height: 500px;
+    height: 300px;
+    font-size: 11px;
+}
+
+#chartDivGeneral_2, #chartDivDetailed_2 {
+    width: 100%;
+    height: 550px;
     font-size: 11px;
 }
 

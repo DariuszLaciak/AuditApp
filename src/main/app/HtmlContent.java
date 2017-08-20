@@ -846,32 +846,40 @@ public class HtmlContent {
         return html;
     }
 
-    public static String makeOverviewContent(List<Audit> audits, List<Swot> swots) {
+    public static String makeOverviewContent(List<Audit> audits, List<Swot> swots, List<Audit> detailedAudits) {
         String html = "";
         if (audits.size() >= 2) {
-            html += makeOverviewChart(audits);
+            html += "<h1>Zestawienie wyników audytu ogólnego</h1>";
+            html += makeOverviewChart(audits, "chartDivGeneral");
+        } else {
+            html += "<h1>Do zestawienia ogólnego są potrzebne co najmniej dwa audyty!</h1>";
+        }
+        if (detailedAudits.size() >= 2) {
+            html += "<h1>Zestawienie wyników audytu szczegółowego</h1>";
+            html += makeOverviewChart(detailedAudits, "chartDivDetailed");
+        } else {
+            html += "<h1>Do zestawienia szczegółowego potrzebne są co najmniej dwa audyty!</h1>";
+        }
+        if (swots.size() >= 2) {
             html += makeSwotOverview(swots);
         } else {
-            html += "<h1>Do zestawienia są potrzebne co najmniej dwa audyty</h1>";
+            html += "<h1>Do zestawienia SWOT są potrzebne co najmniej dwa audyty!</h1>";
         }
+
         return html;
     }
 
-    private static String makeOverviewChart(List<Audit> audits) {
+    private static String makeOverviewChart(List<Audit> audits, String divId) {
         String html = "";
-        SimpleDateFormat sdfForChart = new SimpleDateFormat("yyyy-MM-dd");
         QuestionType type = audits.get(0).getAnswers().get(0).getQuestion().getType();
 
-        Comparator<String> comparator = new Comparator<String>() {
-            @Override
-            public int compare(String s, String t1) {
-                try {
-                    Date d1 = sdf.parse(s);
-                    Date d2 = sdf.parse(t1);
-                    return d1.compareTo(d2);
-                } catch (ParseException e) {
-                    return 0;
-                }
+        Comparator<String> comparator = (s, t1) -> {
+            try {
+                Date d1 = sdf.parse(s);
+                Date d2 = sdf.parse(t1);
+                return d1.compareTo(d2);
+            } catch (ParseException e) {
+                return 0;
             }
         };
 
@@ -883,8 +891,7 @@ public class HtmlContent {
             data.put(sdf.format(audit.getAuditDate()), dataMap);
 
         }
-
-        html += makeTimeChart(data, title);
+        html += makeTimeChart(data, title, divId + "_1");
 
         data = new TreeMap<>(comparator);
         title = "Wyniki poszczególnych kategorii";
@@ -902,31 +909,7 @@ public class HtmlContent {
 
         }
 
-        html += makeTimeChart(data, title);
-
-        /*TimeSeriesCollection collection = new TimeSeriesCollection();
-        TimeSeries series = new TimeSeries("Końcowy wynik");
-        for (Audit audit : audits) {
-            series.addOrUpdate(new Day(audit.getAuditDate()), Common.getResultFromAnswers(audit.getAnswers()) * 100);
-        }
-        collection.addSeries(series);
-
-        html += makeTimeChart(collection, new BasicStroke(5.0f), "Wyniki końcowe", false);
-
-        collection = new TimeSeriesCollection();
-
-        for (QuestionCategory cat : QuestionCategory.values()) {
-            series = new TimeSeries(cat.getVisible());
-            for (Audit audit : audits) {
-                series.addOrUpdate(new Day(audit.getAuditDate()), Common.getResultFromAnswersForLickert(audit.getAnswers(), cat, true) * 100);
-            }
-            collection.addSeries(series);
-        }
-
-
-        html += makeTimeChart(collection, new BasicStroke(3.0f), "Wyniki poszczególnych kategorii", true);*/
-
-
+        html += makeTimeChart(data, title, divId + "_2");
         return html;
     }
 
@@ -948,6 +931,7 @@ public class HtmlContent {
                         areSwotChanges = true;
                         if (lastSwot.getAlternatives().contains(sw)) {
                             html += "<li>" + sw.getText() + "</li>";
+                            shownAlternatives.add(sw.getId());
                         } else {
                             if (cat.equals(SwotCategory.OPPORTUNITES) || cat.equals(SwotCategory.STRENGHTS)) {
                                 html += "<li>" + printIconOverview(false, false) + sw.getText() + "</li>";
@@ -980,14 +964,10 @@ public class HtmlContent {
         return html;
     }
 
-    private static String makeTimeChart(TreeMap<String, Map<String, Integer>> data, String title/*TimeSeriesCollection collection, Stroke lineStroke, String title, boolean showLegend*/) {
+    private static String makeTimeChart(TreeMap<String, Map<String, Integer>> data, String title, String divId) {
         String html = "<h2>" + title + "</h2>";
-        String divId = "chartDiv_1";
-        if (data.get(data.firstKey()).size() != 1) {
-            divId = "chartDiv_2";
-        }
 
-        html += "<div id='" + divId + "'></div>";
+        html += "<div class='chartDivClass' id='" + divId + "'></div>";
 
         String js = "var chartData = generateChartData();\n" +
                 "\n" +
@@ -1090,34 +1070,6 @@ public class HtmlContent {
                 "    $(\".amcharts-chart-div\").find(\"a\").remove();\n" +
                 "}\n";
         html += makeJS(js);
-
-        /*JFreeChart chart = ChartFactory.createTimeSeriesChart(title, "Data", "Wynik [%]", collection, showLegend, false, false);
-        chart.setBackgroundPaint(null);
-        if (showLegend) {
-            chart.getLegend().setBackgroundPaint(Color.lightGray);
-        }
-        Paint[] paints = {Color.BLUE, Color.GREEN, Color.YELLOW, Color.CYAN, Color.BLACK};
-        chart.getTitle().setPaint(Color.WHITE);
-        chart.getXYPlot().getDomainAxis().setTickLabelPaint(Color.WHITE);
-        chart.getXYPlot().getDomainAxis().setLabelPaint(Color.WHITE);
-        XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer();
-        for (int i = 0; i < chart.getXYPlot().getSeriesCount(); ++i) {
-            renderer.setSeriesStroke(i, lineStroke);
-            renderer.setSeriesShapesFilled(i, true);
-            if (showLegend)
-                renderer.setSeriesPaint(i, paints[i]);
-        }
-        chart.getXYPlot().setRenderer(renderer);
-        chart.getXYPlot().getRangeAxis().setTickLabelPaint(Color.WHITE);
-        chart.getXYPlot().getRangeAxis().setLabelPaint(Color.WHITE);
-
-        File tempFile = new File("temporary.png");
-        try {
-            ChartUtilities.saveChartAsPNG(tempFile, chart, 640, 480);
-            html += "<img class='resultTimeChart' src=\"data:image/png;base64, " + Base64.getEncoder().encodeToString(FileUtils.getBytes(tempFile)) + "\"/>";
-        } catch (IOException e) {
-            e.printStackTrace();
-        }*/
 
         return html;
     }
