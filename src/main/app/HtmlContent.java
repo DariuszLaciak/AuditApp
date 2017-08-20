@@ -1288,29 +1288,29 @@ public class HtmlContent {
     }
 
     private static String makeInputText(String id, String label) {
-        String html = "<div class='innovationDiv'><div>" + label + "</div><input value='inputTest' class='valueInput' type='text' id='" + id + "' name='" + id + "'/></div>";
+        String html = "<div class='innovationDiv'><div>" + label + "</div><input class='valueInput' type='text' id='" + id + "' name='" + id + "'/></div>";
         return html;
     }
 
     private static String makeInputText(String id, String label, boolean wider) {
-        String html = "<div class='innovationDiv'><div>" + label + "</div><input value='inputTest' class='wider valueInput' type='text' id='" + id + "' name='" + id + "'/></div>";
+        String html = "<div class='innovationDiv'><div>" + label + "</div><input class='wider valueInput' type='text' id='" + id + "' name='" + id + "'/></div>";
         return html;
     }
 
     private static String makeTextarea(String id, String label) {
-        String html = "<div class='innovationDiv'><div>" + label + "</div><textarea class='valueInput' id='" + id + "' name='" + id + "'>test</textarea></div>";
+        String html = "<div class='innovationDiv'><div>" + label + "</div><textarea class='valueInput' id='" + id + "' name='" + id + "'></textarea></div>";
 
         return html;
     }
 
     private static String makeTextarea(String id, String label, boolean wider) {
-        String html = "<div class='innovationDiv'><div>" + label + "</div><textarea class='wider valueInput' id='" + id + "' name='" + id + "'>test</textarea></div>";
+        String html = "<div class='innovationDiv'><div>" + label + "</div><textarea class='wider valueInput' id='" + id + "' name='" + id + "'></textarea></div>";
 
         return html;
     }
 
     private static String makeTextarea(String id, String label, String placeholder) {
-        String html = "<div class='innovationDiv'><div>" + label + "</div><textarea class='wider valueInput' id='" + id + "' name='" + id + "' placeholder='" + placeholder + "'>test</textarea></div>";
+        String html = "<div class='innovationDiv'><div>" + label + "</div><textarea class='wider valueInput' id='" + id + "' name='" + id + "' placeholder='" + placeholder + "'></textarea></div>";
 
         return html;
     }
@@ -1333,7 +1333,7 @@ public class HtmlContent {
     private static String makeRadioButton(String[] id, String[] label, String[] value, String name) {
         String html = "<div class='innovationDiv'>";
         for (int i = 0; i < id.length; ++i) {
-            html += label[i] + "<input checked=checked type='radio' id='" + id[i] + "' name='" + name + "' value='" + value[i] + "'/>";
+            html += label[i] + "<input type='radio' id='" + id[i] + "' name='" + name + "' value='" + value[i] + "'/>";
         }
         html += "</div>";
         return html;
