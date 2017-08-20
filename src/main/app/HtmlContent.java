@@ -3,6 +3,7 @@ package main.app;
 import main.app.enums.*;
 import main.app.orm.*;
 import main.app.orm.methods.AuditMethods;
+import main.app.orm.methods.QuestionMethods;
 
 import javax.servlet.http.HttpSession;
 import java.text.ParseException;
@@ -74,6 +75,7 @@ public class HtmlContent {
             html += makeButton("Historia", "auditHistory");
             html += makeButton("Zestawienie", "auditOverview");
         }
+        html += makeButton("Identyfikacja innowacji", "innovationIdentification");
         html += makeButton("Zgłoś pomysł", "newIdea");
         html += makeButton("Zgłoszone pomysły", "listIdeas");
         if (userType == LoginType.ADMIN) {
@@ -1185,6 +1187,178 @@ public class HtmlContent {
             html += "</div>";
 
         }
+        return html;
+    }
+
+    public static String makeInnovationMenu(User loggedUser) {
+        String html = HtmlContent.makeButton("Nowa innowacja", "newInnovation");
+        switch (loggedUser.getRole()) {
+            case EMPLOYEE:
+                html += HtmlContent.makeButton("Przeglądaj swoje innowacje", "viewInnovations");
+                break;
+            case USER:
+                html += HtmlContent.makeButton("Przeglądaj zgłoszone innowacje", "viewInnovations");
+                break;
+            case ADMIN:
+                html += HtmlContent.makeButton("Zarządzaj zgłoszonymi innowacjami", "viewInnovations");
+                break;
+        }
+        return html;
+    }
+
+    public static String makeNewInnovationForm(User loggedUser) {
+        String html = makeInnovationMenu(loggedUser);
+        List<InnovationQuestion> questions = QuestionMethods.getInnovationQuestions();
+        html += "</br>";
+        html += "<form id='innovationForm'>";
+        html += makeInputText("innovationName", "Nazwa innowacji");
+        html += makeInputText("innovationCompany", "Nazwa przedsiębiorstwa");
+        for (InnovationCategory category : InnovationCategory.values()) {
+            html += "<h2>" + category.getDisplay().toUpperCase() + "</h2>";
+            for (InnovationQuestion question : Common.getQuestionOfCategory(category, questions)) {
+                html += makeHtmlForType(question);
+            }
+        }
+        html += makeTextarea("innovationAttachments", "Linki do załączników");
+        html += makeLongQuestion("Każdy innowator oświadcza, że zapoznał się z treścią formularza oraz, że treść formularza jest zgodna ze stanem faktycznym.");
+        html += makeTextarea("innovationSigns", "", true);
+
+        html += "</br></br></br></br>";
+        html += makeButton("Zapisz", "saveInnovation");
+
+        html += "</form>";
+
+        return html;
+    }
+
+    private static String makeHtmlForType(InnovationQuestion question) {
+        String html = "";
+        switch (question.getType()) {
+            case TEXT:
+                if (question.isLonger()) {
+                    html = makeLongQuestion(question.getLabel());
+                    html += makeInputText("question_" + question.getId(), "", true);
+                } else {
+                    html = makeInputText("question_" + question.getId(), question.getLabel());
+                }
+                break;
+            case TEXTAREA:
+                if (question.isLonger()) {
+                    html = makeLongQuestion(question.getLabel());
+                    html += makeTextarea("question_" + question.getId(), "", true);
+                } else {
+                    html = makeTextarea("question_" + question.getId(), question.getLabel());
+                }
+                break;
+            case NUMBER:
+                if (question.isLonger()) {
+                    html = makeLongQuestion(question.getLabel());
+                    html += wrapWithLabel("", makeNumber(0, 999, 1, 0, "question_" + question.getId()));
+                    if (question.isAdditional()) {
+                        html += makeTextarea("questionAdditional_" + question.getId(), "", question.getPlaceholder());
+                    }
+                } else {
+                    html = wrapWithLabel(question.getLabel(), makeNumber(0, 999, 1, 0, "question_" + question.getId()));
+                    if (question.isAdditional()) {
+                        html += makeTextarea("questionAdditional_" + question.getId(), "", question.getPlaceholder());
+                    }
+                }
+                break;
+            case RADIO:
+                html = makeLongQuestion(question.getLabel());
+                String[] id = new String[question.getRadioOptions().size()];
+                String[] label = new String[question.getRadioOptions().size()];
+                String[] value = new String[question.getRadioOptions().size()];
+                for (int i = 0; i < question.getRadioOptions().size(); ++i) {
+                    label[i] = question.getRadioOptions().get(i);
+                    id[i] = "questionRadio_" + question.getId() + "_" + i;
+                    value[i] = "" + i;
+                }
+                html += makeRadioButton(id, label, value, "question_" + question.getId());
+                if (question.isAdditional()) {
+                    html += makeTextarea("questionAdditional_" + question.getId(), "", question.getPlaceholder());
+                }
+                break;
+            case JUST_LABEL:
+                html = makeLongQuestion(question.getLabel());
+                break;
+        }
+
+        return html;
+    }
+
+    private static String makeInputText(String id, String label) {
+        String html = "<div class='innovationDiv'><div>" + label + "</div><input value='inputTest' class='valueInput' type='text' id='" + id + "' name='" + id + "'/></div>";
+        return html;
+    }
+
+    private static String makeInputText(String id, String label, boolean wider) {
+        String html = "<div class='innovationDiv'><div>" + label + "</div><input value='inputTest' class='wider valueInput' type='text' id='" + id + "' name='" + id + "'/></div>";
+        return html;
+    }
+
+    private static String makeTextarea(String id, String label) {
+        String html = "<div class='innovationDiv'><div>" + label + "</div><textarea class='valueInput' id='" + id + "' name='" + id + "'>test</textarea></div>";
+
+        return html;
+    }
+
+    private static String makeTextarea(String id, String label, boolean wider) {
+        String html = "<div class='innovationDiv'><div>" + label + "</div><textarea class='wider valueInput' id='" + id + "' name='" + id + "'>test</textarea></div>";
+
+        return html;
+    }
+
+    private static String makeTextarea(String id, String label, String placeholder) {
+        String html = "<div class='innovationDiv'><div>" + label + "</div><textarea class='wider valueInput' id='" + id + "' name='" + id + "' placeholder='" + placeholder + "'>test</textarea></div>";
+
+        return html;
+    }
+
+    private static String wrapWithLabel(String label, String code) {
+        String html = "<div class='innovationDiv'><div>" + label + "</div>" + code + "</div>";
+        return html;
+    }
+
+    private static String makeSimpleLabel(String label) {
+        String html = "<div class='innovationDiv'><div>" + label + "</div></div>";
+        return html;
+    }
+
+    private static String makeLongQuestion(String question) {
+        String html = "<div class='innovationDiv'>" + question + "</div>";
+        return html;
+    }
+
+    private static String makeRadioButton(String[] id, String[] label, String[] value, String name) {
+        String html = "<div class='innovationDiv'>";
+        for (int i = 0; i < id.length; ++i) {
+            html += label[i] + "<input checked=checked type='radio' id='" + id[i] + "' name='" + name + "' value='" + value[i] + "'/>";
+        }
+        html += "</div>";
+        return html;
+    }
+
+    public static String makeInnovationTable(User loggedUser) {
+        String html = makeInnovationMenu(loggedUser);
+        List<Innovation> innovations = null;
+        if (loggedUser.getRole().equals(LoginType.EMPLOYEE)) {
+            innovations = QuestionMethods.getInnovations(loggedUser);
+        } else {
+            innovations = QuestionMethods.getInnovations();
+        }
+        html += "</br></br><div id='tableWrapper'>";
+        html += "<table class='myTable'><thead>";
+        html += "<tr><th>Nazwa Innowacji</th><th>Data innowacji</th><th>Akcje</th></tr></thead><tbody>";
+        for (Innovation innovation : innovations) {
+            html += "<tr><td>" + innovation.getInnovationName() + "</td><td>" + sdf.format(innovation.getDate()) + "</td><td>";
+            html += "<img src='images/pdf.png' id='pdf_" + innovation.getId() + "' class='ideaOption'  onclick='generatePdf(" + innovation.getId() + ")' title='Generuj PDF'/>";
+            if (loggedUser.getRole().equals(LoginType.ADMIN)) {
+                html += "<img src='images/reject.png' id='delete_" + innovation.getId() + "' class='ideaOption'  onclick='deleteInnovation(" + innovation.getId() + ")' title='Usuń innowację'/>";
+            }
+            html += "</td></tr>";
+        }
+        html += "</tbody></table></div>";
         return html;
     }
 }

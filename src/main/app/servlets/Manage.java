@@ -8,7 +8,10 @@ import main.app.orm.methods.AuditMethods;
 import main.app.orm.methods.OtherMethods;
 import main.app.orm.methods.UserMethods;
 import org.hibernate.Session;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -294,6 +297,81 @@ public class Manage extends HttpServlet {
 
                     data = HtmlContent.makeHelp(OtherMethods.getHelp(), loggedUser.getRole());
                     responseMessage = "Pomyślnie dodano pojęcie";
+                    break;
+                case "innovationIdentification":
+                    data = HtmlContent.makeInnovationMenu(loggedUser);
+                    break;
+                case "newInnovationForm":
+                    data = HtmlContent.makeNewInnovationForm(loggedUser);
+                    break;
+                case "saveInnovation":
+                    JSONArray answersJson = null, additionalJson = null;
+                    JSONParser parser = new JSONParser();
+                    String innovationName = request.getParameter("name");
+                    String innovationCompany = request.getParameter("company");
+                    String innovationAttachments = request.getParameter("attachments");
+                    String innovationSigns = request.getParameter("signs");
+                    String answers = request.getParameter("answers");
+                    String additionAnswers = request.getParameter("additional");
+
+                    Innovation innovation = new Innovation(innovationName, innovationCompany);
+                    innovation.setAttachments(innovationAttachments);
+                    innovation.setSigned(innovationSigns);
+                    innovation.setLoggedUser(loggedUser);
+
+                    try {
+                        answersJson = (JSONArray) parser.parse(answers);
+                        additionalJson = (JSONArray) parser.parse(additionAnswers);
+                    } catch (ParseException e) {
+                        e.printStackTrace();
+                    }
+
+                    session = HibernateUtil.getSessionFactory().getCurrentSession();
+                    if (!session.getTransaction().isActive())
+                        session.beginTransaction();
+
+                    session.save(innovation);
+
+                    if (answersJson != null) {
+                        for (Object jo : answersJson) {
+                            JSONObject ob = (JSONObject) jo;
+                            JSONObject additional = Common.findAdditionalAnswer(additionalJson, (String) ob.get("id"));
+
+                            InnovationQuestion question = session.load(InnovationQuestion.class, Long.parseLong((String) ob.get("id")));
+
+                            InnovationAnswer innovationAnswer = new InnovationAnswer((String) ob.get("value"));
+                            if (additional != null) {
+                                innovationAnswer.setAdditionalAnswer((String) additional.get("value"));
+                            }
+
+                            innovationAnswer.setInnovation(innovation);
+                            innovationAnswer.setQuestion(question);
+                            session.save(innovationAnswer);
+                        }
+                    }
+                    session.getTransaction().commit();
+                    session.close();
+
+                    responseMessage = "Pomyślnie zapisano innowację";
+                    data = HtmlContent.makeInnovationTable(loggedUser);
+                    break;
+                case "viewInnovations":
+                    data = HtmlContent.makeInnovationTable(loggedUser);
+                    break;
+                case "deleteInnovation":
+                    String innovationId = request.getParameter("innovationId");
+                    long id = Long.parseLong(innovationId);
+                    session = HibernateUtil.getSessionFactory().getCurrentSession();
+                    if (!session.getTransaction().isActive())
+                        session.beginTransaction();
+
+                    Innovation in = session.load(Innovation.class, id);
+                    session.delete(in);
+
+                    session.getTransaction().commit();
+                    session.close();
+                    responseMessage = "Pomyślnie usunięto innowację";
+                    data = HtmlContent.makeInnovationTable(loggedUser);
                     break;
             }
 

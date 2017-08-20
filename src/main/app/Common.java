@@ -3,6 +3,8 @@ package main.app;
 import main.app.enums.*;
 import main.app.orm.*;
 import main.app.orm.methods.AuditMethods;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 
 import javax.servlet.http.HttpSession;
 import java.util.*;
@@ -304,5 +306,25 @@ public class Common {
         returnValue.add(empIdeas);
         returnValue.add(nonEmpIdeas);
         return returnValue;
+    }
+
+    public static List<InnovationQuestion> getQuestionOfCategory(InnovationCategory category, List<InnovationQuestion> questions) {
+        List<InnovationQuestion> categoryQuestions = new ArrayList<>();
+        for (InnovationQuestion question : questions) {
+            if (question.getCategory().equals(category)) {
+                categoryQuestions.add(question);
+            }
+        }
+        return categoryQuestions;
+    }
+
+    public static JSONObject findAdditionalAnswer(JSONArray additional, String id) {
+        for (Object jo : additional) {
+            JSONObject ob = (JSONObject) jo;
+            if (ob.get("id").equals(id)) {
+                return ob;
+            }
+        }
+        return null;
     }
 }

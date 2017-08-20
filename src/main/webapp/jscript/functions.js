@@ -167,6 +167,200 @@ function manageImpediments() {
     }
 }
 
+function innovationIdentification() {
+    switchTab("innovationIdentificationTab");
+    if ($("#innovationIdentificationTab").length === 0) {
+        $("#content").append("<div id='innovationIdentificationTab' class = 'innerContent'></div>");
+        makeIdentificationMenu();
+    }
+}
+
+function makeIdentificationMenu() {
+    $.ajax({
+        url: "/Manage",
+        method: "POST",
+        dataType: "json",
+        data: {
+            action: "innovationIdentification"
+        },
+        success: function (data) {
+            if (data.success) {
+                $("#innovationIdentificationTab").html(data.data);
+            }
+            else {
+                showInfo(false, data.message);
+            }
+        }
+    });
+}
+
+function newInnovation() {
+    $.ajax({
+        url: "/Manage",
+        method: "POST",
+        dataType: "json",
+        data: {
+            action: "newInnovationForm"
+        },
+        success: function (data) {
+            if (data.success) {
+                $("#innovationIdentificationTab").html(data.data);
+                scrollUp();
+            }
+            else {
+                showInfo(false, data.message);
+            }
+        }
+    });
+}
+
+function saveInnovation() {
+    var allDivs = $(".innovationDiv");
+    var questionAnswers = [];
+    var additionalAnswers = [];
+    var allAnswered = true;
+    var input, textarea;
+    $(function () {
+        $(".innovationDiv").click(function () {
+            $(this).css("border", "");
+        });
+    });
+    var object = {};
+    var id, val;
+    $.each(allDivs, function () {
+        if ($(this).find("input").length > 0) {
+            if ($(this).find("input").is(":radio")) {
+                val = $(this).find("input:checked").val();
+                id = $(this).find("input").attr("name");
+                id = id.substring(id.indexOf("_") + 1, id.length);
+                if (typeof val === "undefined") {
+                    allAnswered = false;
+                    $(this).css("border", "2px solid red");
+                }
+                else {
+                    object = {};
+                    object.id = id;
+                    object.value = val;
+                    questionAnswers.push(object);
+                }
+            }
+            else {
+                val = $(this).find("input").val();
+                id = $(this).find("input").attr("id");
+                if (id.indexOf("_") != -1) {
+                    id = id.substring(id.indexOf("_") + 1, id.length);
+                    if (typeof val === "undefined" || val == "") {
+                        allAnswered = false;
+                        $(this).css("border", "2px solid red");
+                    }
+                    else {
+                        object = {};
+                        object.id = id;
+                        object.value = val;
+                        questionAnswers.push(object);
+                    }
+                }
+            }
+        }
+        else if ($(this).find("textarea").length > 0) {
+            val = $(this).find("textarea").val();
+            id = $(this).find("textarea").attr("name");
+            var type = id.substring(0, id.indexOf("_"));
+            if (id.indexOf("_") != -1) {
+                id = id.substring(id.indexOf("_") + 1, id.length);
+                if (val == "" || typeof val === "undefined") {
+                    allAnswered = false;
+                    $(this).css("border", "2px solid red");
+                }
+                if (type == "questionAdditional") {
+                    object = {};
+                    object.id = id;
+                    object.value = val;
+                    additionalAnswers.push(object);
+                }
+                else {
+                    object = {};
+                    object.id = id;
+                    object.value = val;
+                    questionAnswers.push(object);
+                }
+            }
+        }
+    });
+    if (!allAnswered) {
+        showInfo(false, "Wszystkie odpowiedzi są wymagane");
+    }
+    else {
+        var innovationName = $("#innovationName").val();
+        var innovationCompany = $("#innovationCompany").val();
+        var innovationAttachments = $("#innovationAttachments").val();
+        var innovationSigns = $("#innovationSigns").val();
+        $.ajax({
+            url: "/Manage",
+            method: "POST",
+            dataType: "json",
+            data: {
+                action: "saveInnovation",
+                name: innovationName,
+                company: innovationCompany,
+                attachments: innovationAttachments,
+                signs: innovationSigns,
+                answers: JSON.stringify(questionAnswers),
+                additional: JSON.stringify(additionalAnswers)
+            },
+            success: function (data) {
+                if (data.success) {
+                    $("#innovationIdentificationTab").html(data.data);
+                    showInfo(true, data.message);
+                }
+                else {
+                    showInfo(false, data.message);
+                }
+            }
+        });
+    }
+}
+
+function deleteInnovation(innovationId) {
+    $.ajax({
+        url: "/Manage",
+        method: "POST",
+        dataType: "json",
+        data: {
+            action: "deleteInnovation",
+            innovationId: innovationId
+        },
+        success: function (data) {
+            if (data.success) {
+                showInfo(true, data.message);
+                $("#innovationIdentificationTab").html(data.data);
+            }
+            else {
+                showInfo(false, data.message);
+            }
+        }
+    });
+}
+
+function viewInnovations() {
+    $.ajax({
+        url: "/Manage",
+        method: "POST",
+        dataType: "json",
+        data: {
+            action: "viewInnovations"
+        },
+        success: function (data) {
+            if (data.success) {
+                $("#innovationIdentificationTab").html(data.data);
+            }
+            else {
+                showInfo(false, data.message);
+            }
+        }
+    });
+}
+
 function getSourcesTable() {
     $.ajax({
         url: "/Manage",
@@ -1214,39 +1408,55 @@ function newIdeaComment(id) {
 }
 
 function swotRelations(swotId) {
+    $(function () {
+        $(".numberInput").click(function () {
+            $(this).css("background-color", "");
+        });
+    });
     // swot_id_id
     $(".numberInput");
+    var allGood = true;
     var dataToSave = [];
     $.each($(".numberInput"), function () {
         var singleData = {};
         var real_id = $(this).attr("id");
         var id1 = real_id.substring(real_id.indexOf("_") + 1, real_id.lastIndexOf("_"));
         var id2 = real_id.substring(real_id.lastIndexOf("_") + 1, real_id.length);
+        if ($(this).val() < 0 || $(this).val() > 2) {
+            $(this).css("background-color", "red");
+            //return;
+            allGood = false;
+        }
         singleData.value = $(this).val();
         singleData.id1 = id1;
         singleData.id2 = id2;
         dataToSave.push(singleData);
     });
-
-    $.ajax({
-        url: "/Question",
-        method: "POST",
-        dataType: "json",
-        data: {
-            action: "swotRelations",
-            swotId: swotId,
-            relations: JSON.stringify(dataToSave)
-        },
-        success: function (data) {
-            if (data.success) {
-                $("#newSwotTab").html(data.data);
+    if (allGood) {
+        $.ajax({
+            url: "/Question",
+            method: "POST",
+            dataType: "json",
+            data: {
+                action: "swotRelations",
+                swotId: swotId,
+                relations: JSON.stringify(dataToSave)
+            },
+            success: function (data) {
+                if (data.success) {
+                    $("#newSwotTab").html(data.data);
+                }
+                else {
+                    showInfo(false, data.message);
+                }
             }
-            else {
-                showInfo(false, data.message);
-            }
-        }
-    });
+        });
+    }
+    else {
+        showInfo(false, "Wartości mogą mieć wyłącznie wartość 0, 1 lub 2");
+    }
 }
+
 
 function saveSwot() {
     var chosenOptions = $(".form-control").find("option");

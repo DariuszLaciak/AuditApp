@@ -30,6 +30,7 @@ public class User implements ObjectDTO {
     private List<Idea> ideas;
     private List<Opinion> opinions;
     private List<Swot> swots;
+    private List<Innovation> innovations;
 
     public User() {
     }
@@ -201,5 +202,16 @@ public class User implements ObjectDTO {
     public boolean equals(Object o) {
         User a = (User) o;
         return this.getId() == a.getId();
+    }
+
+    @OneToMany(mappedBy = "loggedUser", cascade = CascadeType.ALL)
+    @Fetch(value = FetchMode.SUBSELECT)
+    @PrimaryKeyJoinColumn
+    public List<Innovation> getInnovations() {
+        return innovations;
+    }
+
+    public void setInnovations(List<Innovation> innovations) {
+        this.innovations = innovations;
     }
 }
