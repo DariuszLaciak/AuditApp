@@ -215,7 +215,7 @@ function newInnovation() {
 }
 
 function saveInnovation() {
-    var allDivs = $(".innovationDiv");
+    var allDivs = $(".innovationDiv:visible");
     var questionAnswers = [];
     var additionalAnswers = [];
     var allAnswered = true;
@@ -287,27 +287,12 @@ function saveInnovation() {
             }
         }
     });
+    var type = $("#innovationType");
+    if (type.find(":selected").val() == "-1") {
+        allAnswered = false;
+        type.parent().css("border", "2px solid red");
+    }
 
-    var innovationName = $("#innovationName").val();
-    var innovationCompany = $("#innovationCompany").val();
-    var innovationAttachments = $("#innovationAttachments").val();
-    var innovationSigns = $("#innovationSigns").val();
-    if (innovationName == "") {
-        allAnswered = false;
-        $("#innovationName").parent().css("border", "2px solid red");
-    }
-    if (innovationSigns == "") {
-        allAnswered = false;
-        $("#innovationSigns").parent().css("border", "2px solid red");
-    }
-    if (innovationAttachments == "") {
-        allAnswered = false;
-        $("#innovationAttachments").parent().css("border", "2px solid red");
-    }
-    if (innovationCompany == "") {
-        allAnswered = false;
-        $("#innovationCompany").parent().css("border", "2px solid red");
-    }
     if (!allAnswered) {
         showInfo(false, "Wszystkie odpowiedzi są wymagane");
     }
@@ -318,12 +303,9 @@ function saveInnovation() {
             dataType: "json",
             data: {
                 action: "saveInnovation",
-                name: innovationName,
-                company: innovationCompany,
-                attachments: innovationAttachments,
-                signs: innovationSigns,
                 answers: JSON.stringify(questionAnswers),
-                additional: JSON.stringify(additionalAnswers)
+                additional: JSON.stringify(additionalAnswers),
+                typeInnovation: type.find(":selected").val()
             },
             success: function (data) {
                 if (data.success) {
@@ -337,6 +319,58 @@ function saveInnovation() {
         });
     }
 }
+
+function addHideTextareaOnNo() {
+    var TEXTAREALABEL = "questionAdditional_";
+    $.each($(".radioInnovation"), function () {
+        if ($(this).find("input").length == 2) {
+            var no = $(this).find("input[value=\"0\"]");
+            var id = no.attr("name");
+            var name = id;
+            id = id.substring(id.indexOf("_") + 1, id.length);
+            $("input[name=\"" + name + "\"]").click(function () {
+                if (no.is(":checked")) {
+                    $("#" + TEXTAREALABEL + id).parent().hide();
+                }
+                else {
+                    $("#" + TEXTAREALABEL + id).parent().show();
+                }
+            });
+        }
+    })
+}
+
+function replaceDollarsWithConjunction() {
+    var conjunctions = [];
+    var product = {};
+    product.first = "produktowej";
+    product.second = "produktową";
+    conjunctions["3"] = product;
+    var process = {};
+    process.first = "procesowej";
+    process.second = "procesową";
+    conjunctions["4"] = process;
+    var organization = {};
+    organization.first = "organizacyjnej";
+    organization.second = "organizacyjną";
+    conjunctions["5"] = organization;
+    var marketing = {};
+    marketing.first = "marketingowej";
+    marketing.second = "marketingową";
+    conjunctions["6"] = marketing;
+
+    var allLabels = $(".labelInnovation");
+    $("#innovationType").change(function () {
+        var typeSelected = $(this).find(":selected").val();
+        $.each(allLabels, function () {
+            var label = $(this);
+            label.find(".first").text(conjunctions[typeSelected].first);
+            label.find(".second").text(conjunctions[typeSelected].second);
+        });
+    });
+}
+
+
 
 function deleteInnovation(innovationId) {
     $.ajax({

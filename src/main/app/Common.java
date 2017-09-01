@@ -376,4 +376,90 @@ public class Common {
         return desc;
     }
 
+    public static Map<String, List<String>> getCategoryOptions(InnovationCategory category) {
+        Map<String, List<String>> map = null;
+        List<String> list;
+        switch (category) {
+            case PRODUCT:
+                map = new HashMap<>();
+                list = new ArrayList<>();
+                list.add("Nowa");
+                list.add("Ulepszona");
+                map.put("Usługa", list);
+                list.clear();
+                list.add("Nowy");
+                list.add("Ulepszony");
+                map.put("Produkt", list);
+                break;
+            case PROCESS:
+                map = new HashMap<>();
+                list = new ArrayList<>();
+                list.add("Nowa");
+                list.add("Ulepszona");
+                map.put("Metoda", list);
+                list.clear();
+                list.add("Nowy");
+                list.add("Ulepszony");
+                map.put("Proces", list);
+                break;
+            case ORGANIZATION:
+                map = new HashMap<>();
+                list = new ArrayList<>();
+                list.add("Metoda organizacji pracy");
+                list.add("Metoda organizacji produkcji");
+                list.add("Metoda organizacji relacji zewnętrznych");
+                map.put("Nowa", list);
+                map.put("Ulepszona", list);
+                break;
+            case MARKETING:
+                map = new HashMap<>();
+                list = new ArrayList<>();
+                list.add("Metoda promocji");
+                list.add("Metoda wizerunku");
+                list.add("Metoda strategii cenowej");
+                map.put("Nowa", list);
+                map.put("Ulepszona", list);
+                break;
+            default:
+                break;
+        }
+        return map;
+    }
+
+    public static Map<Integer, String> getTypeOptions(InnovationType type) {
+        Map<Integer, String> map = null;
+        switch (type) {
+            case YES_NO:
+                map = new HashMap<>();
+                map.put(1, "Tak");
+                map.put(0, "Nie");
+                break;
+            case RADIO:
+                map = new HashMap<>();
+                map.put(0, "Idea");
+                map.put(1, "Badania podstawowe");
+                map.put(2, "Badania stosowane");
+                map.put(3, "Potwierdzona koncepcja");
+                map.put(4, "Prototyp");
+                map.put(5, "Prototyp gotowy do wdrożenia");
+                break;
+            case RADIO2:
+                map = new HashMap<>();
+                map.put(0, "Procedura nie została rozpoczęta");
+                map.put(1, "Zgłoszony wniosek patentowy");
+                map.put(2, "Patenty przyznane");
+                break;
+        }
+        return map;
+    }
+
+    public static InnovationCategory getCategoryByNumber(int number) {
+        for (InnovationCategory innovationCategory : InnovationCategory.values()) {
+            if (innovationCategory.getNumber() == number) {
+                return innovationCategory;
+            }
+        }
+        return null;
+    }
+
 }

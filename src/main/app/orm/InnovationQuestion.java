@@ -17,7 +17,6 @@ public class InnovationQuestion implements ObjectDTO {
     private boolean additional = false;
     private InnovationType type;
     private InnovationCategory category;
-    private List<String> radioOptions;
     private String placeholder;
     private boolean isLonger = false;
 
@@ -34,15 +33,6 @@ public class InnovationQuestion implements ObjectDTO {
         this.type = type;
         this.category = category;
         this.isLonger = isLonger;
-    }
-
-    public InnovationQuestion(String label, boolean additional, InnovationType type, InnovationCategory category, boolean isLonger, List<String> radioOptions) {
-        this.label = label;
-        this.additional = additional;
-        this.type = type;
-        this.category = category;
-        this.isLonger = isLonger;
-        this.radioOptions = radioOptions;
     }
 
     @Id
@@ -76,22 +66,13 @@ public class InnovationQuestion implements ObjectDTO {
     }
 
     @Column(nullable = false)
+    @Enumerated(EnumType.ORDINAL)
     public InnovationType getType() {
         return type;
     }
 
     public void setType(InnovationType type) {
         this.type = type;
-    }
-
-    @ElementCollection
-    @Column
-    public List<String> getRadioOptions() {
-        return radioOptions;
-    }
-
-    public void setRadioOptions(List<String> radioOptions) {
-        this.radioOptions = radioOptions;
     }
 
     @OneToMany(mappedBy = "question", cascade = CascadeType.ALL)
@@ -106,6 +87,7 @@ public class InnovationQuestion implements ObjectDTO {
     }
 
     @Column(nullable = false)
+    @Enumerated(EnumType.ORDINAL)
     public InnovationCategory getCategory() {
         return category;
     }

@@ -1,5 +1,5 @@
 package main.app.enums;
 
 public enum InnovationType {
-    TEXT, TEXTAREA, NUMBER, RADIO, JUST_LABEL
+    TEXT, TEXTAREA, DATE, YES_NO, JUST_LABEL, RADIO, RADIO2
 }

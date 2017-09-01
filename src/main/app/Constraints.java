@@ -57,4 +57,6 @@ public interface Constraints {
     int DETAILED_3_LIMIT = 245;
     int DETAILED_4_LIMIT = 315;
     int DETAILED_5_LIMIT = 350;
+
+    int INNOVATION_QUESTION_FIRST = 18;
 }

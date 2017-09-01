@@ -1179,23 +1179,67 @@ public class HtmlContent {
         List<InnovationQuestion> questions = QuestionMethods.getInnovationQuestions();
         html += "</br>";
         html += "<form id='innovationForm'>";
-        html += makeInputText("innovationName", "Nazwa innowacji");
-        html += makeInputText("innovationCompany", "Nazwa przedsiębiorstwa");
-        for (InnovationCategory category : InnovationCategory.values()) {
-            html += "<h2>" + category.getDisplay().toUpperCase() + "</h2>";
-            for (InnovationQuestion question : Common.getQuestionOfCategory(category, questions)) {
-                html += makeHtmlForType(question);
+//        html += makeInputText("innovationName", "Nazwa innowacji");
+//        html += makeInputText("innovationCompany", "Nazwa przedsiębiorstwa");
+//        for (InnovationCategory category : InnovationCategory.values()) {
+//            html += "<h2>" + category.getDisplay().toUpperCase() + "</h2>";
+//            for (InnovationQuestion question : Common.getQuestionOfCategory(category, questions)) {
+//                html += makeHtmlForType(question);
+//            }
+//        }
+        int number = 1;
+        String clas = "hideInnovation";
+        for (InnovationQuestion q : questions) {
+            if (q.getCategory().equals(InnovationCategory.OTHER) ||
+                    q.getCategory().equals(InnovationCategory.USER)) {
+                clas = "showInnovation";
+            } else {
+                clas = "hideInnovation";
+                clas += " cat_" + q.getCategory().getNumber();
+            }
+            html += "<div class='" + clas + "'>" + makeHtmlForType(q) + "</div>";
+            if (number++ == Constraints.INNOVATION_QUESTION_FIRST) {
+                html += "<div class=" + clas + "'>" + makeInnovationSelect() + "</div>";
             }
         }
-        html += makeTextarea("innovationAttachments", "Linki do załączników");
-        html += makeLongQuestion("Każdy innowator oświadcza, że zapoznał się z treścią formularza oraz, że treść formularza jest zgodna ze stanem faktycznym.");
-        html += makeTextarea("innovationSigns", "", true);
+//        html += makeTextarea("innovationAttachments", "Linki do załączników");
+//        html += makeLongQuestion("Każdy innowator oświadcza, że zapoznał się z treścią formularza oraz, że treść formularza jest zgodna ze stanem faktycznym.");
+//        html += makeTextarea("innovationSigns", "", true);
 
         html += "</br></br></br></br>";
         html += makeButton("Zapisz", "saveInnovation");
 
         html += "</form>";
 
+        html += makeINnovationJs();
+
+        return html;
+    }
+
+    private static String makeInnovationSelect() {
+        String html = "<br/><br/><div class='innovationDiv'><h2>Kategoria innowacji</h2><select id='innovationType'>";
+        html += "<option value='-1'>Wybierz kategorię innowacji</option>";
+        html += "<option value='" + InnovationCategory.PRODUCT.getNumber() + "'>" + InnovationCategory.PRODUCT.getDisplay() + "</option>";
+        html += "<option value='" + InnovationCategory.PROCESS.getNumber() + "'>" + InnovationCategory.PROCESS.getDisplay() + "</option>";
+        html += "<option value='" + InnovationCategory.ORGANIZATION.getNumber() + "'>" + InnovationCategory.ORGANIZATION.getDisplay() + "</option>";
+        html += "<option value='" + InnovationCategory.MARKETING.getNumber() + "'>" + InnovationCategory.MARKETING.getDisplay() + "</option>";
+        html += "</select></div><br/><br/><br/>";
+
+        return html;
+    }
+
+    private static String makeINnovationJs() {
+        String html = "";
+        String js = "$(\".dateInput\").datepicker();" +
+                "    addHideTextareaOnNo();" +
+                "    replaceDollarsWithConjunction();" +
+                "    $(\"#innovationType\").change(function(){" +
+                "    $(\".hideInnovation\").hide();" +
+                "       var clas=\"cat_\";" +
+                "       $(\".\"+clas+$(this).val()).show();" +
+                "       if($(this).val() != '-1') $(\".cat_2\").show();" +
+                "});";
+        html += makeJS(js);
         return html;
     }
 
@@ -1203,44 +1247,22 @@ public class HtmlContent {
         String html = "";
         switch (question.getType()) {
             case TEXT:
-                if (question.isLonger()) {
-                    html = makeLongQuestion(question.getLabel());
-                    html += makeInputText("question_" + question.getId(), "", true);
-                } else {
-                    html = makeInputText("question_" + question.getId(), question.getLabel());
-                }
+                html = makeLongQuestion(question.getLabel());
+                html += makeInputText("question_" + question.getId(), "", true);
                 break;
             case TEXTAREA:
-                if (question.isLonger()) {
-                    html = makeLongQuestion(question.getLabel());
-                    html += makeTextarea("question_" + question.getId(), "", true);
-                } else {
-                    html = makeTextarea("question_" + question.getId(), question.getLabel());
-                }
-                break;
-            case NUMBER:
-                if (question.isLonger()) {
-                    html = makeLongQuestion(question.getLabel());
-                    html += wrapWithLabel("", makeNumber(0, 999, 1, 0, "question_" + question.getId()));
-                    if (question.isAdditional()) {
-                        html += makeTextarea("questionAdditional_" + question.getId(), "", question.getPlaceholder());
-                    }
-                } else {
-                    html = wrapWithLabel(question.getLabel(), makeNumber(0, 999, 1, 0, "question_" + question.getId()));
-                    if (question.isAdditional()) {
-                        html += makeTextarea("questionAdditional_" + question.getId(), "", question.getPlaceholder());
-                    }
-                }
-                break;
-            case RADIO:
                 html = makeLongQuestion(question.getLabel());
-                String[] id = new String[question.getRadioOptions().size()];
-                String[] label = new String[question.getRadioOptions().size()];
-                String[] value = new String[question.getRadioOptions().size()];
-                for (int i = 0; i < question.getRadioOptions().size(); ++i) {
-                    label[i] = question.getRadioOptions().get(i);
+                html += makeTextarea("question_" + question.getId(), "", question.getPlaceholder());
+                break;
+            case YES_NO:
+                html = makeLongQuestion(question.getLabel());
+                String[] id = new String[2];
+                String[] label = new String[2];
+                String[] value = new String[2];
+                for (int i = 0; i < 2; ++i) {
+                    label[i] = Common.getTypeOptions(question.getType()).get(i);
                     id[i] = "questionRadio_" + question.getId() + "_" + i;
-                    value[i] = "" + i;
+                    value[i] = i + "";
                 }
                 html += makeRadioButton(id, label, value, "question_" + question.getId());
                 if (question.isAdditional()) {
@@ -1250,13 +1272,42 @@ public class HtmlContent {
             case JUST_LABEL:
                 html = makeLongQuestion(question.getLabel());
                 break;
+            case RADIO:
+                html = makeLongQuestion(question.getLabel());
+                id = new String[6];
+                label = new String[6];
+                value = new String[6];
+                for (int i = 0; i < 6; ++i) {
+                    label[i] = Common.getTypeOptions(question.getType()).get(i);
+                    id[i] = "questionRadio_" + question.getId() + "_" + i;
+                    value[i] = i + "";
+                }
+                html += makeRadioButton(id, label, value, "question_" + question.getId());
+                if (question.isAdditional()) {
+                    html += makeTextarea("questionAdditional_" + question.getId(), "", question.getPlaceholder());
+                }
+                break;
+            case RADIO2:
+                html = makeLongQuestion(question.getLabel());
+                id = new String[3];
+                label = new String[3];
+                value = new String[3];
+                for (int i = 0; i < 3; ++i) {
+                    label[i] = Common.getTypeOptions(question.getType()).get(i);
+                    id[i] = "questionRadio_" + question.getId() + "_" + i;
+                    value[i] = i + "";
+                }
+                html += makeRadioButton(id, label, value, "question_" + question.getId());
+                if (question.isAdditional()) {
+                    html += makeTextarea("questionAdditional_" + question.getId(), "", question.getPlaceholder());
+                }
+                break;
+            case DATE:
+                html = makeLongQuestion(question.getLabel());
+                html += makeInputText("question_" + question.getId(), "", true, "dateInput");
+                break;
         }
 
-        return html;
-    }
-
-    private static String makeInputText(String id, String label) {
-        String html = "<div class='innovationDiv'><div>" + label + "</div><input class='valueInput' type='text' id='" + id + "' name='" + id + "'/></div>";
         return html;
     }
 
@@ -1265,41 +1316,27 @@ public class HtmlContent {
         return html;
     }
 
-    private static String makeTextarea(String id, String label) {
-        String html = "<div class='innovationDiv'><div>" + label + "</div><textarea class='valueInput' id='" + id + "' name='" + id + "'></textarea></div>";
-
-        return html;
-    }
-
-    private static String makeTextarea(String id, String label, boolean wider) {
-        String html = "<div class='innovationDiv'><div>" + label + "</div><textarea class='wider valueInput' id='" + id + "' name='" + id + "'></textarea></div>";
-
+    private static String makeInputText(String id, String label, boolean wider, String class_) {
+        String html = "<div class='innovationDiv'><div>" + label + "</div><input class='wider valueInput " + class_ + "' type='text' id='" + id + "' name='" + id + "'/></div>";
         return html;
     }
 
     private static String makeTextarea(String id, String label, String placeholder) {
+        if (placeholder == null) {
+            placeholder = "";
+        }
         String html = "<div class='innovationDiv'><div>" + label + "</div><textarea class='wider valueInput' id='" + id + "' name='" + id + "' placeholder='" + placeholder + "'></textarea></div>";
 
         return html;
     }
 
-    private static String wrapWithLabel(String label, String code) {
-        String html = "<div class='innovationDiv'><div>" + label + "</div>" + code + "</div>";
-        return html;
-    }
-
-    private static String makeSimpleLabel(String label) {
-        String html = "<div class='innovationDiv'><div>" + label + "</div></div>";
-        return html;
-    }
-
     private static String makeLongQuestion(String question) {
-        String html = "<div class='innovationDiv'>" + question + "</div>";
+        String html = "<div class='innovationDiv labelInnovation'>" + question + "</div>";
         return html;
     }
 
     private static String makeRadioButton(String[] id, String[] label, String[] value, String name) {
-        String html = "<div class='innovationDiv'>";
+        String html = "<div class='innovationDiv radioInnovation'>";
         for (int i = 0; i < id.length; ++i) {
             html += label[i] + "<input type='radio' id='" + id[i] + "' name='" + name + "' value='" + value[i] + "'/>";
         }
@@ -1320,9 +1357,9 @@ public class HtmlContent {
         } else {
             html += "</br></br><div id='tableWrapper'>";
             html += "<table class='myTable'><thead>";
-            html += "<tr><th>Nazwa Innowacji</th><th>Data innowacji</th><th>Akcje</th></tr></thead><tbody>";
+            html += "<tr><th>Nazwa Innowacji</th><th>Data innowacji</th><th>Kategoria</th><th>Akcje</th></tr></thead><tbody>";
             for (Innovation innovation : innovations) {
-                html += "<tr><td>" + innovation.getInnovationName() + "</td><td>" + sdf.format(innovation.getDate()) + "</td><td>";
+                html += "<tr><td>" + innovation.getAnswers().get(0).getContent() + "</td><td>" + sdf.format(innovation.getDate()) + "</td><td>" + innovation.getCategory().getDisplay() + "</td><td>";
                 html += "<img src='images/pdf.png' id='pdf_" + innovation.getId() + "' class='ideaOption'  onclick='generatePdf(" + innovation.getId() + ")' title='Generuj PDF'/>";
                 if (loggedUser.getRole().equals(LoginType.ADMIN)) {
                     html += "<img src='images/reject.png' id='delete_" + innovation.getId() + "' class='ideaOption'  onclick='deleteInnovation(" + innovation.getId() + ")' title='Usuń innowację'/>";
@@ -1335,7 +1372,7 @@ public class HtmlContent {
     }
 
     public static String generatePDFForInnovation(Innovation innovation, User loggedUser, HttpServletRequest request) {
-        String filename = "Raport_" + innovation.getInnovationName() + ".pdf";
+        String filename = "Raport_" + innovation.getAnswers().get(0).getContent() + ".pdf";
         String path = request.getServletContext().getRealPath("/");
         BaseFont bf = null;
         try {
@@ -1357,22 +1394,21 @@ public class HtmlContent {
         Font normalSmallFont = new Font(bf, 10);
         Font biggerBold = new Font(bf, 14,
                 Font.BOLD);
-        Font normalItalic = new Font(Font.FontFamily.TIMES_ROMAN, 12,
-                Font.ITALIC);
         try {
             Document document = new Document();
             File output = new File(path + filename);
             PdfWriter.getInstance(document, new FileOutputStream(output));
             document.open();
-            document.addTitle(innovation.getInnovationName());
+            document.addTitle(innovation.getAnswers().get(0).getContent());
             document.addSubject("Identyfikacja innowacji");
             document.addKeywords("Innowacja, raport");
             document.addAuthor(Common.getAuthorOfInnovation(innovation));
 
             Paragraph firstPage = new Paragraph();
-            firstPage.add(new Paragraph("Raport identyfikacji innowacji: " + innovation.getInnovationName(), catFont));
+            firstPage.add(new Paragraph("Raport identyfikacji innowacji: " + innovation.getAnswers().get(0).getContent(), catFont));
+            firstPage.add(new Paragraph(innovation.getCategory().getDisplay(), subFont));
             addEmptyLine(firstPage, 1);
-            firstPage.add(new Paragraph("Dla: " + innovation.getCompanyName(), subFont));
+            firstPage.add(new Paragraph("Dla: " + innovation.getAnswers().get(1).getContent(), subFont));
             addEmptyLine(firstPage, 1);
             firstPage.add(new Paragraph("Innowacja sporządzona przez:" + Common.getAuthorOfInnovation(innovation), biggerBold));
             firstPage.add(new Paragraph("Data innowacji: " + sdf.format(innovation.getDate()), biggerBold));
@@ -1383,38 +1419,34 @@ public class HtmlContent {
             firstPage.add(new Paragraph("S Z I P  -  System Zarządzania Innowacjami w Przedsiębiorstwie", biggerBold));
             document.add(firstPage);
             document.newPage();
-
-            for (InnovationCategory category : InnovationCategory.values()) {
-                Paragraph page = new Paragraph();
-                page.add(new Paragraph(category.getDisplay().toUpperCase(), subFont));
-                addEmptyLine(page, 1);
-                for (InnovationAnswer answer : Common.getAnswersForCategory(innovation.getAnswers(), category)) {
-                    Paragraph ans = new Paragraph(answer.getQuestion().getLabel(), smallBold);
-                    String ansToPrint = answer.getContent();
-                    if (answer.getQuestion().getType().equals(InnovationType.RADIO)) {
-                        ansToPrint = answer.getQuestion().getRadioOptions().get(Integer.parseInt(ansToPrint));
-                    }
-                    ans.add(new Paragraph(ansToPrint, normalFont));
-                    if (answer.getQuestion().isAdditional()) {
-                        ans.add(new Paragraph(answer.getQuestion().getPlaceholder() + ": ", smallerBold));
-                        ans.add(new Paragraph(answer.getAdditionalAnswer(), normalSmallFont));
-                    }
-                    addEmptyLine(page, 1);
-                    page.add(ans);
-
-                }
-                document.add(page);
-                document.newPage();
-            }
-
-
             Paragraph page = new Paragraph();
-            addEmptyLine(page, 2);
-            page.add(new Paragraph("Załączniki: ", smallBold));
-            page.add(new Paragraph(innovation.getAttachments(), normalFont));
-            addEmptyLine(page, 5);
-            page.add(new Paragraph("Każdy innowator oświadcza, że zapoznał się z treścią formularza oraz, że treść formularza jest zgodna ze stanem faktycznym.", biggerBold));
-            page.add(new Paragraph(innovation.getSigned(), normalItalic));
+            for (InnovationAnswer answer : innovation.getAnswers()) {
+                String question = answer.getQuestion().getLabel();
+                if (question.contains("<")) {
+                    String toReplace = question.substring(question.indexOf("<"), question.lastIndexOf(">") + 1);
+
+                    if (toReplace.contains("first")) {
+                        question = question.replace(toReplace, innovation.getCategory().getConjunction1());
+                    } else {
+                        question = question.replace(toReplace, innovation.getCategory().getConjunction2());
+                    }
+                }
+                Paragraph ans = new Paragraph(question, smallBold);
+                String ansToPrint = answer.getContent();
+                if (answer.getQuestion().getType().equals(InnovationType.RADIO) ||
+                        answer.getQuestion().getType().equals(InnovationType.RADIO2) ||
+                        answer.getQuestion().getType().equals(InnovationType.YES_NO)) {
+                    ansToPrint = Common.getTypeOptions(answer.getQuestion().getType()).get(Integer.parseInt(ansToPrint));
+                }
+                ans.add(new Paragraph(ansToPrint, normalFont));
+                if (answer.getQuestion().isAdditional() && answer.getAdditionalAnswer() != null && !answer.getAdditionalAnswer().equals("")) {
+                    ans.add(new Paragraph(answer.getQuestion().getPlaceholder() + ": ", smallerBold));
+                    ans.add(new Paragraph(answer.getAdditionalAnswer(), normalSmallFont));
+                }
+                ans.setKeepTogether(true);
+                page.add(ans);
+
+            }
             document.add(page);
             document.newPage();
             document.close();

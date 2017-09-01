@@ -2,6 +2,7 @@ package main.app.servlets;
 
 import main.app.Common;
 import main.app.HtmlContent;
+import main.app.enums.InnovationCategory;
 import main.app.enums.LoginType;
 import main.app.orm.*;
 import main.app.orm.methods.AuditMethods;
@@ -21,6 +22,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -307,17 +309,16 @@ public class Manage extends HttpServlet {
                 case "saveInnovation":
                     JSONArray answersJson = null, additionalJson = null;
                     JSONParser parser = new JSONParser();
-                    String innovationName = request.getParameter("name");
-                    String innovationCompany = request.getParameter("company");
-                    String innovationAttachments = request.getParameter("attachments");
-                    String innovationSigns = request.getParameter("signs");
                     String answers = request.getParameter("answers");
                     String additionAnswers = request.getParameter("additional");
+                    String type = request.getParameter("typeInnovation");
 
-                    Innovation innovation = new Innovation(innovationName, innovationCompany);
-                    innovation.setAttachments(innovationAttachments);
-                    innovation.setSigned(innovationSigns);
+                    InnovationCategory category = Common.getCategoryByNumber(Integer.parseInt(type));
+
+                    Innovation innovation = new Innovation();
+                    innovation.setDate(new Date());
                     innovation.setLoggedUser(loggedUser);
+                    innovation.setCategory(category);
 
                     try {
                         answersJson = (JSONArray) parser.parse(answers);
