@@ -9,6 +9,7 @@ var $ideaDesc = [["PROMOTION", "Dotyczące promocji marki, wizerunku i osiągni�
     ["COMPANY_CLIENT", "Dotyczące ulepszenia obsługi klientów, komunikacji z dostawcami i klientami."],
     ["PRODUCT", "Dotyczące produktów wykorzystywanych w firmie"],
     ["OTHER", "Niezwiązane z żadną z powyższych kategorii"]];
+var $barrierType = [["COST", "Bariery kosztowe"], ["KNOWLEDGE", "Bariery dotyczące wiedzy"], ["MARKET", "Bariery rynkowe"], ["INSTITUTIONAL", "Bariery instytucyjne"], ["OTHER", "Inne powody nieprowadzenia działalności innowacyjnej"]];
 var timer = 1000;
 $.ajaxSetup({
     beforeSend: function () {
@@ -622,6 +623,11 @@ function newImpediment() {
     button2.onclick = "closeOverlay(\"newImpediment\")";
     var buttons = [button, button2];
     var html = "<input class='allWidthInput' type='text' placeholder='Bariera innowacyjności' id='newImpedimentText' />";
+    html += "<br/><br/>Typ: <select id='newImpedimentType'>";
+    $.each($barrierType, function () {
+        html += "<option value='" + $(this)[0] + "'>" + $(this)[1] + "</option>";
+    });
+    html += "</select>";
     html += "<h3>Wskazówki do barier</h3>";
     html += "<input type='text' class='allWidthInput adviceInput' placeholder='Rada do bariery' id='newImpedimentAdvice_1' />";
     html += "<img id='adviceButton_1' title='Kolejna rada' src='images/plusG.png' class='ideaOption' onclick='nextAdvice(2)'/>";
@@ -707,6 +713,7 @@ function confirmAddImpediment() {
             advices.push($(this).val());
         }
     });
+    var type = $("#newImpedimentType").val();
 
     if (text == "" || advices.length == 0) {
         showInfo(false, "Podaj treść bariery i przynajmniej jedną wskazówkę!");
@@ -719,7 +726,8 @@ function confirmAddImpediment() {
             data: {
                 action: "saveImpediment",
                 text: text,
-                advices: advices
+                advices: advices,
+                type: type
             },
             success: function (data) {
                 if (data.success) {

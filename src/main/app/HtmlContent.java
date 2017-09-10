@@ -128,9 +128,9 @@ public class HtmlContent {
         } else {
             html.append("<div class='tableHeader'>Bariery innowacyjności</div>");
             html.append("<div id='tableWrapper'><table class='myTable'>");
-            html.append("<thead><tr><th>Id</th><th class='widestCol'>Treść</th><th>Zalecenia</th><th>Akcja</th></tr></thead><tbody>");
+            html.append("<thead><tr><th>Id</th><th class='widestCol'>Treść</th><th>Type</th><th>Zalecenia</th><th>Akcja</th></tr></thead><tbody>");
             for (Impediment q : impediments) {
-                html.append("<tr><td>").append(q.getId()).append("</td><td class='widestCol'>").append(q.getText()).append("</td><td>").append(makeButton("Pokaż", "showAdvices", q.getId() + ""));
+                html.append("<tr><td>").append(q.getId()).append("</td><td class='widestCol'>").append(q.getText()).append("</td><td>").append(q.getType().getDisplay()).append("</td><td>").append(makeButton("Pokaż", "showAdvices", q.getId() + ""));
                 if (q.getAudits().isEmpty()) {
                     html.append("<td><img id='delete_" + q.getId() + "' src='images/reject.png' title='Usuń barierę' class='ideaOption' onclick='deleteImpediment(" + q.getId() + ")' /></td>");
                 }

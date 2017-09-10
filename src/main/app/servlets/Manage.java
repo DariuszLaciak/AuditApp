@@ -2,6 +2,7 @@ package main.app.servlets;
 
 import main.app.Common;
 import main.app.HtmlContent;
+import main.app.enums.BarrierType;
 import main.app.enums.InnovationCategory;
 import main.app.enums.LoginType;
 import main.app.orm.*;
@@ -217,12 +218,15 @@ public class Manage extends HttpServlet {
                 case "saveImpediment":
                     String impedimentText = request.getParameter("text");
                     String[] advices = request.getParameterValues("advices[]");
+                    String impedimentTypeString = request.getParameter("type");
+                    BarrierType type = BarrierType.valueOf(impedimentTypeString);
 
                     session = HibernateUtil.getSessionFactory().getCurrentSession();
                     if (!session.getTransaction().isActive())
                         session.beginTransaction();
 
                     Impediment impediment = new Impediment(impedimentText);
+                    impediment.setType(type);
                     session.save(impediment);
                     for (String advice : advices) {
                         ImpedimentAdvice adviceObj = new ImpedimentAdvice(advice);
@@ -311,9 +315,9 @@ public class Manage extends HttpServlet {
                     JSONParser parser = new JSONParser();
                     String answers = request.getParameter("answers");
                     String additionAnswers = request.getParameter("additional");
-                    String type = request.getParameter("typeInnovation");
+                    String impedimentType = request.getParameter("typeInnovation");
 
-                    InnovationCategory category = Common.getCategoryByNumber(Integer.parseInt(type));
+                    InnovationCategory category = Common.getCategoryByNumber(Integer.parseInt(impedimentType));
 
                     Innovation innovation = new Innovation();
                     innovation.setDate(new Date());

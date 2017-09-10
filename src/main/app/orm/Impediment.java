@@ -1,5 +1,6 @@
 package main.app.orm;
 
+import main.app.enums.BarrierType;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.Type;
@@ -12,6 +13,7 @@ import java.util.List;
 public class Impediment implements ObjectDTO {
     private long id;
     private String text;
+    private BarrierType type = BarrierType.OTHER;
 
     private List<ImpedimentAdvice> advices;
 
@@ -69,5 +71,14 @@ public class Impediment implements ObjectDTO {
     public boolean equals(Object o) {
         Impediment a = (Impediment) o;
         return this.getId() == a.getId();
+    }
+
+    @Column(nullable = false)
+    public BarrierType getType() {
+        return type;
+    }
+
+    public void setType(BarrierType type) {
+        this.type = type;
     }
 }
