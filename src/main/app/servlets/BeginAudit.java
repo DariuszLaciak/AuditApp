@@ -17,9 +17,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Date;
 
-/**
- * Created by Darek on 2017-04-08.
- */
+
 @WebServlet(name = "BeginAudit", urlPatterns = {"/BeginAudit"})
 public class BeginAudit extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {

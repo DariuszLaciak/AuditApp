@@ -1,8 +1,6 @@
 package main.app.enums;
 
-/**
- * Created by darek on 24.05.17.
- */
+
 public enum SwotResult {
     MAXI_MAXI("W przedsiębiorstwie mocne strony mają przewagę nad słabymi, natomiast w otoczeniu szanse dominują nad " +
             "zagrożeniami. Możliwa jest strategia agresywna, polegająca na silnej ekspansji i rozwoju." +

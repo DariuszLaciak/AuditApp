@@ -26,9 +26,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-/**
- * Created by darek on 17.05.17.
- */
+
 @WebServlet(name = "AuditHistory", urlPatterns = {"/AuditHistory"})
 public class AuditHistory extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {

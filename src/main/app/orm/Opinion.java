@@ -5,9 +5,7 @@ import org.hibernate.annotations.Type;
 import javax.persistence.*;
 import java.util.Date;
 
-/**
- * Created by darek on 22.05.17.
- */
+
 @Table
 @Entity
 public class Opinion implements ObjectDTO {

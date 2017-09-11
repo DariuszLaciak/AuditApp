@@ -6,9 +6,7 @@ import org.hibernate.Session;
 
 import java.util.List;
 
-/**
- * Created by Darek on 2017-04-23.
- */
+
 public class ResultMethods {
     private static Session s;
 

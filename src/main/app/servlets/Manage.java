@@ -26,9 +26,7 @@ import java.io.PrintWriter;
 import java.util.Date;
 import java.util.List;
 
-/**
- * Created by darek on 29.05.17.
- */
+
 @WebServlet(name = "Manage", urlPatterns = {"/Manage"})
 public class Manage extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {

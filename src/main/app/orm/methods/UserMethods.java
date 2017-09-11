@@ -7,9 +7,7 @@ import org.hibernate.Session;
 
 import java.util.List;
 
-/**
- * Created by Darek on 2017-03-19.
- */
+
 public class UserMethods {
 
     private static Session s;

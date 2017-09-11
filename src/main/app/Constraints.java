@@ -1,8 +1,6 @@
 package main.app;
 
-/**
- * Created by Darek on 2017-04-23.
- */
+
 public interface Constraints {
     float LICKERT_1 = 0.0f;
     float LICKERT_2 = 0.5f;

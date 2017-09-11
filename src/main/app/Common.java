@@ -9,9 +9,7 @@ import org.json.simple.JSONObject;
 import javax.servlet.http.HttpSession;
 import java.util.*;
 
-/**
- * Created by Darek on 2017-03-05.
- */
+
 public class Common {
     private static final float MAX_POINTS = (Constraints.NUMBER_OF_LICKERT_QUESTIONS * Constraints.LICKERT_7);
     private static final float MAX_POINTS_PER_LICKERT_GROUP = (Constraints.NUMBER_OF_LICKERT_QUESTIONS * Constraints.LICKERT_7) /

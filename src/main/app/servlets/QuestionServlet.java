@@ -26,9 +26,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-/**
- * Created by Darek on 2017-04-22.
- */
+
 @WebServlet(name = "Question", urlPatterns = {"/Question"})
 public class QuestionServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {

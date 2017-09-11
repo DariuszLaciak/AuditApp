@@ -5,9 +5,7 @@ import org.hibernate.Session;
 
 import java.util.List;
 
-/**
- * Created by Darek on 2017-04-22.
- */
+
 public class AuditMethods {
     private static Session s;
 

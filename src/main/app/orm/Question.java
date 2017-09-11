@@ -7,9 +7,6 @@ import org.hibernate.annotations.Type;
 import javax.persistence.*;
 import java.util.List;
 
-/**
- * Created by Darek on 2017-04-09.
- */
 
 @Table
 @Entity
